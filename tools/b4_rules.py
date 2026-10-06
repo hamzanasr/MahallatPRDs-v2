@@ -105,7 +105,7 @@ INT_REFS = {'ميسر': ['INT-001', 'PAY-001', 'PAY-006'], 'OpenLoyalty': ['MKT-
 def integrations_section(num):
     rows = []
     for a, b, c in D['integrations']:
-        cls = 'p1' if c == 'أساسي' else 'p2'
+        cls = 'p1' if c == 'أساسي' else ('p3' if c.startswith('لاحق') else 'p2')
         rows.append(['<b>%s</b>' % esc(a), fmt(b), '<span class="tag %s">%s</span>' % (cls, esc(c)), refs_html(INT_REFS[a])])
     return ('<section id="integrations"><h2><span class="num">%d</span>الربط مع الخدمات</h2>'
             '<p class="sub">كل خدمة خارجية خلف محوّل مستقل ولها بديل تجريبي بلا مفاتيح حقيقية ( <a class="rid" href="#SYS-009">SYS-009</a> )، ولا يوقف تعطلها الطلب. المزودون الذين لم يُحسموا في «قبل التشغيل».</p>%s</section>') % (

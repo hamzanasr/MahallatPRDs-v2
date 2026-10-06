@@ -54,8 +54,35 @@ for _n, _rid, _kind, _txt in DEC3.ADD:
     _r = _touch(_rid, _n)
     _r['rules' if _kind == 'R' else 'acceptance'].append(_txt)
 DEC.DECISIONS.extend((n, t, d, _ids3.get(n, [])) for n, t, d in DEC3.DECISIONS)
+
+# الجولة الرابعة: الأسئلة العشرة المفتوحة، والعقد ومنيو المطاعم، والكول سنتر
+import b4_decisions4 as DEC4
+for _n, _rid in DEC4.DROP:
+    assert _rid in _by, _rid
+    D['requirements'] = [r for r in D['requirements'] if r['id'] != _rid]
+    _ids3.setdefault(_n, []).append(_rid)
+for _n, _rid, _old, _new in DEC4.REPLACE:
+    _r = _touch(_rid, _n)
+    _k = next(k for k in ('rules', 'acceptance') if any(x.startswith(_old) for x in _r[k]))
+    _r[_k] = [(_new if x.startswith(_old) else x) for x in _r[_k] if _new is not None or not x.startswith(_old)]
+for _n, _rid, _kind, _txt in DEC4.ADD:
+    _r = _touch(_rid, _n)
+    _r['rules' if _kind == 'R' else 'acceptance'].append(_txt)
+for _n, _rid, _p in DEC4.PRIORITY:
+    _touch(_rid, _n)['priority'] = _p
+for _i, _row in DEC4.EXAMPLES:
+    if _i is None:
+        D['financialExamples'].append(list(_row))
+    else:
+        D['financialExamples'][_i] = list(_row)
+for _row in D['integrations']:
+    if _row[0] in DEC4.INTEGRATIONS:
+        _row[2] = DEC4.INTEGRATIONS[_row[0]]
+DEC.DECISIONS.extend((n, t, d, _ids3.get(n, [])) for n, t, d in DEC4.DECISIONS)
+
 DEC.DECISIONS.sort(key=lambda x: x[0])
 DEC.SETTING_EDITS.update(DEC3.SETTING_EDITS)
+DEC.SETTING_EDITS.update(DEC4.SETTING_EDITS)
 DEC.SETTING_ADD[0] = ('رسوم التوصيل', 'المطاعم والمحلات: 9 ر.س تشمل 3 كم + 1.5 لكل كيلو، حد 9–25؛ المارت والصيدليات: 12 ر.س تشمل 3 كم + 1.5 لكل كيلو، حد 12–30',
                       'عام للنظام وإعداد اختياري لكل مدينة', 'المال والرسوم', ['PAY-013'])
 SETTING_REFS_ADD = []
