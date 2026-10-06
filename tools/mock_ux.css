@@ -1,0 +1,96 @@
+/* مكوّنات إضافية للمعاينات (الإصدار 4.2): نوافذ، وحالات، ومؤقتات، ومصفوفات صلاحيات.
+   كلها تحت .mock .mk وتعتمد متغيرات الألوان نفسها، فتعمل في الوضع الفاتح وتطبيق المندوب الداكن. */
+.mock .desk .app{position:relative}
+.mock .mk .mx-row{display:flex;align-items:center;gap:8px}
+.mock .mk .mx-grow{flex:1;min-width:0}
+
+/* شارة حالة */
+.mock .mk .mx-badge{display:inline-flex;align-items:center;gap:5px;height:22px;padding:0 9px;border-radius:999px;font-size:11px;font-weight:600;white-space:nowrap;background:var(--m-bg);color:var(--m-2)}
+.mock .mk .mx-badge::before{content:"";width:6px;height:6px;border-radius:50%;background:currentColor}
+.mock .mk .mx-badge.ok{background:var(--m-tint);color:var(--m-brand)}
+.mock .mk .mx-badge.warn{background:var(--m-sun-tint);color:#9A5F06}
+.mock .mk .mx-badge.bad{background:var(--m-red-tint);color:var(--m-red)}
+.mock .mk .mx-badge.info{background:var(--m-blue-tint);color:var(--m-blue)}
+.mock .phone.drv .mx-badge.warn{color:#F3C77E}
+
+/* تنبيه داخل الصفحة */
+.mock .mk .mx-alert{display:flex;gap:10px;align-items:flex-start;padding:10px 12px;border-radius:12px;background:var(--m-blue-tint);color:var(--m-ink);font-size:12px;line-height:1.6;margin-bottom:10px}
+.mock .mk .mx-alert svg{color:var(--m-blue);margin-top:1px}
+.mock .mk .mx-alert b{display:block;font-size:12.5px}
+.mock .mk .mx-alert.warn{background:var(--m-sun-tint)}.mock .mk .mx-alert.warn svg{color:#B57212}
+.mock .mk .mx-alert.bad{background:var(--m-red-tint)}.mock .mk .mx-alert.bad svg{color:var(--m-red)}
+.mock .mk .mx-alert.ok{background:var(--m-tint)}.mock .mk .mx-alert.ok svg{color:var(--m-brand)}
+
+/* خطوات التقدم */
+.mock .mk .mx-steps{display:flex;gap:4px;list-style:none;margin:6px 0 10px;padding:0;counter-reset:s}
+.mock .mk .mx-steps li{flex:1;font-size:10.5px;color:var(--m-3);text-align:center;position:relative;padding-top:12px}
+.mock .mk .mx-steps li::before{content:"";position:absolute;top:0;right:0;left:0;height:5px;border-radius:5px;background:var(--m-line)}
+.mock .mk .mx-steps li.done::before{background:var(--m-brand)}
+.mock .mk .mx-steps li.now{color:var(--m-ink);font-weight:600}
+.mock .mk .mx-steps li.now::before{background:linear-gradient(to left,var(--m-brand) 55%,var(--m-line) 55%)}
+
+/* مؤقت تنازلي */
+.mock .mk .mx-timer{display:inline-flex;align-items:center;gap:6px;height:28px;padding:0 10px;border-radius:999px;background:var(--m-sun-tint);color:#8A5507;font:600 13px var(--f-display);direction:ltr}
+.mock .mk .mx-timer.bad{background:var(--m-red-tint);color:var(--m-red)}
+.mock .phone.drv .mx-timer{color:#F3C77E}
+
+/* صفوف اسم/قيمة */
+.mock .mk .mx-kv{display:grid;grid-template-columns:auto 1fr;gap:6px 14px;font-size:12px;margin:0}
+.mock .mk .mx-kv dt{color:var(--m-2)}
+.mock .mk .mx-kv dd{margin:0;text-align:left;font-weight:600}
+.mock .mk .mx-kv .t{border-top:1px dashed var(--m-line);padding-top:6px}
+
+/* خيارات اختيار واحد */
+.mock .mk .mx-opts{display:grid;gap:6px;margin:6px 0}
+.mock .mk .mx-opt{display:flex;align-items:center;gap:10px;padding:10px 12px;border:1px solid var(--m-line);border-radius:12px;background:var(--m-card);font-size:12.5px}
+.mock .mk .mx-opt::before{content:"";width:16px;height:16px;border-radius:50%;border:2px solid var(--m-line);flex:none}
+.mock .mk .mx-opt.on{border-color:var(--m-brand);background:var(--m-tint)}
+.mock .mk .mx-opt.on::before{border:5px solid var(--m-brand)}
+.mock .mk .mx-opt small{display:block;color:var(--m-2);font-size:11px}
+
+/* نافذة سفلية في الجوال */
+.mock .phone .mx-scrim{position:absolute;inset:0;background:rgba(8,20,20,.45);z-index:5}
+.mock .phone .mx-sheet{position:absolute;right:0;left:0;bottom:0;z-index:6;background:var(--m-card);border-radius:22px 22px 0 0;padding:10px 16px 22px;box-shadow:0 -8px 30px rgba(0,0,0,.18);max-height:78%;overflow:auto}
+.mock .phone .mx-sheet::before{content:"";display:block;width:40px;height:4px;border-radius:4px;background:var(--m-line);margin:0 auto 10px}
+.mock .phone .mx-sheet h5{font:600 16px var(--f-display);margin:0 0 4px}
+.mock .phone .mx-sheet p{font-size:12px;color:var(--m-2);margin:0 0 10px}
+
+/* نافذة حوار في اللوحات */
+.mock .desk .mx-modal{position:absolute;inset:0;z-index:5;background:rgba(8,20,20,.42);display:grid;place-items:center;padding:20px}
+.mock .desk .mx-dialog{width:min(460px,100%);background:#fff;border-radius:16px;box-shadow:0 20px 50px rgba(0,0,0,.25);padding:18px 20px}
+.mock .desk .mx-dialog h5{font:600 16px var(--f-display);margin:0 0 4px}
+.mock .desk .mx-dialog > p{font-size:12px;color:var(--m-2);margin:0 0 12px}
+.mock .desk .mx-dialog .foot{display:flex;gap:8px;justify-content:flex-start;margin-top:14px;padding-top:12px;border-top:1px solid var(--m-line)}
+
+/* أزرار إضافية */
+.mock .mk .d-btn.danger{background:var(--m-red)!important;color:#fff!important;border-color:var(--m-red)!important}
+.mock .mk .m-btn.disabled,.mock .mk .d-btn.disabled{opacity:.45}
+
+/* حقل بخطأ */
+.mock .mk .mx-err{border-color:var(--m-red)!important}
+.mock .mk .mx-errmsg{display:block;color:var(--m-red);font-size:11px;margin-top:3px}
+
+/* إشعار عابر */
+.mock .mk .mx-toast{position:absolute;bottom:86px;right:16px;left:16px;z-index:7;background:#132C2B;color:#fff;border-radius:12px;padding:10px 14px;font-size:12px;display:flex;gap:8px;align-items:center;box-shadow:0 8px 24px rgba(0,0,0,.25)}
+.mock .desk .mx-toast{right:auto;left:20px;bottom:20px;width:320px}
+
+/* حالة فارغة وهيكل تحميل */
+.mock .mk .mx-empty{text-align:center;padding:26px 14px;color:var(--m-2);font-size:12px}
+.mock .mk .mx-empty .ic{width:54px;height:54px;border-radius:18px;background:var(--m-tint);color:var(--m-brand);display:grid;place-items:center;margin:0 auto 10px}
+.mock .mk .mx-empty b{display:block;color:var(--m-ink);font:600 14px var(--f-display);margin-bottom:4px}
+.mock .mk .mx-skel{display:block;height:12px;border-radius:6px;background:var(--m-line);margin:6px 0}
+
+/* مصفوفة صلاحيات */
+.mock .mk .mx-matrix{width:100%;border-collapse:collapse;font-size:11.5px}
+.mock .mk .mx-matrix th,.mock .mk .mx-matrix td{padding:7px 8px;border-bottom:1px solid var(--m-line);text-align:center}
+.mock .mk .mx-matrix th:first-child,.mock .mk .mx-matrix td:first-child{text-align:right}
+.mock .mk .mx-matrix th{color:var(--m-2);font-weight:600;background:var(--m-bg)}
+.mock .mk .mx-matrix .y{color:var(--m-brand);font-weight:700}
+.mock .mk .mx-matrix .n{color:var(--m-3)}
+
+/* شريط اختيار جماعي */
+.mock .mk .mx-bulk{display:flex;align-items:center;gap:10px;padding:8px 12px;border-radius:12px;background:var(--m-ink);color:#fff;font-size:12px;margin-bottom:10px}
+.mock .mk .mx-bulk .d-btn{background:#fff!important;color:var(--m-ink)!important}
+.mock .mk .mx-cb{display:inline-block;width:15px;height:15px;border-radius:4px;border:1.5px solid var(--m-line-2,#C9D4D0);vertical-align:middle;background:#fff}
+.mock .mk .mx-cb.on{background:var(--m-brand);border-color:var(--m-brand);box-shadow:inset 0 0 0 3px #fff}
+.mock .desk .app:has(.mx-modal) .side{filter:brightness(.55)}

@@ -1,0 +1,68 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>مواصفات منصة محلات</title>
+<meta name="description" content="مرجع تنفيذ منصة محلات: قواعد العمل والرسوم، صفحات الواجهات، والمتطلبات بمعايير قبولها.">
+<meta name="color-scheme" content="light dark">
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Arabic:wght@400;500;600;700&family=IBM+Plex+Mono:wght@500&display=swap" media="print" onload="this.media='all'">
+<link rel="stylesheet" href="assets/style.css">
+<link rel="stylesheet" href="assets/mock.css">
+<script>try{var t=localStorage.getItem('theme');if(t)document.documentElement.dataset.theme=t}catch(e){}</script>
+</head>
+<body>
+<a class="skip" href="#content">تخطَّ إلى المحتوى</a>
+{{SPRITE}}
+
+<header class="bar">
+  <button class="ib" id="menu-btn" type="button" aria-label="القائمة" aria-expanded="false" aria-controls="sidebar">
+    <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 6h16M4 12h16M4 18h16"/></svg>
+  </button>
+  <a class="brand" href="#top">مواصفات منصة محلات</a>
+  <button class="search-btn" id="search-btn" type="button" aria-label="بحث في المواصفات">
+    <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>
+    <span>بحث في المواصفات</span><kbd>/</kbd>
+  </button>
+  <button class="ib" id="theme-btn" type="button" aria-label="تبديل المظهر">
+    <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8Z"/></svg>
+  </button>
+</header>
+
+<div class="shell">
+  <aside class="sidebar" id="sidebar">
+    <nav aria-label="فهرس المحتويات">
+{{NAV}}
+    </nav>
+  </aside>
+  <div class="scrim" id="scrim"></div>
+
+  <main id="content">
+    <div class="hero" id="top">
+      <div class="eyebrow">مرجع التنفيذ · الإصدار {{VERSION}} · {{DATE}}</div>
+      <h1>مواصفات منصة محلات</h1>
+      <p class="lede">المتطلبات هي المرجع. كل ما يحتاجه المبرمج لبناء المنصة: القواعد والرسوم والقيم المرنة، وصفحات الواجهات، والمتطلبات بمعايير قبولها.</p>
+      <div class="facts">
+        <span><b>4</b> واجهات</span>
+        <span><b>{{N_PAGES}}</b> صفحة</span>
+        <span><b>{{N_FLOWS}}</b> مخططات</span>
+        <span><b>{{N_REQ}}</b> متطلباً</span>
+      </div>
+    </div>
+{{BODY}}
+    <footer>آخر تحديث: {{DATE}} · الإصدار {{VERSION}}.</footer>
+  </main>
+</div>
+
+<div class="sr" id="sr" hidden>
+  <div class="sr-box" role="dialog" aria-modal="true" aria-label="بحث في المواصفات">
+    <input id="sr-q" type="search" placeholder="ابحث في كل المواصفات: كلمة، رقم، أو معرّف متطلب" autocomplete="off" aria-label="بحث">
+    <div class="sr-list" id="sr-list" role="listbox"></div>
+    <div class="sr-foot"><span>↑ ↓ للتنقل</span><span>Enter للفتح</span><span>Esc للإغلاق</span></div>
+  </div>
+</div>
+
+<script src="assets/app.js"></script>
+</body>
+</html>
