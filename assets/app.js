@@ -3,6 +3,12 @@
   var $ = function (s, r) { return (r || document).querySelector(s); };
   var $$ = function (s, r) { return Array.prototype.slice.call((r || document).querySelectorAll(s)); };
   var root = document.documentElement;
+  var EN = root.lang === 'en';
+  var T = function (ar, en) { return EN ? en : ar; };
+
+  /* ---------- تبديل اللغة مع البقاء في الموضع نفسه ---------- */
+  var lb = $('#lang-btn');
+  if (lb) lb.addEventListener('click', function (e) { e.preventDefault(); location.href = lb.getAttribute('href') + location.hash; });
 
   /* ---------- المظهر ---------- */
   var themeBtn = $('#theme-btn');
@@ -78,7 +84,7 @@
     if (pages.length < 2) return;
     var bar = document.createElement('div');
     bar.className = 'pgbar';
-    bar.innerHTML = '<button type="button" data-o="1">فتح كل الصفحات</button><button type="button" data-o="0">إغلاق الكل</button>';
+    bar.innerHTML = '<button type="button" data-o="1">' + T('فتح كل الصفحات', 'Expand all pages') + '</button><button type="button" data-o="0">' + T('إغلاق الكل', 'Collapse all') + '</button>';
     var h2 = $('h2', s);
     var anchor = $('.sub', s) || h2;
     anchor.insertAdjacentElement('afterend', bar);
@@ -109,7 +115,7 @@
       if (ok) shown++;
     });
     $$('.mod').forEach(function (s) { s.hidden = !$$('details.req:not([hidden])', s).length; });
-    count.textContent = shown === reqs.length ? reqs.length + ' متطلباً' : shown + ' من ' + reqs.length;
+    count.textContent = shown === reqs.length ? reqs.length + T(' متطلباً', ' requirements') : shown + T(' من ', ' of ') + reqs.length;
     empty.hidden = shown > 0;
   }
   function resetCatalog() {
@@ -173,7 +179,7 @@
   function runSearch() {
     var terms = nz(srq.value).split(/\s+/).filter(Boolean);
     srl.innerHTML = ''; sel = -1; results = [];
-    if (!terms.length) { srl.innerHTML = '<div class="sr-empty">اكتب كلمة أو معرّف متطلب مثل ORD-003</div>'; return; }
+    if (!terms.length) { srl.innerHTML = '<div class="sr-empty">' + T('اكتب كلمة أو معرّف متطلب مثل ORD-003', 'Type a word or a requirement ID such as ORD-003') + '</div>'; return; }
     var scored = [];
     index.forEach(function (it) {
       var ok = terms.every(function (t) { return it.n.indexOf(t) > -1; });
@@ -183,7 +189,7 @@
     });
     scored.sort(function (a, b) { return b[0] - a[0]; });
     results = scored.slice(0, 40).map(function (x) { return x[1]; });
-    if (!results.length) { srl.innerHTML = '<div class="sr-empty">لا توجد نتائج. جرّب كلمة أخرى.</div>'; return; }
+    if (!results.length) { srl.innerHTML = '<div class="sr-empty">' + T('لا توجد نتائج. جرّب كلمة أخرى.', 'No results. Try another word.') + '</div>'; return; }
     srl.innerHTML = results.map(function (r, i) {
       return '<button type="button" class="sr-item" role="option" data-i="' + i + '"><small>' + esc(r.sec) + (r.ctx && r.ctx !== r.sec ? ' › ' + esc(r.ctx) : '') + '</small><span>' + snippet(r.text, terms) + '</span></button>';
     }).join('');
@@ -241,20 +247,20 @@
     if (!out) return;
     var ids = ['base', 'markup', 'rate', 'delivery', 'tip'];
     function v(id) { return Math.max(0, Number($('#calc-' + id).value) || 0); }
-    function m(x) { return (Math.round(x * 100) / 100).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) + ' ر.س'; }
+    function m(x) { return (Math.round(x * 100) / 100).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) + T(' ر.س', ' SAR'); }
     function r2(x) { return Math.round(x * 100) / 100; }
     function run() {
       var b = v('base'), mk = v('markup'), rt = v('rate'), dl = v('delivery'), tip = v('tip');
       var products = r2(b * (1 + mk / 100)), fee = r2((products + dl) * 0.025), mf = r2(b * rt / 100), total = r2(products + dl + fee + tip);
-      out.innerHTML = '<small>المطلوب من العميل</small><div class="big">' + m(total) + '</div>' +
-        '<div class="row"><span>سعر المنتجات للعميل</span><b>' + m(products) + '</b></div>' +
-        '<div class="row"><span>التوصيل</span><b>' + m(dl) + '</b></div>' +
-        '<div class="row"><span>خدمة 2.5% دون الإكرامية</span><b>' + m(fee) + '</b></div>' +
-        '<div class="row"><span>الإكرامية</span><b>' + m(tip) + '</b></div>' +
-        '<div class="row"><span>يصل للمندوب من الإكرامية بعد خصم 15%</span><b>' + m(r2(tip * 0.85)) + '</b></div>' +
-        '<div class="row"><span>خصم نسبة التاجر</span><b>' + m(mf) + '</b></div>' +
-        '<div class="row"><span>مستحق المنتجات للتاجر</span><b>' + m(b - mf) + '</b></div>' +
-        '<p>قبل ضريبة رسوم المنصة وتمويل العروض والاسترداد والغرامة اليدوية. لا رسم دفع إلكتروني للمارت.</p>';
+      out.innerHTML = '<small>' + T('المطلوب من العميل', 'Customer pays') + '</small><div class="big">' + m(total) + '</div>' +
+        '<div class="row"><span>' + T('سعر المنتجات للعميل', 'Product price to customer') + '</span><b>' + m(products) + '</b></div>' +
+        '<div class="row"><span>' + T('التوصيل', 'Delivery') + '</span><b>' + m(dl) + '</b></div>' +
+        '<div class="row"><span>' + T('خدمة 2.5% دون الإكرامية', 'Service fee 2.5% (excl. tip)') + '</span><b>' + m(fee) + '</b></div>' +
+        '<div class="row"><span>' + T('الإكرامية', 'Tip') + '</span><b>' + m(tip) + '</b></div>' +
+        '<div class="row"><span>' + T('يصل للمندوب من الإكرامية بعد خصم 15%', 'Tip reaching the driver after 15% deduction') + '</span><b>' + m(r2(tip * 0.85)) + '</b></div>' +
+        '<div class="row"><span>' + T('خصم نسبة التاجر', 'Merchant percentage deduction') + '</span><b>' + m(mf) + '</b></div>' +
+        '<div class="row"><span>' + T('مستحق المنتجات للتاجر', 'Products due to merchant') + '</span><b>' + m(b - mf) + '</b></div>' +
+        '<p>' + T('قبل ضريبة رسوم المنصة وتمويل العروض والاسترداد والغرامة اليدوية. لا رسم دفع إلكتروني للمارت.', 'Before platform-fee VAT, promotion funding, refunds and manual penalties. No online payment fee for Mart.') + '</p>';
     }
     ids.forEach(function (i) { $('#calc-' + i).addEventListener('input', run); });
     run();

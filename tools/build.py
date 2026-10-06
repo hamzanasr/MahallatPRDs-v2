@@ -78,4 +78,9 @@ for _w in UXM.LOG:
     print('UX:', _w)
 shutil.copy(os.path.join(HERE, 'app4.js'), os.path.join(OUT, 'assets', 'app.js'))
 open(os.path.join(OUT, 'prd.md'), 'w', encoding='utf8').write(M.markdown(FIXES))
+
+# النسخة الإنجليزية (en/index.html) من القاموس tools/i18n/en.json
+import b4_en
+_miss = b4_en.build(OUT)
+print('EN: untranslated segments', len(_miss))
 print('written', OUT, len(html_out), 'sections', len(nav), 'reqs', F.N_REQ, 'pages', F.N_PAGES, 'icons', len(P.SPRITE))
