@@ -79,6 +79,9 @@ for _row in D['integrations']:
     if _row[0] in DEC4.INTEGRATIONS:
         _row[2] = DEC4.INTEGRATIONS[_row[0]]
 DEC.DECISIONS.extend((n, t, d, _ids3.get(n, [])) for n, t, d in DEC4.DECISIONS)
+for _p in D['pages']:
+    if _p['id'] in DEC4.PAGE_PURPOSE:
+        _p['purpose'] = DEC4.PAGE_PURPOSE[_p['id']]
 
 DEC.DECISIONS.sort(key=lambda x: x[0])
 DEC.SETTING_EDITS.update(DEC3.SETTING_EDITS)
