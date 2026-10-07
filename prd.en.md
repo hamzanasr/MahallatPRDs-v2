@@ -279,7 +279,7 @@ One definition for each number, used on all pages and reports, so the same numbe
 - **Adjust** — source, links, and referral (Launch-critical)
 - **OneSignal** — order and marketing notifications (Launch-critical)
 - **PostHog** — visits, conversion, and product events (Launch-critical)
-- **Odoo** — ledger, reconciliation, and settlements (Launch-critical)
+- **Odoo** — ledger, reconciliation and settlements, and automatic issuing of all invoices on command from the system (Launch-critical)
 - **Google Maps** — route duration from the store to the customer (Launch-critical)
 - **MCP** — role-scoped reports; financial reports with approval inside the dashboard (Launch-critical)
 - **Cashier and partner interfaces** — sending the order and importing the product and the optional or write-in invoice (per the first integration batch)
@@ -3671,6 +3671,7 @@ Rules:
 - Unregistered merchant: the platform issues a tax invoice for the entire order: product value, delivery fee and service fee.
 - When paying out an unregistered merchant, the VAT included in the product price (15 of every 115) is deducted, in addition to the platform commission and its 15% VAT.
 - Changing the registration status or VAT number applies to new orders only; it is saved on each order and recorded in the audit log.
+- All platform invoices are issued automatically through Odoo on command from the system (INT-010), except the product invoice of a registered merchant, which the merchant issues itself.
 
 Acceptance criteria:
 - 1.525 becomes 1.53.
@@ -5535,9 +5536,14 @@ Pages: MD09 MD13
 
 Rules:
 - Accounting, settlements, and platform invoices
+- All invoices are issued automatically through Odoo on command from the platform system (admin dashboard); no staff member issues an invoice manually inside Odoo: the order tax invoice, the merchant monthly platform-fee invoice, ads and cashier invoices, and the credit note on refund.
+- The system sends the issue command at the event: the order invoice when the order is captured, the merchant monthly invoice at month close, and the credit note on refund; it saves the invoice number and link on the order or statement and sends it to the customer or merchant.
+- If Odoo is down, issuing commands queue and are retried automatically in order without duplicates, and the number pending is shown in Accounts.
 
 Acceptance criteria:
 - An Odoo outage does not stop orders
+- Capturing an order issues its tax invoice in Odoo with no staff involvement, and its number appears in the order file.
+- Repeating the issue command for the same order does not create two invoices.
 
 Pages: A18 A22
 
