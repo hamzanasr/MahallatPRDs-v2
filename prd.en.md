@@ -271,7 +271,8 @@ One definition for each number, used on all pages and reports, so the same numbe
 | Mart: same 100, merchant percentage 4% | Customer price does not change with a change in the merchant percentage alone | Merchant deduction 4; product markup 5 is independent |
 | Driver: full delivery 12, illustrative platform percentage 10% | The customer's discount does not change the driver pay base | Net delivery without tax 10.43; platform percentage 1.04; due 9.39; tip is independent |
 | Fee-contract restaurant: new customer at the branch, two orders at selling price 20 then 40 | Customer pays the selling price | Fee 2 then 5; continues until the customer's total at the branch reaches 30; no percentage |
-| Restaurant not registered for VAT, 10% contract percentage: products at selling price 115 | Customer pays 115 including VAT; the platform issues a tax invoice for the entire order | Product VAT 15 + commission 11.50 + its VAT 1.73 are deducted; merchant receives 86.77 before the payment fee |
+| Restaurant not registered for VAT, without splitting, 10% contract percentage: products at selling price 115 | Customer pays 115 including VAT; the platform issues a tax invoice for the entire order | Product VAT 15 + commission 11.50 + its VAT 1.73 are deducted; merchant receives 86.77 before the payment fee |
+| Restaurant not registered for VAT, splitting active, 10% contract percentage: products at selling price 115 | Customer pays 115 including VAT and the amount reaches the merchant directly<br/>The platform issues its invoice for delivery and service only | Commission 11.50 + its VAT 1.73 are deducted; merchant receives 101.77 before the payment fee; product VAT 15 stays with them |
 
 ## Integrations
 
@@ -3361,8 +3362,8 @@ Rules:
 - Each transfer appears with its status, bank reference, and date. Statuses: in progress, sent, or failed
 - Freelance driver payouts are weekly on the same day as merchant payouts, automatically through STC Pay with no manual approval (INT-014).
 - A merchant whose new bank account is awaiting finance approval does not enter the payout list (MER-001).
-- An unregistered merchant's balance is paid out after deducting product VAT (PAY-029).
-- When splitting is supported, the merchant's share is split when the order is captured after closing (not at hold), and equals their net in the statement: products minus the commission or contract fee, the payment fee, the tax on platform fees, and their share of offers; for an unregistered merchant the products tax stays with the platform (PAY-029).
+- In a manual payout (without splitting) an unregistered merchant's balance is paid out after deducting product VAT; with splitting it is not deducted (PAY-029).
+- When splitting is supported, the merchant's share is split when the order is captured after closing (not at hold), and equals their net in the statement: products minus the commission or contract fee, the payment fee, the tax on platform fees, and their share of offers; product VAT inside their share is borne by them and is not deducted by the platform (PAY-029).
 - The share of a merchant whose new bank account is awaiting Finance approval (MER-001) stays in the merchant wallet as "Due", is not split, and arrives after approval.
 - Penalties, charges, and refunds that occur after an order has been split are recorded on the merchant wallet and deducted from the merchant's later shares, or from the next payout if the merchant is paid manually.
 - Each split is recorded in the ledger (PAY-005) with its gateway reference, and shows in the merchant wallet as "In progress", then "Sent" or "Failed"; a failed one returns to being due, visible to Finance in A18, and is not counted as paid.
@@ -3375,7 +3376,7 @@ Acceptance criteria:
 - The statement shows all deductions, compensations, and offers
 - Gateway that supports splitting: for a delivered order the merchant's share arrives automatically and the account does not appear in the approval list.
 - Gateway that does not support splitting: the due amount stays with the platform and appears in the approval list on the payout date.
-- Unregistered merchant, products with a selling price of 115 and a 10% percentage contract: 86.77 is split to the merchant before the payment fee (PAY-029).
+- Unregistered merchant, splitting active, products at selling price 115, 10% contract percentage: 101.77 is split to the merchant before the payment fee, and product VAT is not deducted from them (PAY-029).
 
 Pages: D07 MD07 A18 A26
 
@@ -3565,7 +3566,7 @@ Rules:
 - Exemptions and store type are applied to each order before aggregation.
 - The default accounting tax is 15% on platform fees; it is shown separately and the sum of the lines matches the statement.
 - Refund and reversal are entries linked to the original; accounting integration is through Odoo.
-- The statement of an unregistered merchant shows, for each order, the deducted "Product VAT" line separately from platform fees and their VAT (PAY-029).
+- The statement of an unregistered merchant shows, for each order without splitting, the deducted "Product VAT" line separately from platform fees and their VAT (PAY-029); on a split order it is not deducted.
 
 Acceptance criteria:
 - An exempt linked order carries no contract fee.
@@ -3680,15 +3681,18 @@ Rules:
 - The accountant approves the table before coding, and then the examples are declared final.
 - Each merchant has an option the manager sets when adding it: registered for VAT or not registered; a registered merchant must have its VAT number (15 digits) entered. The option covers all merchants: restaurants, Shops, Mart and pharmacies.
 - A registered merchant is responsible for issuing the tax invoice for the product value under its own VAT number, and the platform issues its invoice for the delivery fee and service fee.
-- Unregistered merchant: the platform issues a tax invoice for the entire order: product value, delivery fee and service fee.
-- When paying out an unregistered merchant, the VAT included in the product price (15 of every 115) is deducted, in addition to the platform commission and its 15% VAT.
+- Unregistered merchant without splitting (payments reach the platform account): the platform issues a tax invoice for the entire order: product value, delivery fee and service fee.
+- When paying out an unregistered merchant without splitting, the VAT included in the product price (15 of every 115) is deducted, in addition to the platform commission and its 15% VAT.
+- With payment splitting (PAY-006) the product value reaches the merchant directly and does not pass through the platform account; the platform issues its tax invoice only for delivery fees, service fees, and its fees on the merchant, while product VAT and the invoice for it stay with the merchant, registered or not: the platform issues no invoice for the products and does not deduct their VAT.
+- If splitting fails or the gateway no longer supports it and payments reach the platform account, the rules above apply: a registered merchant issues the invoice for their products, and for an unregistered merchant the platform issues the invoice for the entire order and deducts product VAT. Each order records whether its payments were split, so a change of mode applies to new orders only.
 - Changing the registration status or VAT number applies to new orders only; it is saved on each order and recorded in the audit log.
 - All platform invoices are issued automatically through Odoo on command from the system (INT-010), except the product invoice of a registered merchant, which the merchant issues itself.
 
 Acceptance criteria:
 - 1.525 becomes 1.53.
 - Each row in "Financial operation examples" matches the calculation output in halalas.
-- Unregistered merchant, products at selling price 115, 10% contract percentage: product VAT 15, commission 11.50 and its VAT 1.73 are deducted, so the merchant receives 86.77 before the payment fee.
+- Unregistered merchant, without splitting, products at selling price 115, 10% contract percentage: product VAT 15, commission 11.50 and its VAT 1.73 are deducted, so the merchant receives 86.77 before the payment fee.
+- Unregistered merchant, splitting active, products at selling price 115, 10% contract percentage: the platform issues no invoice for the products and does not deduct their VAT; it deducts only the commission 11.50 and its VAT 1.73, so the merchant receives 101.77 before the payment fee and bears the product VAT of 15 themselves.
 - Registered merchant, same order: no product VAT is deducted; only the commission 11.50 and its VAT 1.73, so the merchant receives 101.77 before the payment fee.
 - A "Registered" merchant cannot be saved without a 15-digit VAT number.
 
