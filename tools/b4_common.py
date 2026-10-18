@@ -99,6 +99,11 @@ for _n, _rid, _old, _new in DEC5.REPLACE:
 for _n, _rid, _kind, _txt in DEC5.ADD:
     _r = _touch(_rid, _n)
     _r['rules' if _kind == 'R' else 'acceptance'].append(_txt)
+for _start, _new in DEC5.EXAMPLE_EDITS:
+    _i = next(i for i, x in enumerate(D['financialExamples']) if x[0].startswith(_start))
+    D['financialExamples'][_i][0] = _new
+for _row in DEC5.EXAMPLE_ADD:
+    D['financialExamples'].append(list(_row))
 for _where, _name, _desc, _st in DEC5.INTEGRATION_ADD:
     _i = next(i for i, x in enumerate(D['integrations']) if x[0] == _where)
     D['integrations'].insert(_i + 1, [_name, _desc, _st])
