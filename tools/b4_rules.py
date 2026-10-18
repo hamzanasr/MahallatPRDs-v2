@@ -96,7 +96,7 @@ def settings_section(num):
 
 
 # ---------------------------------------------------------------- الربط
-INT_REFS = {'ميسر': ['INT-001', 'PAY-001', 'PAY-006'], 'OpenLoyalty': ['MKT-010', 'MKT-013'], 'Adjust': ['INT-008', 'MKT-013'],
+INT_REFS = {'ميسر': ['INT-001', 'PAY-001', 'PAY-006'], 'STC Pay': ['INT-014', 'PAY-006'], 'OpenLoyalty': ['MKT-010', 'MKT-013'], 'Adjust': ['INT-008', 'MKT-013'],
             'OneSignal': ['INT-004', 'ADM-007'], 'PostHog': ['INT-008'], 'Odoo': ['INT-010', 'PAY-005'],
             'Google Maps': ['SYS-021', 'ORD-011'], 'MCP': ['INT-011'], 'الكاشير وواجهات الشركاء': ['MER-011', 'INT-012', 'MER-041'],
             'الكول سنتر': ['INT-013']}

@@ -24,12 +24,16 @@ for r in D['requirements']:
     got = [norm(x.get_text(' ')) for x in d.select('.rbody li')]
     src = r['rules'] + r['acceptance']
     if len(got) != len(src): print('COUNT', r['id'], len(got), len(src)); bad += 1
-    o = ORIG[r['id']]
+    o = ORIG.get(r['id'])
+    if o is None:
+        continue  # متطلب أضافه المالك بعد الملف الأصلي (INT-014)
     orig_nums = nums(' '.join(o['rules'] + o['acceptance']))
     if r['id'] not in changed and nums(' '.join(got)) != orig_nums: print('NUMS', r['id']); bad += 1
     if d['data-p'] != {'launch': 'p1', 'important': 'p2', 'later': 'p3', 'foundation': 'p4'}[r['priority']]: print('PRI', r['id']); bad += 1
 # الأرقام في المتطلبات المحرَّرة: أي رقم ضاع من المتطلب بعد التحرير؟
 for rid in sorted(changed):
+    if rid not in ORIG:
+        continue
     r = ORIG[rid]; f = next(x for x in D['requirements'] if x['id'] == rid)
     a = nums(' '.join(r['rules'] + r['acceptance'])); b = nums(' '.join(f['rules'] + f['acceptance']))
     lost = collections.Counter(a) - collections.Counter(b)

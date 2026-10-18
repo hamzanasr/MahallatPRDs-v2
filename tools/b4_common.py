@@ -85,6 +85,40 @@ for _p in D['pages']:
     if _p['id'] in DEC4.PAGE_PURPOSE:
         _p['purpose'] = DEC4.PAGE_PURPOSE[_p['id']]
 
+# الجولة الخامسة: تحويل التجار بحسب بوابة الدفع، وتحويل المناديب عبر STC Pay
+import b4_decisions5 as DEC5
+for _after, _new in DEC5.NEW_REQ:
+    _i = next(i for i, x in enumerate(D['requirements']) if x['id'] == _after)
+    D['requirements'].insert(_i + 1, copy.deepcopy(_new))
+    _by[_new['id']] = D['requirements'][_i + 1]
+    _ids3.setdefault(91, []).append(_new['id'])
+for _n, _rid, _old, _new in DEC5.REPLACE:
+    _r = _touch(_rid, _n)
+    _k = next(k for k in ('rules', 'acceptance') if any(x.startswith(_old) for x in _r[k]))
+    _r[_k] = [(_new if x.startswith(_old) else x) for x in _r[_k] if _new is not None or not x.startswith(_old)]
+for _n, _rid, _kind, _txt in DEC5.ADD:
+    _r = _touch(_rid, _n)
+    _r['rules' if _kind == 'R' else 'acceptance'].append(_txt)
+for _where, _name, _desc, _st in DEC5.INTEGRATION_ADD:
+    _i = next(i for i, x in enumerate(D['integrations']) if x[0] == _where)
+    D['integrations'].insert(_i + 1, [_name, _desc, _st])
+for _row in D['integrations']:
+    if _row[0] in DEC5.INTEGRATIONS_DESC:
+        _row[1] = DEC5.INTEGRATIONS_DESC[_row[0]]
+for _after, _item in DEC5.PRELAUNCH_ADD:
+    _i = next(i for i, x in enumerate(D['open']) if x[0] == _after)
+    D['open'].insert(_i + 1, list(_item))
+for _start, _old, _new in DEC5.QUALITY_EDITS:
+    _i = next(i for i, x in enumerate(D['quality']) if x.startswith(_start))
+    assert _old in D['quality'][_i]
+    D['quality'][_i] = D['quality'][_i].replace(_old, _new)
+for _pid, _rid in DEC5.PAGE_REFS_ADD:
+    _p = next(p for p in D['pages'] if p['id'] == _pid)
+    if _rid not in _p['refs']:
+        _p['refs'].append(_rid)
+DEC.DECISIONS.extend((n, t, d, _ids3.get(n, [])) for n, t, d in DEC5.DECISIONS)
+DEC.SETTING_ADD.extend(DEC5.SETTING_ADD)
+
 DEC.DECISIONS.sort(key=lambda x: x[0])
 DEC.SETTING_EDITS.update(DEC3.SETTING_EDITS)
 DEC.SETTING_EDITS.update(DEC4.SETTING_EDITS)

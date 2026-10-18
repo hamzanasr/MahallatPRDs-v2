@@ -1,6 +1,6 @@
 # Mahallat Platform Specification — Version 4.8
 
-6 October 2026 · Revision 2026-10-05-final · 233 requirements · 93 pages. The requirements are the reference.
+6 October 2026 · Revision 2026-10-05-final · 234 requirements · 93 pages. The requirements are the reference.
 
 ## Order states by type
 
@@ -257,6 +257,7 @@ One definition for each number, used on all pages and reports, so the same numbe
 | Delivery fee | Restaurants and shops: 9 SAR including 3 km + 1.5 per km, bounds 9–25; Mart and pharmacies: 12 SAR including 3 km + 1.5 per km, bounds 12–30 | System-wide, with an optional per-city setting |
 | Delivery distance measurement | Straight line | Or the Google Maps route if the cost is acceptable; falls back to straight line when the call cap is reached |
 | Driver negative balance limit | −50 SAR | When reached, new tasks stop until payment |
+| Payment splitting for merchants | Off until the payment provider confirms support in writing | System-wide; the admin changes it under Integrations and it applies to new orders |
 
 ## Financial transaction examples
 
@@ -274,7 +275,8 @@ One definition for each number, used on all pages and reports, so the same numbe
 
 ## Integrations
 
-- **Moyasar** — hold, capture, refund, and payouts (Launch-critical)
+- **Moyasar** — hold, capture, and refund, plus merchant payouts: by payment splitting if the gateway supports it, otherwise through the payment distribution service (Launch-critical)
+- **STC Pay** — automatic payouts of freelance driver dues (Launch-critical)
 - **OpenLoyalty** — points, referral, and reward rules (Launch-critical)
 - **Adjust** — source, links, and referral (Launch-critical)
 - **OneSignal** — order and marketing notifications (Launch-critical)
@@ -292,7 +294,7 @@ One definition for each number, used on all pages and reports, so the same numbe
 - Every page has loading, empty, error, and weak-network states; money and states are not updated from the customer UI alone.
 - Riyadh time, amounts in whole halalas, round half up once per fee; tax and commercial calculations remain without separate compliance requirements.
 - Prevent duplicate payment, acceptance, refund, reward, and entries; a durable scheduler for timeouts that survives a server restart.
-- Finance is shown only to authorized users; a log of who did what, when, and before and after; payouts are approved by a different person.
+- Finance is shown only to authorized users; a log of who did what, when, and before and after; manual payouts are approved by a different person.
 - Home, sections, placements, values, and keys come from the server; exception order is store, then city, then global, per the value's setting.
 - Three separate environments; daily backups and a restore drill; measurable performance targets; monitoring of payment, the scheduler, and integrations.
 - The release is an update to the same store apps; migration of accounts, balances, and contracts with a pilot phase and reconciliation, and the old system is read-only at cutover.
@@ -302,6 +304,7 @@ One definition for each number, used on all pages and reports, so the same numbe
 
 - **CFG-01 Specific operating values before launch**: the default driver platform percentage and tier benefits, delivery fees per city, small-refund and financial-discount and negative-balance limits, and messages. Filled in settings; not hardcoded.
 - **INT-SEL Providers and the first integration batch**: approve the mobile/WhatsApp code channel, the payment methods actually tested with Moyasar, the first cashier systems, and the call center provider when it starts.
+- **INT-PAY Payment splitting and driver payouts**: written confirmation from Moyasar on whether it supports payment splitting and on what terms (when the share is split, its fees, and recovery after a split), and confirmation of the STC Pay integration details for automatic payouts: the payout interface available to businesses, amount and count limits, its fees, and how the wallet holder's name is verified. The outcome decides the splitting setting and the driver payout limits.
 - **DATA-01 Migration inventory**: count the existing accounts, addresses, balances, contracts, dues, and products and match them before and after the move; no count is assumed in the document.
 
 ## Pages
@@ -1428,7 +1431,7 @@ A reports center with flexible periods and comparison.
 
 Breakdown of dues, exemption, and manual deductions.
 
-- Elements: tabs: live statement, payouts, monthly fee invoice, archive (MER-045), net: the period summary on the first line: sales, platform fees and their tax, offers, refunds, and manual items, net so far, next payout status, sales: a waterfall under the summary explaining how sales go down to the net, an item for each type, and the tax as a separate item (MER-008, PAY-022), contract fee and payment fee in each order's breakdown: source, products, the actual contract fee with the reason for its value written ("Exempt" with the exemption value, or "Cap reached"), payment fee, offers, tax, net (PAY-010, PAY-011, MER-007), Mart and pharmacy: a "Store percentage" column instead of the contract fee, with no payment fee column (PAY-011), offers (merchant share) and refunds: two items in the waterfall, manual and its reason: charges on the merchant, for each charge the type, amount, order or source, reason, status as a colored badge, last date to object, and an "Object" button beside it (MER-008), payouts: reference, period, amount, status, bank reference, date (PAY-006), monthly fee invoice: the total of each fee type, tax separate, the total, and an indicator of whether the month's lines match the invoice (PAY-022), archive: the order result is one card with the products invoice, the statement line, and the linked payout (MER-045)
+- Elements: tabs: live statement, payouts, monthly fee invoice, archive (MER-045), merchant wallet at the top of the page: three separate balances: "Pending capture" for orders not yet closed (amount held), "Due" for what was captured and has not reached you, and "Paid out to you" for the period; below them "Payout method": "Automatic when the order closes" or "Weekly after platform approval" (MER-008, PAY-006), net: the period summary on the first line: sales, platform fees and their tax, offers, refunds, and manual items, net so far, next payout status, sales: a waterfall under the summary explaining how sales go down to the net, an item for each type, and the tax as a separate item (MER-008, PAY-022), contract fee and payment fee in each order's breakdown: source, products, the actual contract fee with the reason for its value written ("Exempt" with the exemption value, or "Cap reached"), payment fee, offers, tax, net (PAY-010, PAY-011, MER-007), Mart and pharmacy: a "Store percentage" column instead of the contract fee, with no payment fee column (PAY-011), offers (merchant share) and refunds: two items in the waterfall, manual and its reason: charges on the merchant, for each charge the type, amount, order or source, reason, status as a colored badge, last date to object, and an "Object" button beside it (MER-008), payouts: reference, period, amount, method (automatic by splitting, or weekly by approval), status, bank reference, date (PAY-006), monthly fee invoice: the total of each fee type, tax separate, the total, and an indicator of whether the month's lines match the invoice (PAY-022), archive: the order result is one card with the products invoice, the statement line, and the linked payout (MER-045)
 - Actions and what happens:
   - **Order search**: filters the order breakdown to the order and opens its card with the statement line, the payout, and the invoice.
   - **Statement**: downloads the statement for the period and branch (Excel or PDF) with the same numbers as the screen (MER-008).
@@ -1447,7 +1450,7 @@ Breakdown of dues, exemption, and manual deductions.
   - Admin sees the same archive from the merchant page (MER-045)
 - Requirements: MER-008 PAY-006 PAY-025 PAY-010 PAY-011 PAY-022 MER-045 MER-043
 - Navigates to: MD02 MD08 MD12
-- Special states: failed transfer: red badge "Failed · not paid" with the reason if it came from the bank (PAY-006); payout awaiting approval: the amount is an estimate that changes until approval; objection period expired: the button is disabled with "Objection period ended on …" (SUP-006); "Potential" charge: in a different color, and not counted in the net until it becomes "Charged"; month not finished: "This month's invoice is issued after it ends"
+- Special states: failed transfer: red badge "Failed · not paid" with the reason if it came from the bank (PAY-006); payout awaiting approval: the amount is an estimate that changes until approval; objection period expired: the button is disabled with "Objection period ended on …" (SUP-006); "Potential" charge: in a different color, and not counted in the net until it becomes "Charged"; month not finished: "This month's invoice is issued after it ends"; split share failed: red badge "Failed · not paid", and the amount stays in "Due" until Finance retries it (PAY-006); payment gateway without splitting: "Payout method" is weekly by approval, and the payout shows "Awaiting approval" (PAY-006); your new bank account is awaiting Finance approval: your share stays in "Due" with "Arrives after the account is approved" (MER-001)
 
 #### MD08 — Ratings and Complaints
 
@@ -1812,7 +1815,7 @@ Returning an undelivered medicine order to the pharmacy with a return code that 
 
 Net, incentives, manual deductions, and their reasons.
 
-- Elements: Delivery and tip after tax: two separate lines, delivery after tax and platform percentage, and the tip after its deduction (PAY-014). Platform percentage. Incentives. Manual penalties: each amount with its reason and order number beside it (PAY-025). Net. Payout date. Payments log: each payout with its status and bank reference (PAY-006), including "Awaiting approval". Wallet balance: excludes the deposit, with the held deposit line shown separately (PAY-024). Task list: with the badges "Late tip" and "Ended for non-response · full fee". Negative-balance deduction from the next payout: a visible line (PAY-026)
+- Elements: Delivery and tip after tax: two separate lines, delivery after tax and platform percentage, and the tip after its deduction (PAY-014). Platform percentage. Incentives. Manual penalties: each amount with its reason and order number beside it (PAY-025). Net. Payout date. Payout account: the STC Pay wallet with its last 4 digits and status (approved, or awaiting Finance approval), with a line "Your earnings are paid out automatically on [day] without approval" (INT-014). Payments log: each payout with its status and reference (STC Pay transaction number) (PAY-006, INT-014), including "In progress". Wallet balance: excludes the deposit, with the held deposit line shown separately (PAY-024). Task list: with the badges "Late tip" and "Ended for non-response · full fee". Negative-balance deduction from the next payout: a visible line (PAY-026)
 - Actions and what happens:
   - **Open task**: opens the task statement (second preview): delivery fee, tax, platform percentage, fee, tip and the time it was added if it was late, wait time at the store, and any delivery offer (PAY-014).
   - **Statement**: opens the live statement for the selected period with all movements (fees, tips, incentives, penalties, reversal entries, payouts) with a PDF export button.
@@ -1822,9 +1825,9 @@ Net, incentives, manual deductions, and their reasons.
   - One large number (the balance) on top, with its breakdown beneath as a sum equal to the number
   - The deposit is visually separated from the balance so the driver does not think it is withdrawable money
   - Payout status is a clear word and color, and a failed one is red and not confused with paid
-- Requirements: PAY-014 PAY-025 PAY-006 DRV-005 PAY-026 PAY-024
+- Requirements: PAY-014 PAY-025 PAY-006 INT-014 DRV-005 PAY-026 PAY-024
 - Navigates to: D11 D10
-- Special states: late tip: a notification "The customer added a tip of [amount] to order [number]" and it appears in the same task's statement (DRV-005); negative balance: the number is red with "Deducted from your next payout", and at the suspension threshold a "Task reception stopped" bar and a payment link (PAY-026); payout failed: "Failed · not paid" with a link to update bank details in D10 (PAY-006); deduction not yet approved: does not appear in the balance (PAY-026); reversal entry after a dispute is accepted: a green line "Refunded: your dispute on [number] was accepted"; task whose driver was replaced: per (PAY-014), and any compensation to the first driver is a manual line with its reason
+- Special states: late tip: a notification "The customer added a tip of [amount] to order [number]" and it appears in the same task's statement (DRV-005); negative balance: the number is red with "Deducted from your next payout", and at the suspension threshold a "Task reception stopped" bar and a payment link (PAY-026); payout failed: "Failed · not paid" with a link to update the STC Pay account in D10 (PAY-006, INT-014); deduction not yet approved: does not appear in the balance (PAY-026); reversal entry after a dispute is accepted: a green line "Refunded: your dispute on [number] was accepted"; task whose driver was replaced: per (PAY-014), and any compensation to the first driver is a manual line with its reason; STC Pay wallet not yet approved: "Your payout arrives after Finance approves your number", and nothing is sent before then (INT-014)
 
 #### D08 — My Performance
 
@@ -1865,23 +1868,24 @@ Targets, benefits, progress, budget, and duration.
 
 Operating data, bank, deposit, equipment, and services.
 
-- Elements: Driver type. Vehicle and its photos: type, allowed services, and maximum distance, display-only (DRV-011). Equipment: with the effect of lacking a cooler bag (DRV-013). Bank. Deposit: amount and status (paid and held, or being refunded), separate from the wallet (PAY-024). Regular services. Optional files: to request the "Verified" badge. "Verified" badge and its explanation (DRV-007). Document expiry reminder: one yellow card that states explicitly that it does not stop tasks (DRV-006). Preferred navigation app. Chat language (Arabic, English, Urdu)
+- Elements: Driver type. Vehicle and its photos: type, allowed services, and maximum distance, display-only (DRV-011). Equipment: with the effect of lacking a cooler bag (DRV-013). Bank and STC Pay: the IBAN for the deposit refund and account-closure settlement, and the STC Pay wallet (last 4 digits) for the automatic weekly earnings payout, and the status of each: approved or under review (INT-014). Deposit: amount and status (paid and held, or being refunded), separate from the wallet (PAY-024). Regular services. Optional files: to request the "Verified" badge. "Verified" badge and its explanation (DRV-007). Document expiry reminder: one yellow card that states explicitly that it does not stop tasks (DRV-006). Preferred navigation app. Chat language (Arabic, English, Urdu)
 - Actions and what happens:
-  - **Edit**: opens the item for editing. Changing the vehicle, equipment, or bank is sent for review and the old one stays active until approval; changing navigation and language is immediate.
+  - **Edit**: opens the item for editing. Changing the vehicle, equipment, bank, or STC Pay number is sent for review and the old one stays active until approval; changing navigation and language is immediate.
   - **Upload file**: opens the camera or files; the optional file is sent for verification review, and its status shows (under review, accepted, rejected with the reason).
   - **Request closure via support**: opens a dialog (second preview) showing the settlement: the balance, the deposit, and the net that is refunded. Confirming opens a closure ticket in D11 and stops task reception immediately (PAY-026).
   - **Hadaf deliveries**: opens D12 (DRV-022).
 - Validation and error messages:
   - IBAN: 24 characters starting with SA; the message "Check the IBAN number"
+  - STC Pay number: a Saudi mobile of 10 digits starting with 05; message "Check the STC Pay number"
   - File: image or PDF only; the message "File type is not supported"
 - Permissions:
   - The driver edits their own data; changing the type (Saudi freelancer/resident) is through support only
 - UX decisions:
   - Status (active, verified) in the page header as badges
   - The closure button is red at the bottom
-- Requirements: DRV-001 DRV-013 PAY-024 DRV-007 DRV-011 PAY-026 DRV-021 DRV-029 DRV-006
+- Requirements: DRV-001 DRV-013 PAY-024 INT-014 DRV-007 DRV-011 PAY-026 DRV-021 DRV-029 DRV-006
 - Navigates to: D11 D12
-- Special states: edit under review: an "Under review" badge on the item; verification rejected: the reason and an "Upload another file" button; closure request open: a "Closure request is being settled" bar and the closure button is disabled; resident driver: the "Hadaf deliveries" link does not appear
+- Special states: edit under review: an "Under review" badge on the item; verification rejected: the reason and an "Upload another file" button; closure request open: a "Closure request is being settled" bar and the closure button is disabled; resident driver: the "Hadaf deliveries" link does not appear; first STC Pay number under review: "Your payout will arrive after Finance approves your number"; changing an approved number keeps the old one active until the new one is approved (INT-014)
 
 #### D11 — My Tickets and Disputes
 
@@ -2432,10 +2436,10 @@ Order templates, scheduling, and targeting via OneSignal.
 
 Reconciliation, settlements, liabilities, and closing.
 
-- Elements: The nine tabs (ADM-036): each tab has a number for what awaits action (open differences, accounts awaiting approval), Months status bar: the current is open, the previous awaiting closing, and the oldest closed; and the daily entry balance check result (PAY-005), "Needs your attention" first in the overview: accounts awaiting approval, failed transfers, reconciliation differences, entries not sent to Odoo, a month ready for closing; each item has a button that opens its place, Overview: collected and held (with the count of open orders), undisbursed dues (with the count of accounts), payments sent, open differences with count and amount, drivers' negative balances and those stopped from tasks (PAY-026), liabilities and those expiring this month, and held driver deposits separated from wallet balances; each number opens its list, Collection and reconciliation: each payment operation with its status (held, collected, hold released, refunded, failed), its method, Moyasar reference, and actual fee (PAY-027), Daily reconciliation (INT-001): a line equation: collected − actual Moyasar fee = expected in bank, against what was actually deposited; the difference in red with a flag button; and the payment fee taken from merchants is a separate revenue line (PAY-027), Dues and payouts: the live statement and the dues list (PAY-006) with columns: select, account and its type, due, deductions and fees, net, statement, status, bank reference, transfer date, transfer statuses: "Awaiting approval" then PAY-006 statuses, and "Failed" with the Moyasar reason, Bulk selection: a checkbox for each row and "Select all" in the header; and when selected, a fixed dark bar above the table: the number of accounts, their net total, and an "Approve N payouts" button (not "Confirm"), Rows that cannot be approved: shown with a disabled checkbox and a written reason: negative balance (PAY-026), or a payout prepared by the current user (ADM-002), Driver deposit refund: a row in the payouts list that goes through the same approval (PAY-024), Liabilities: the single table with its items and columns (PAY-031), and a total-reconciliation line with wallet and points balances in the ledger, Invoices: customer purchase orders, and the monthly statement and invoice for each merchant with its lines (PAY-022, PAY-007), Tax: platform fee tax separately (PAY-022), what was deducted from tips (15%), and the percentage's effective date, Refunds: each refund with its type (full, partial, compensation) and source (card, wallet), its actor, reason, and bearing party, and the order link and the reversal entry, Financial reports: the "Finance" reports from the reports center (net revenue by components, order profitability, collection and reconciliation, dues and payouts, liabilities, refunds, expected balance) with the same filters, Closing and controls: each month's status and who closed it and when, a link to the financial audit log (A26), and the roles' financial limits for reading (edited in A22), Entries: a table of the latest entries: entry number, time, description, debit, credit, reference; and the reversal entry with a "Reversal" badge and a link to its original instead of editing the row, Odoo: last successful send, the count of entries waiting, and a resend button
+- Elements: The nine tabs (ADM-036): each tab has a number for what awaits action (open differences, accounts awaiting approval), Months status bar: the current is open, the previous awaiting closing, and the oldest closed; and the daily entry balance check result (PAY-005), "Needs your attention" first in the overview: accounts awaiting approval, failed transfers, reconciliation differences, entries not sent to Odoo, a month ready for closing; each item has a button that opens its place, Overview: collected and held (with the count of open orders), undisbursed dues (with the count of accounts), payments sent, open differences with count and amount, drivers' negative balances and those stopped from tasks (PAY-026), liabilities and those expiring this month, and held driver deposits separated from wallet balances; each number opens its list, Collection and reconciliation: each payment operation with its status (held, collected, hold released, refunded, failed), its method, Moyasar reference, and actual fee (PAY-027), Daily reconciliation (INT-001): a line equation: collected − actual Moyasar fee = expected in bank, against what was actually deposited; the difference in red with a flag button; and the payment fee taken from merchants is a separate revenue line (PAY-027), Dues and payouts: the live statement and the dues list (PAY-006) with columns: select, account and its type, due, deductions and fees, net, statement, status, bank reference, transfer date, transfer statuses: "Awaiting approval" then PAY-006 statuses, and "Failed" with the Moyasar reason, payout method in the dues list: a column showing for each account "Manual approval", "Automatic by splitting", or "Automatic STC Pay"; automatic ones appear with their status and reference, with no checkbox and no approve button (PAY-006, INT-014), Bulk selection: a checkbox for each row and "Select all" in the header; and when selected, a fixed dark bar above the table: the number of accounts, their net total, and an "Approve N payouts" button (not "Confirm"), Rows that cannot be approved: shown with a disabled checkbox and a written reason: negative balance (PAY-026), or a payout prepared by the current user (ADM-002), Driver deposit refund: a row in the payouts list that goes through the same approval (PAY-024), Liabilities: the single table with its items and columns (PAY-031), and a total-reconciliation line with wallet and points balances in the ledger, Invoices: customer purchase orders, and the monthly statement and invoice for each merchant with its lines (PAY-022, PAY-007), Tax: platform fee tax separately (PAY-022), what was deducted from tips (15%), and the percentage's effective date, Refunds: each refund with its type (full, partial, compensation) and source (card, wallet), its actor, reason, and bearing party, and the order link and the reversal entry, Financial reports: the "Finance" reports from the reports center (net revenue by components, order profitability, collection and reconciliation, dues and payouts, liabilities, refunds, expected balance) with the same filters, Closing and controls: each month's status and who closed it and when, a link to the financial audit log (A26), and the roles' financial limits for reading (edited in A22), Entries: a table of the latest entries: entry number, time, description, debit, credit, reference; and the reversal entry with a "Reversal" badge and a link to its original instead of editing the row, Odoo: last successful send, the count of entries waiting, and a resend button
 - Actions and what happens:
   - **Approve payouts individually or in bulk**: "Approve" on the row for one account, or the "Approve N payouts" bar for the selection. Both open a confirmation: each account with its masked IBAN and amount, the total, that sending via Moyasar cannot be stopped after approval, and the excluded rows and their reason. After approval (PAY-006) rows become "In progress" then "Sent" with the bank reference or "Failed" with the reason, and a notice "N payouts sent for execution" appears
-  - **Retry failed**: on a "Failed" payout: a confirmation shows the Moyasar reason and the current bank account details (the new IBAN if edited). It resends the payout with the same amount without a new approval, unless the IBAN changed, in which case it needs a new approval
+  - **Retry failed**: on a "Failed" payout: a confirmation shows the Moyasar or STC Pay reason and the current account details (the new IBAN if edited). It resends the payout with the same amount without a new approval, unless the IBAN changed, in which case it needs a new approval
   - **Reversal entry**: window: the original entry read-only, the amount, the reason. After confirmation the entry is created in the open month linked to its original (PAY-005), and appears in the audit log (ADM-002). If the original is in a closed month the window states that the correction will be recorded in the open month
   - **Close**: for a month "awaiting closing": a confirmation shows the month summary (total entries, open differences, incomplete transfers) and asks to type the month's name because it cannot be reversed. After it the month becomes "Closed" with the actor's name and time (ADM-036)
   - **Export**: exports the current tab with the same period and filters to Excel or PDF with numbers matching the screen, and is recorded in the audit log
@@ -2460,9 +2464,9 @@ Reconciliation, settlements, liabilities, and closing.
   - Reversal entry: the "Reverse a financial decision with a reversal entry" permission (admin, support supervisor, finance)
   - Closing: the closing permission holder (finance by default) and admin
   - No direct edit of any party's balance (PAY-005)
-- Requirements: PAY-005 PAY-006 PAY-031 ADM-036 PAY-022 PAY-027 PAY-029 INT-001 INT-010 PAY-024 ADM-002 PAY-018 PAY-026 PAY-007 PAY-003 FLT-002
+- Requirements: PAY-005 PAY-006 PAY-031 INT-014 ADM-036 PAY-022 PAY-027 PAY-029 INT-001 INT-010 PAY-024 ADM-002 PAY-018 PAY-026 PAY-007 PAY-003 FLT-002
 - Leads to: A03 A26 A22 A21 A10
-- Special states: Closed month: its entries are read-only (ADM-036); Open reconciliation difference: a red row in daily reconciliation and a number on the collection and reconciliation tab until settled; Daily balance check failed (PAY-005): a red alert at the top of the page with the date and difference; Odoo down: a yellow bar "Entries are saved in the ledger and waiting to be sent (N)", and orders and payouts work; Failed payout: stays "Failed" and is not counted in payments sent (PAY-006); Bulk approval partially succeeded: a notice "N sent and M failed", and the failed are visible with a "Retry failed" button; Account with a negative balance: it is not paid (PAY-026); and the stopped driver has a "Stopped from tasks" badge; Payout prepared by the current user: its checkbox is disabled with the badge "Approved by someone else"; No dues on schedule: "No accounts due in this period" with the next payout date; Companies: hidden at launch, and a "Companies" filter appears when enabled later
+- Special states: Closed month: its entries are read-only (ADM-036); Open reconciliation difference: a red row in daily reconciliation and a number on the collection and reconciliation tab until settled; Daily balance check failed (PAY-005): a red alert at the top of the page with the date and difference; Odoo down: a yellow bar "Entries are saved in the ledger and waiting to be sent (N)", and orders and payouts work; Failed payout: stays "Failed" and is not counted in payments sent (PAY-006); Bulk approval partially succeeded: a notice "N sent and M failed", and the failed are visible with a "Retry failed" button; Account with a negative balance: it is not paid (PAY-026); and the stopped driver has a "Stopped from tasks" badge; Payout prepared by the current user: its checkbox is disabled with the badge "Approved by someone else"; No dues on schedule: "No accounts due in this period" with the next payout date; Companies: hidden at launch, and a "Companies" filter appears when enabled later; automatic payout failed (splitting or STC Pay): "Failed" badge and a retry button for whoever has "Approve payouts" (PAY-006, INT-014)
 #### A19 — Support and Tickets
 
 Context, evidence, decision, satisfaction, and dispute.
@@ -2554,7 +2558,7 @@ Every report with a custom period, comparison, export, and scheduling.
 
 Configurable values, permissions, keys, and connection status.
 
-- Elements: Connection status bar at the top of all tabs: Moyasar, Odoo, OneSignal, OpenLoyalty, PostHog, Adjust, Google Maps (usage percentage of the cap), call center; each badge opens the Integrations tab, Tabs: fees, windows, dispatch, batching, home, roles, feature flags, integrations, security, quality and trust, languages, calculation basis, settings log (ADM-034): for each value: name, type (percentage, amount, duration, count, list), unit, allowed range, the global value and the selected level's value side by side, version, effective date, the scheduled version if any, last editor, Level selector: global ← region ← city, and "a specific store" where the setting supports it (ADM-034); the inherited value is gray "Inherits global/region" and the overridden one carries an "Override" badge, Currency and time: SAR next to every amount, and the city's time zone next to every effective date (SYS-012), Setting edit panel: the global value (read-only), the source of the current value, allowed range, new value, "Effective immediately / on date", reason, and below it the setting's versions (scheduled, effective, and previous), Approved rules (ADM-034): locked "Approved rule · read-only under the contract" without an edit button, Dispatch: the twelve dispatch algorithm settings (DSP-001) with their global values and a city-override column, Roles: the list of roles with the number of agents in each role (the six built-in roles and a custom role); a permission × role matrix with values execute/view/no access, highlighting the column of the role being edited and the modified cell in a different color until saved; and the role editor: name, city scope, amount limit for financial actions, permissions, Security: two-step verification read-only with no off switch, and idle time before the session expires (ADM-001), Feature flags: a feature × city table with its stages (SYS-006), and the city's pilot group of merchants and drivers (SYS-019), and the minimum allowed version per app and platform, Quality and trust: the "Quality" badge thresholds (MKT-014), and the customer refund-rate threshold and what happens when it recurs (SUP-007), and no automatic refund (SUP-004), and the Mart damage report window (SUP-009), Languages: data rows (SYS-013), and each text with its key and translations, and the count of missing texts per language; notification templates are in A17, Calculation basis (read-only): a table of basis, tax, and invoice per amount type, and the rounding rules (PAY-029), Integrations: for each integration: status, environment (test/live for Moyasar), last successful operation, number of errors today, test button; and for Google Maps: the two caps and the cost so far (SYS-021); and for PostHog and Adjust: the list of events sent (INT-008); and MCP: read by default, Call center: a "Later · not connected" card in Integrations (INT-013)
+- Elements: Connection status bar at the top of all tabs: Moyasar, STC Pay, Odoo, OneSignal, OpenLoyalty, PostHog, Adjust, Google Maps (usage percentage of the cap), call center; each badge opens the Integrations tab, Tabs: fees, windows, dispatch, batching, home, roles, feature flags, integrations, security, quality and trust, languages, calculation basis, settings log (ADM-034): for each value: name, type (percentage, amount, duration, count, list), unit, allowed range, the global value and the selected level's value side by side, version, effective date, the scheduled version if any, last editor, Level selector: global ← region ← city, and "a specific store" where the setting supports it (ADM-034); the inherited value is gray "Inherits global/region" and the overridden one carries an "Override" badge, Currency and time: SAR next to every amount, and the city's time zone next to every effective date (SYS-012), Setting edit panel: the global value (read-only), the source of the current value, allowed range, new value, "Effective immediately / on date", reason, and below it the setting's versions (scheduled, effective, and previous), Approved rules (ADM-034): locked "Approved rule · read-only under the contract" without an edit button, Dispatch: the twelve dispatch algorithm settings (DSP-001) with their global values and a city-override column, Roles: the list of roles with the number of agents in each role (the six built-in roles and a custom role); a permission × role matrix with values execute/view/no access, highlighting the column of the role being edited and the modified cell in a different color until saved; and the role editor: name, city scope, amount limit for financial actions, permissions, Security: two-step verification read-only with no off switch, and idle time before the session expires (ADM-001), Feature flags: a feature × city table with its stages (SYS-006), and the city's pilot group of merchants and drivers (SYS-019), and the minimum allowed version per app and platform, Quality and trust: the "Quality" badge thresholds (MKT-014), and the customer refund-rate threshold and what happens when it recurs (SUP-007), and no automatic refund (SUP-004), and the Mart damage report window (SUP-009), Languages: data rows (SYS-013), and each text with its key and translations, and the count of missing texts per language; notification templates are in A17, Calculation basis (read-only): a table of basis, tax, and invoice per amount type, and the rounding rules (PAY-029), Integrations: for each integration: status, environment (test/live for Moyasar), last successful operation, number of errors today, test button; for Moyasar a "Payment splitting for merchants" switch (on or off) that is not turned on before the provider confirms in writing and applies to new orders (PAY-006); for STC Pay the last successful payout and the number of failed ones (INT-014); and for Google Maps: the two caps and the cost so far (SYS-021); and for PostHog and Adjust: the list of events sent (INT-008); and MCP: read by default, Call center: a "Later · not connected" card in Integrations (INT-013)
 - Actions and what happens:
   - **Edit**: opens the edit panel at the selected level. "Immediately" creates a version effective now, and "On date" a scheduled version with a "Scheduled" badge (ADM-034). A notification "Version [number] scheduled to take effect [date]" appears
   - **Test connection**: sends a probe request and shows the result within seconds: "Working · response time" or "Failed" with the provider's message, and updates the status badge; it creates no financial operation and no notification to a customer
@@ -2581,7 +2585,7 @@ Configurable values, permissions, keys, and connection status.
   - Minimum allowed version is not lower than the minimum supported version (SYS-006)
 - Permissions:
   - The page is for admin only (settings, cities and fees, roles and permissions, and audit log); other roles do not see it, and finance sees the financial limits read-only in A18
-- Requirements: SYS-002 ADM-001 INT-008 ADM-034 ADM-002 SYS-006 SYS-012 SYS-013 SYS-019 SYS-021 PAY-029 MKT-014 SUP-007 SUP-004 SUP-009 INT-001 INT-010 INT-013 ADM-043 DSP-001
+- Requirements: SYS-002 ADM-001 INT-008 INT-014 ADM-034 ADM-002 SYS-006 SYS-012 SYS-013 SYS-019 SYS-021 PAY-029 MKT-014 SUP-007 SUP-004 SUP-009 INT-001 INT-010 INT-013 ADM-043 DSP-001
 - Navigates to: A26 A20 A17 A18 A09
 - Special states: scheduled version: "Scheduled" badge and its effective date, then "Effective" automatically at its time; inherited value: shown with its source; editing it creates an override for the selected level; integration down: red badge and last success, and text beside it that PostHog, Adjust, OpenLoyalty, or Odoo being down does not stop orders or payment; Maps cap reached: badge "Saved estimates in use" (SYS-021); call center not connected: masked-call buttons are hidden (INT-013); unsaved permission change: an alert bar, and leaving the tab asks "Save or discard"; language with missing translations: the count of missing texts beside it and it is not enabled
 
@@ -3350,20 +3354,28 @@ Pages: A18 A26
 
 Rules:
 - The system shows a real-time statement for each merchant, freelance driver, and company
-- Payouts are made through Moyasar's payment distribution service, because the platform holds merchants' and drivers' money
-- At payout time (weekly for merchants, and on their own schedule for drivers and companies), the system prepares the list of dues, and no payout is sent without manual approval.
+- How a merchant is paid depends on whether the payment gateway supports payment splitting (Split Payment), as recorded in the integration settings (INT-001): if it does, the merchant's share is split when the order is captured and arrives automatically with no manual approval; if not, the platform holds the merchant's dues and pays them out itself through Moyasar's payment distribution service on the payout date, by manual approval
+- On the payout date (weekly for merchants the platform pays out, and on its date for companies) the system prepares the dues list, and no payout from it is sent without manual approval. Payouts by splitting and freelance driver payouts through STC Pay (INT-014) are automatic and do not enter the approval list.
 - The holder of the "Approve payouts" permission approves after reviewing the account statement: one account, or selects several accounts and approves them together.
 - Delivery companies' dues are paid to the company only
 - Each transfer appears with its status, bank reference, and date. Statuses: in progress, sent, or failed
-- Freelance driver payouts are weekly on the same day as merchant payouts, by manual approval.
+- Freelance driver payouts are weekly on the same day as merchant payouts, automatically through STC Pay with no manual approval (INT-014).
 - A merchant whose new bank account is awaiting finance approval does not enter the payout list (MER-001).
 - An unregistered merchant's balance is paid out after deducting product VAT (PAY-029).
+- When splitting is supported, the merchant's share is split when the order is captured after closing (not at hold), and equals their net in the statement: products minus the commission or contract fee, the payment fee, the tax on platform fees, and their share of offers; for an unregistered merchant the products tax stays with the platform (PAY-029).
+- The share of a merchant whose new bank account is awaiting Finance approval (MER-001) stays in the merchant wallet as "Due", is not split, and arrives after approval.
+- Penalties, charges, and refunds that occur after an order has been split are recorded on the merchant wallet and deducted from the merchant's later shares, or from the next payout if the merchant is paid manually.
+- Each split is recorded in the ledger (PAY-005) with its gateway reference, and shows in the merchant wallet as "In progress", then "Sent" or "Failed"; a failed one returns to being due, visible to Finance in A18, and is not counted as paid.
+- Changing the splitting setting applies to new orders only, is saved on each order, and is recorded in the audit log.
 
 Acceptance criteria:
 - A failed transfer does not appear as paid
-- No payout is sent without an approval recorded with the approver's name and time.
+- No payout prepared by the platform (a merchant without splitting, a company, or a deposit refund) is sent without an approval recorded under the approver's name and time.
 - Selecting 10 accounts and approving them sends 10 payouts and records an approval for each account.
 - The statement shows all deductions, compensations, and offers
+- Gateway that supports splitting: for a delivered order the merchant's share arrives automatically and the account does not appear in the approval list.
+- Gateway that does not support splitting: the due amount stays with the platform and appears in the approval list on the payout date.
+- Unregistered merchant, products with a selling price of 115 and a 10% percentage contract: 86.77 is split to the merchant before the payment fee (PAY-029).
 
 Pages: D07 MD07 A18 A26
 
@@ -3821,10 +3833,12 @@ Rules:
 - Statement export.
 - Each charge on the merchant in the statement carries a visible type and status; the statuses are: potential, charged, under appeal, accepted, rejected.
 - An appeal button for each charge.
+- The page opens with the merchant wallet, in three separate balances: "Pending capture" (orders not yet closed, amount held), "Due" (captured, not yet paid out to the merchant), and "Paid out to you" for the period; below them a "Payout method" line: "Automatic when the order closes" or "Weekly after platform approval", and each order shows which of the two it was paid by (PAY-006).
 
 Acceptance criteria:
 - Each line is linked to its order or its source (campaign, cashier integration, case).
 - When an appeal is accepted, the status changes and the system issues a reversal entry.
+- The total of "Pending capture", "Due", and "Paid out to you" for the period matches the net of its orders in the statement.
 
 Pages: MD02 MD07
 
@@ -5487,12 +5501,34 @@ Rules:
 - Sandbox environment, then production
 - Daily reconciliation with the Moyasar report
 - All displayed payment methods support authorization then capture through Moyasar (PAY-001).
+- The integration settings record whether the payment gateway supports payment splitting (Split Payment), as confirmed in writing by the provider; this capability decides how merchants are paid (PAY-006).
 
 Acceptance criteria:
 - Successful, failed, and refunded payments appear in their correct state.
 - Before launch, the results of the authorization, capture, cancellation, and refund trial are documented for each approved payment method, and what concerns Moyasar is confirmed in writing. This is an item in the manual acceptance checklist (SYS-014).
+- Before launch, written confirmation is obtained on whether the payment gateway supports payment splitting, the setting is configured accordingly, and the chosen method is tested. This is an item on the manual acceptance checklist (SYS-014).
 
 Pages: A18 A22
+
+#### INT-014 — STC Pay: driver payouts [Launch-critical]
+
+Rules:
+- A direct integration with STC Pay to pay out freelance driver dues automatically; each payout carries the STC Pay transaction number as its reference.
+- The driver adds an STC Pay wallet number in their name in their details (D10), and Finance approves it after matching the holder's name; payouts are not made to a new number before it is approved, and the previously approved one stays active until then.
+- On the weekly payout date (PAY-006) the system sends each freelance driver a payout of their net due after deducting any negative balance (PAY-026), with no manual approval; no payout is created for a net of zero or less.
+- The system prevents duplicate payouts: one key per driver and period, and resending never pays twice.
+- The payout appears to the driver in D07 and to Finance in A18 with its status: in progress, sent, or failed; a failed payout is not counted as paid and appears to Finance to be retried.
+- Manual approval remains for the driver deposit refund and account-closure settlement (PAY-024) and for delivery company payouts (FLT-002).
+- An STC Pay outage does not stop orders; payouts wait and are sent when it returns, without duplication.
+
+Acceptance criteria:
+- A freelance driver with a net of SAR 250 on payout day receives the payout through STC Pay without their account appearing in the approval list.
+- A new STC Pay number awaiting Finance approval is not paid to before approval.
+- Re-running the payout job on the same day does not create a second payout for the same driver and period.
+- A failed payout does not appear as paid, and appears to Finance to be retried.
+- A driver whose net after deducting a negative balance is zero or less gets no payout created.
+
+Pages: D07 D10 A18 A22
 
 #### INT-004 — Notifications and Messages [Launch-critical]
 
