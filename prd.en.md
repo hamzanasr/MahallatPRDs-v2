@@ -3562,7 +3562,7 @@ Pages: C09
 #### PAY-022 — Merchant statement and monthly fees [Launch-critical]
 
 Rules:
-- It aggregates contract fees or the Mart and pharmacy percentage, payment fees, advertising, cashier, and manual deductions, with the details and source of each order.
+- The monthly invoice aggregates contract fees or the Mart and pharmacy percentage, payment fees, cashier fees, and manual deductions, with the details and source of each order; advertising fees are not included, as they have a separate invoice when deducted (MKT-003).
 - Exemptions and store type are applied to each order before aggregation.
 - The default accounting tax is 15% on platform fees; it is shown separately and the sum of the lines matches the statement.
 - Refund and reversal are entries linked to the original; accounting integration is through Odoo.
@@ -3573,6 +3573,7 @@ Acceptance criteria:
 - Mart and pharmacy carry no payment fees.
 - The sum of the month's lines equals the merchant statement.
 - Platform fees of 100 SAR in the month appear on the invoice as 100 + 15 tax = 115.
+- An ad campaign approved during the month does not appear on that month's invoice, and its deduction appears in the statement with the number of its separate invoice.
 
 Pages: MD07 A16 A18
 
@@ -3677,7 +3678,7 @@ Rules:
 - The tax of the monthly invoice equals the sum of the taxes of its lines.
 - Points are rounded down.
 - Everything the customer pays (products, delivery, and service fees) includes 15% tax: a delivery of 12 SAR, of which 10.43 is before tax.
-- Platform fees on the merchant (contract fee or percentage, payment fee, and advertising) have 15% tax added on the monthly invoice.
+- Platform fees on the merchant (contract fee or percentage, and payment fee) have 15% tax added on the monthly invoice; advertising fees have 15% added on their separate invoice when deducted (MKT-003).
 - The accountant approves the table before coding, and then the examples are declared final.
 - Each merchant has an option the manager sets when adding it: registered for VAT or not registered; a registered merchant must have its VAT number (15 digits) entered. The option covers all merchants: restaurants, Shops, Mart and pharmacies.
 - A registered merchant is responsible for issuing the tax invoice for the product value under its own VAT number, and the platform issues its invoice for the delivery fee and service fee.
@@ -5305,10 +5306,13 @@ Rules:
 - The merchant sees the price before submitting the campaign, and the amount is deducted from their dues after approval; no publishing and no deduction before approval.
 - Stopping a campaign for platform reasons refunds the unexecuted part; stopping at the merchant's request applies a placement policy visible before the request.
 - If the merchant stops an ad at their request, the remaining full days are refunded, and the current day is not refunded.
+- When a campaign is approved and its amount deducted, the platform automatically issues the merchant a separate tax invoice for the ad amount and its 15% VAT through Odoo (INT-010), and the deduction appears in their statement with its invoice number (MER-008). Advertising fees are not included in the monthly invoice (PAY-022).
+- Any refund from a stopped campaign is issued as a credit note linked to its invoice.
 
 Acceptance criteria:
 - The price appears before the campaign is submitted.
 - No keywords field.
+- A 100 SAR campaign is approved: 115 is deducted from the merchant's balance and its invoice of 100 + VAT 15 is issued immediately, and it does not appear on the month's fee invoice.
 
 Pages: MD05 A08 A16
 
@@ -5579,7 +5583,7 @@ Pages: MD09 MD13
 Rules:
 - Accounting, settlements, and platform invoices
 - All invoices are issued automatically through Odoo on command from the platform system (admin dashboard); no staff member issues an invoice manually inside Odoo: the order tax invoice, the merchant monthly platform-fee invoice, ads and cashier invoices, and the credit note on refund.
-- The system sends the issue command at the event: the order invoice when the order is captured, the merchant monthly invoice at month close, and the credit note on refund; it saves the invoice number and link on the order or statement and sends it to the customer or merchant.
+- The system sends the issue command at the event: the order invoice when the order is captured, the merchant monthly invoice at month close, the ad invoice when the campaign is approved and its amount deducted, and the credit note on refund; it saves the invoice number and link on the order, statement or campaign and sends it to the customer or merchant.
 - If Odoo is down, issuing commands queue and are retried automatically in order without duplicates, and the number pending is shown in Accounts.
 
 Acceptance criteria:
