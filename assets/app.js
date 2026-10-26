@@ -253,12 +253,12 @@
       var b = v('base'), mk = v('markup'), rt = v('rate'), dl = v('delivery'), tip = v('tip');
       var products = r2(b * (1 + mk / 100)), fee = r2((products + dl) * 0.025), mf = r2(b * rt / 100), total = r2(products + dl + fee + tip);
       out.innerHTML = '<small>' + T('المطلوب من العميل', 'Customer pays') + '</small><div class="big">' + m(total) + '</div>' +
-        '<div class="row"><span>' + T('سعر المنتجات للعميل', 'Product price to customer') + '</span><b>' + m(products) + '</b></div>' +
+        '<div class="row"><span>' + T('سعر البيع للمنتجات', 'Sale price of products') + '</span><b>' + m(products) + '</b></div>' +
         '<div class="row"><span>' + T('التوصيل', 'Delivery') + '</span><b>' + m(dl) + '</b></div>' +
         '<div class="row"><span>' + T('خدمة 2.5% دون الإكرامية', 'Service fee 2.5% (excl. tip)') + '</span><b>' + m(fee) + '</b></div>' +
         '<div class="row"><span>' + T('الإكرامية', 'Tip') + '</span><b>' + m(tip) + '</b></div>' +
-        '<div class="row"><span>' + T('يصل للمندوب من الإكرامية بعد خصم 15%', 'Tip reaching the driver after 15% deduction') + '</span><b>' + m(r2(tip * 0.85)) + '</b></div>' +
-        '<div class="row"><span>' + T('خصم نسبة التاجر', 'Merchant percentage deduction') + '</span><b>' + m(mf) + '</b></div>' +
+        '<div class="row"><span>' + T('يصل للمندوب من الإكرامية بعد استبعاد ضريبتها 15%', 'Tip reaching the driver after removing its 15% VAT') + '</span><b>' + m(r2(tip / 1.15)) + '</b></div>' +
+        '<div class="row"><span>' + T('عمولة التاجر (تُستقطع منه)', 'Merchant commission (deducted)') + '</span><b>' + m(mf) + '</b></div>' +
         '<div class="row"><span>' + T('مستحق المنتجات للتاجر', 'Products due to merchant') + '</span><b>' + m(b - mf) + '</b></div>' +
         '<p>' + T('قبل ضريبة رسوم المنصة وتمويل العروض والاسترداد والغرامة اليدوية. لا رسم دفع إلكتروني للمارت.', 'Before platform-fee VAT, promotion funding, refunds and manual penalties. No online payment fee for Mart.') + '</p>';
     }
