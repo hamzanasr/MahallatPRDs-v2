@@ -129,6 +129,11 @@ DEC.SETTING_EDITS.update(DEC3.SETTING_EDITS)
 DEC.SETTING_EDITS.update(DEC4.SETTING_EDITS)
 DEC.SETTING_ADD[0] = ('رسوم التوصيل', 'المطاعم والمحلات: 9 ر.س تشمل 3 كم + 1.5 لكل كيلو، حد 9–25؛ المارت والصيدليات: 12 ر.س تشمل 3 كم + 1.5 لكل كيلو، حد 12–30',
                       'عام للنظام وإعداد اختياري لكل مدينة', 'المال والرسوم', ['PAY-013'])
+for _i, _row in enumerate(DEC.SETTING_ADD):
+    if _row[0] in DEC5.SETTING_ADD_EDITS:
+        DEC.SETTING_ADD[_i] = DEC5.SETTING_ADD_EDITS[_row[0]]
+    if _row[0] in DEC5.SETTING_SCOPE_EDITS:
+        DEC.SETTING_ADD[_i] = (_row[0], _row[1], DEC5.SETTING_SCOPE_EDITS[_row[0]], _row[3], _row[4])
 SETTING_REFS_ADD = []
 for _i, _row in DEC.SETTING_EDITS.items():
     D['settings'][_i] = list(_row)

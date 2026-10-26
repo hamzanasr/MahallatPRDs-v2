@@ -254,10 +254,11 @@ One definition for each number, used on all pages and reports, so the same numbe
 | Hour Deal | 30% or more | Recurring schedule, a single end time, and inventory |
 | Tier score | Last 30 days | Filters of 10 and 30 orders, 30 days, and custom |
 | Driver platform percentage | 10% | Explicit city, then tier benefits, then default; a company driver uses their company's contract percentage |
-| Delivery fee | Restaurants and shops: 9 SAR including 3 km + 1.5 per km, bounds 9–25; Mart and pharmacies: 12 SAR including 3 km + 1.5 per km, bounds 12–30 | System-wide, with an optional per-city setting |
-| Delivery distance measurement | Straight line | Or the Google Maps route if the cost is acceptable; falls back to straight line when the call cap is reached |
+| Delivery fee | Restaurants and shops: 9 SAR including 3 km + 1.5 per km, bounds 9–25; Mart and pharmacies: 12 SAR including 3 km + 1.5 per km, bounds 12–30 | System-wide, with an optional setting per region and per city |
+| Delivery distance measurement | Air distance (straight line) | Or road distance through Google Maps; each region and each city has its own method, and when road distance is unavailable: air distance × road factor |
 | Driver negative balance limit | −50 SAR | When reached, new tasks stop until payment |
 | Payment splitting for merchants | Off until the payment provider confirms support in writing | System-wide; the admin changes it under Integrations and it applies to new orders |
+| Road factor | 1.3 | System-wide, and per region or city; used when road distance is unavailable: air distance × the factor |
 
 ## Financial transaction examples
 
@@ -2199,10 +2200,10 @@ Only the required review according to permission and request type.
 
 Boundaries, coverage, fees, and exceptions.
 
-- Elements: Boundaries: city boundaries on the map (the default zone), with the drivers' private zones (DSP-002) and out-of-boundary coverage requests, Sections: those enabled in the city, Stores and drivers: city page numbers (ADM-032): stores (by section), drivers (and those online now), active customers, delivered orders; each number opens its list filtered by the city, Delivery fees (PAY-013): base fee and its kilometers, extra kilometer price, minimum and maximum, restaurants and miscellaneous stores fee and Mart and pharmacies fee, distance measurement method, effective date, and rule priority, Driver percentage: in the "Fees and driver percentage" tab, Stacking: a per-city setting, Coverage requests: on the map outside the boundaries and in the readiness indicator, Cities list beside the city page: name, region, status (open, candidate, stopped), readiness for a candidate (X/6 with a bar), and whether it has a specific setting, City tabs: overview and boundaries, fees and driver percentage, distribution and driver cap, seasons, readiness and launch, Source of each setting: "Follows global" or "City-specific" with an "Exception" badge and a revert button, a "Global setting / [City]" switch in the header showing which level is being edited, Distribution settings (DSP-001) with the global value and the city value: starting range, increment, maximum, who they are offered to, acceptance duration, interval, preferred captain, support alert, search timeout, new-driver score, prioritizing those who stayed online without an order; and priority-point weights with a live calculation preview using the three examples that updates as the weights change, Driver cap and waiting-list count (DSP-004); empty = no cap, Seasons (ADM-015): name, cities, from and to, and what is linked to it, Readiness and launch (ADM-037): candidate city indicator, checklist, and the number of those who registered interest, an "Instant stop" button for the city and an active-season badge
+- Elements: Boundaries: city boundaries on the map (the default zone), with the drivers' private zones (DSP-002) and out-of-boundary coverage requests, Sections: those enabled in the city, Stores and drivers: city page numbers (ADM-032): stores (by section), drivers (and those online now), active customers, delivered orders; each number opens its list filtered by the city, Delivery fees (PAY-013): base fee and its kilometers, extra kilometer price, minimum and maximum, restaurants and miscellaneous stores fee and Mart and pharmacies fee, distance measurement method (air or road distance) and road factor, effective date, and rule priority: store, then city, then region, then global, Driver percentage: in the "Fees and driver percentage" tab, Stacking: a per-city setting, Coverage requests: on the map outside the boundaries and in the readiness indicator, Cities list beside the city page: name, region, status (open, candidate, stopped), readiness for a candidate (X/6 with a bar), and whether it has a specific setting, City tabs: overview and boundaries, fees and driver percentage, distribution and driver cap, seasons, readiness and launch, Source of each setting: "Follows global", "Follows region" or "City-specific" with an "Exception" badge and a revert button, a "Global setting / [Region] / [City]" switch in the header showing which level is being edited, Distribution settings (DSP-001) with the global value and the city value: starting range, increment, maximum, who they are offered to, acceptance duration, interval, preferred captain, support alert, search timeout, new-driver score, prioritizing those who stayed online without an order; and priority-point weights with a live calculation preview using the three examples that updates as the weights change, Driver cap and waiting-list count (DSP-004); empty = no cap, Seasons (ADM-015): name, cities, from and to, and what is linked to it, Readiness and launch (ADM-037): candidate city indicator, checklist, and the number of those who registered interest, an "Instant stop" button for the city and an active-season badge
 - Actions and what happens:
   - **Draw boundaries**: placing a drawing on the map with polygon points. "Save boundaries" shows the impact before confirming "[count] stores without a manual zone will take the new boundaries · [count] customer addresses became out of scope". Applies to new orders.
-  - **Pricing**: window: "Follows the global setting" or "Specific setting" with the PAY-013 fields and an effective date, with a fee preview for an example distance.
+  - **Pricing**: window: "Follows the region setting" (or "Follows the global setting" for a region) or "Specific setting" with the PAY-013 fields, including the measurement method: air or road distance, and an effective date, with a fee preview for an example distance using the chosen method. A region has the same window, and its cities inherit it.
   - **City setting**: opens the settings tab (distribution, driver percentage, stacking, cap, enabled sections); each item is "Follows global" or a specific value with an "Exception" badge. "Save [city] settings" applies to orders whose distribution starts after it, and records the editor and the values before and after.
   - **Open city**: for a candidate city: shows the checklist and the button is disabled until it is complete (ADM-037). The confirmation states the impact "[City] will be opened for ordering and [count] registered users will receive a notification with the launch coupon". It becomes "Open" and the notification is sent once.
   - **Global setting**: switches the editor to the global setting (distribution, fees, and cap). The save confirmation states the number of cities that follow global and will be affected.
@@ -3462,14 +3463,15 @@ Pages: C18
 
 Rules:
 - The delivery fee is a system-wide setting: a base fee that includes a set number of kilometers, a price per additional kilometer, a minimum, and a maximum.
-- Distance from the store to the customer is measured by a setting: straight line (default), or Google Maps route if the call cost is acceptable within the SYS-021 cap; when the cap is reached, straight line is used.
+- Distance from the store to the customer is measured by a method the manager chooses in the pricing setting: air distance (straight line) or road distance through Google Maps. The global setting is air distance by default, and each region and each city can choose its own method along with its prices.
 - The distance and the measurement method are stored on the order when it is confirmed.
-- An optional setting can be added for any city; a city with no setting takes the global setting.
+- An optional setting can be added for any region and any city (SYS-012): measurement method, base fee and its kilometers, extra kilometer price, the two limits, and the road factor. A city with no setting inherits its region's setting, and a region with no setting inherits the global setting.
 - There is one fee for restaurants and miscellaneous shops, and another fee for Mart and pharmacies.
-- Pricing rules have a scope, a priority, and an effective date: a specific store first, then city, then the global setting.
+- Pricing rules have a scope, a priority, and an effective date: a specific store first, then city, then region, then the global setting.
 - The driver's pay has rules independent of the customer price, so delivery offers do not reduce it (PAY-014).
 - Default values of the global setting: restaurants and miscellaneous shops 9 SAR including 3 km, 1.5 SAR per additional kilometer, minimum 9 and maximum 25. Mart and pharmacies 12 SAR including 3 km, 1.5 SAR per additional kilometer, minimum 12 and maximum 30.
 - A partial additional kilometer is rounded up: 2.3 km is counted as 3 km.
+- If the scope's method is road distance and Google Maps cannot be called (outage, or the SYS-021 cap is reached) and there is no saved estimate for the route, the air distance multiplied by the scope's road factor (1.3 by default) is used, and the order records its method as "air × factor".
 
 Acceptance criteria:
 - When a city's fees change, no confirmed order changes.
@@ -3477,6 +3479,9 @@ Acceptance criteria:
 - The system does not apply a rule whose effective date is in the future before that date.
 - A city with no specific setting takes the global setting.
 - A restaurant 4.2 km away: 9 SAR for the first three kilometers + 2 × 1.5 = 12 SAR.
+- A region set to road distance, and a city in it with no setting of its own: the city's orders are priced by road distance and the region's prices.
+- A city set to air distance inside a region set to road distance: its orders are priced by air distance and the city's prices.
+- Road method with Google Maps down, a restaurant 4 km away by air with a factor of 1.3: distance 5.2 km, so the fee is 9 + 3 × 1.5 = 13.50 SAR, and the saved method is "air × factor".
 
 Pages: A09
 
@@ -3490,6 +3495,7 @@ Rules:
 - The funder of a delivery offer bears the difference and does not reduce the driver's pay.
 - When a driver is replaced, the pay and the tip go to the driver who delivered; any compensation to the first driver is a documented manual decision with no automatic deduction.
 - The default platform percentage of the driver's pay is 10%.
+- Driver pay is calculated from the delivery fee using the distance and measurement method saved on the order (PAY-013), so it follows the method of the order's region or city.
 
 Acceptance criteria:
 - An offer does not change the driver's base pay.
@@ -5932,7 +5938,7 @@ Rules:
 - The 100 m radius is computed geographically without a paid call.
 - A daily and monthly cap and a visible cost; when it is reached, a saved estimate is used without stopping the order.
 - No automatic penalty calculation is tied to a maps call.
-- The default Google Maps cap is 3,000 SAR monthly and 150 SAR daily, and after it the straight line is used.
+- The default Google Maps cap is 3,000 SAR monthly and 150 SAR daily; after it, the saved estimate is used if available, otherwise pricing distance is air distance × road factor (PAY-013).
 
 Acceptance criteria:
 - Updating each location does not call a distance matrix.
