@@ -3687,6 +3687,7 @@ Rules:
 - If splitting fails or the gateway no longer supports it and payments reach the platform account, the rules above apply: a registered merchant issues the invoice for their products, and for an unregistered merchant the platform issues the invoice for the entire order and deducts product VAT. Each order records whether its payments were split, so a change of mode applies to new orders only.
 - Changing the registration status or VAT number applies to new orders only; it is saved on each order and recorded in the audit log.
 - All platform invoices are issued automatically through Odoo on command from the system (INT-010), except the product invoice of a registered merchant, which the merchant issues itself.
+- VAT on delivery fees and service fees is always on the platform: it issues its invoice for them and remits it, and it is never deducted from the merchant, registered or not, with or without splitting. Product VAT is on the merchant; the platform remits it only for an unregistered merchant when payments reach its account without splitting, and deducts it from that merchant's balance.
 
 Acceptance criteria:
 - 1.525 becomes 1.53.
@@ -3695,6 +3696,7 @@ Acceptance criteria:
 - Unregistered merchant, splitting active, products at selling price 115, 10% contract percentage: the platform issues no invoice for the products and does not deduct their VAT; it deducts only the commission 11.50 and its VAT 1.73, so the merchant receives 101.77 before the payment fee and bears the product VAT of 15 themselves.
 - Registered merchant, same order: no product VAT is deducted; only the commission 11.50 and its VAT 1.73, so the merchant receives 101.77 before the payment fee.
 - A "Registered" merchant cannot be saved without a 15-digit VAT number.
+- Order with a 12 SAR delivery fee: its VAT of 1.57 appears on the platform invoice and is not deducted from the merchant's balance, with or without splitting.
 
 Pages: A18 A22
 
