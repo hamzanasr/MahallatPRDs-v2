@@ -169,6 +169,20 @@ for _key, _old, _new in DEC6.OWNER_STR_EDITS:
 DEC.DECISIONS.extend((n, t, d, _ids3.get(n, [])) for n, t, d in DEC6.DECISIONS)
 DEC.SETTING_ADD.extend(DEC6.SETTING_ADD6)
 
+# الجولة السابعة: الفرع وحدة مستقلة كأنه متجر لوحده
+import b4_decisions7 as DEC7
+for _rid, (_n, _title) in DEC7.TITLE.items():
+    _touch(_rid, _n)['title'] = _title
+for _n, _rid, _old, _new in DEC7.REPLACE:
+    _r = _touch(_rid, _n)
+    _k = next((k for k in ('rules', 'acceptance') if any(x.startswith(_old) for x in _r[k])), None)
+    assert _k, (_rid, _old)
+    _r[_k] = [(_new if x.startswith(_old) else x) for x in _r[_k] if _new is not None or not x.startswith(_old)]
+for _n, _rid, _kind, _txt in DEC7.ADD:
+    _r = _touch(_rid, _n)
+    _r['rules' if _kind == 'R' else 'acceptance'].append(_txt)
+DEC.DECISIONS.extend((n, t, d, _ids3.get(n, [])) for n, t, d in DEC7.DECISIONS)
+
 DEC.DECISIONS.sort(key=lambda x: x[0])
 DEC.SETTING_EDITS.update(DEC3.SETTING_EDITS)
 DEC.SETTING_EDITS.update(DEC4.SETTING_EDITS)
