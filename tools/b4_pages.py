@@ -87,7 +87,7 @@ def page_html(p, with_mock=True):
         ''.join(reqs), nxt_html)
 
 
-STD_STATES = D['pages'][0]['states']
+STD_STATES = list(D_ORIG['pages'][0]['states'])  # الحالات الخمس المشتركة من ملف المالك، دون حالات C01 الخاصة
 
 
 def surface_section(num, sid, name, desc):

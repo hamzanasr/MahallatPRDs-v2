@@ -31,7 +31,7 @@ def apply(D, REQ_IDS, here):
     """يدمج المراجعة في D. يعيد (MOCKS, MOCKS2) لاستعمالهما في المعاينات."""
     data = _load(here)
     pages = {p['id']: p for p in D['pages']}
-    std = D['pages'][0]['states']
+    std = list(D['pages'][0]['states'])  # نسخة: الحالات المشتركة قبل أي إضافة خاصة بـC01
     MOCKS, MOCKS2 = {}, {}
 
     def clean_ids(ids, kind):

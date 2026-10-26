@@ -346,6 +346,7 @@ Access to the sections and stores available for the customer's address.
   - The suggestion reason line builds trust and explains the ordering.
 - Requirements: CUS-003 CUS-004 CUS-009 MKT-014 ORD-011
 - Navigates to: C02 C03 C04 C05 C07 C10 C13 C11 C16 C12 C24 C08 C17 C26
+- Special states: New user with no orders: "Suggestions for you" is replaced by "Most ordered in your city" and the in-progress order card does not appear; the page is never empty.; Address outside coverage: the page moves to C24 (no driver or coverage) with a change-address button.; Section disabled in the city: it disappears from the sections grid and the remaining sections move up in the city's order.; A store closed now: appears with a "Closed · opens 4:00 PM" tag at the end of the row and is not shown as available.; A store outside the customer's city: does not appear in any row, nor in "Suggestions for you".; Pharmacy order in progress: the in-progress order card says "Your order from the pharmacy" without any medicine name.; No offers or discounted products in the city: the whole row is hidden instead of being shown empty.
 
 #### C02 — Search and results
 
@@ -1060,7 +1061,7 @@ Manage the restaurant or Shops menu according to permissions.
 - Permissions:
   - Viewing the menu, enabling, and pausing: "Products" permission
   - Editing the price: "Prices" permission; others see the price as text only
-  - A branch manager edits only the availability of their branch's products; the menu and the store price are the same for all of the merchant's branches (MER-002)
+  - The branch manager edits only their branch's store prices and product availability; the menu is shared by all of the merchant's branches (MER-002)
 - UX decisions:
   - The "Not visible" filter gathers everything that needs action in one tap.
   - Pausing with ready-made durations and a clear return time instead of a permanent pause the employee forgets.
@@ -1072,7 +1073,7 @@ Manage the restaurant or Shops menu according to permissions.
 
 A clear preview of the store price, sale price, and the approved price limits.
 
-- Elements: name, description, and image: product fields, edit limit: badge for the store price edit mode granted to the merchant (not allowed, needs review, within a percentage with the percentage, full) (MER-002), approved price: the last price approved by the platform, and the price limits without review in numbers ("from … to …"), proposed price: the store price the merchant writes, and the review status if any "Your proposal … awaiting review since …", sale price: now and after approval together, with the line "Sale price = store price × (1 + markup rate …%) per your contract" (MER-002), preparation time: in minutes (MER-040), availability time: with the period of the menu the product belongs to for comparison ("Within the Morning menu period …") (MER-005), options: product options; for a combo meal the component list, each component with its options and the availability of each option, and the meal status (available / unavailable) (MER-024), cashier: product linking and sync status (MER-024)
+- Elements: name, description, and image: product fields, edit limit: badge for the store price edit mode granted to the merchant (not allowed, needs review, within a percentage with the percentage, full) (MER-002), approved price: the last price approved by the platform, and the price limits without review in numbers ("from … to …"), proposed price: the store price the merchant writes, and the review status if any "Your proposal … awaiting review since …", sale price: now and after approval together, with the line "Sale price = store price × (1 + markup rate …%) per your branch's contract" (MER-002), preparation time: in minutes (MER-040), availability time: with the period of the menu the product belongs to for comparison ("Within the Morning menu period …") (MER-005), options: product options; for a combo meal the component list, each component with its options and the availability of each option, and the meal status (available / unavailable) (MER-024), cashier: product linking and sync status (MER-024)
 - Actions and what happens:
   - **Allowed save**: available when the price is within the price limits, the mode is "full", or no price change was made: saves immediately without confirmation and updates the sale price, and returns to M05 with a notification "Saved". Disabled when the edit needs review, or the mode is "not allowed" (MER-002)
   - **Submit for review**: appears as the primary action when the price falls outside the price limits or the mode is "needs review": confirmation "The sale price … remains for customers until the platform approves …". After that a badge "Awaiting review" appears in M05, the request reaches the platform (A08), and non-price edits are saved immediately (MER-002)
@@ -1089,7 +1090,7 @@ A clear preview of the store price, sale price, and the approved price limits.
   - Meal component with no option: "Add at least one option for each component"
 - Permissions:
   - Name, description, image, availability, and preparation time: "Products" permission
-  - Price field: "Prices" permission within the merchant's ceiling; the store price is the same for all of the merchant's branches (MER-002)
+  - Price field: the "Prices" permission within the merchant's cap; and the store price is for this branch only (MER-002)
 - UX decisions:
   - The primary button switches automatically between "Allowed save" and "Submit for review" depending on the price entered.
   - The price limits are shown in numbers rather than a percentage alone, so the merchant knows in advance whether it will be reviewed.
@@ -1336,7 +1337,7 @@ Order search, its details, and its net.
 
 A management tool depending on the merchant's operating type.
 
-- Elements: products: for each product the menu period, availability toggle, availability time (MER-005), store price, sale price, completeness, and the customer-facing status in its own text (visible, outside menu period now, paused until a time, centrally paused, price awaiting review, new product for review), menu periods or catalogs: a "Menu periods" tab for restaurants and Shops with a menu, and "Catalogs" instead of it for Mart only (MER-005, MER-010), availability: a toggle for each product, and bulk selection: pause until a time, enable, set availability hours, store price and sale price: two columns; and the pending price next to the approved one with an arrow and "The customer sees the approved price until accepted", review requests: a tab of new products sent for review, price mode: a bar at the top of the page with the granted store price edit mode and its percentage, and that the sale price = store price × (1 + markup rate) per your contract, and the menu and store price are the same for all branches (MER-002), menu completeness: the overall percentage and its breakdown and a percentage per product with small bars (MER-047), improvement assistant: a draft image or description beside the current one with a "Draft" tag until the user chooses to use it (MER-047), linking and sync: a tab with the link status, last sync and its result, the imported count, incoming prices awaiting review, and items hidden for being out of stock in the merchant's system (MER-041), Mart: the catalogs subscribed to and the "Enable additions automatically" option for each, a "Local price" tag for a product whose price was edited in this grocery, a centrally paused product cannot be enabled locally, and a sale price preview (MER-010)
+- Elements: products: for each product the menu period, availability toggle, availability time (MER-005), store price, sale price, completeness, and the customer-facing status in its own text (visible, outside menu period now, paused until a time, centrally paused, price awaiting review, new product for review), menu periods or catalogs: a "Menu periods" tab for restaurants and Shops with a menu, and "Catalogs" instead of it for Mart only (MER-005, MER-010), availability: a toggle for each product, and bulk selection: pause until a time, enable, set availability hours, store price and sale price: two columns; and the pending price next to the approved one with an arrow and "The customer sees the approved price until accepted", review requests: a tab of new products sent for review, price mode: a bar at the top of the page with the granted store price edit mode and its percentage, and that the sale price = store price × (1 + markup rate) per the branch's contract, and the menu is shared by all branches while each branch has its own store price and availability (MER-002), menu completeness: the overall percentage and its breakdown and a percentage per product with small bars (MER-047), improvement assistant: a draft image or description beside the current one with a "Draft" tag until the user chooses to use it (MER-047), linking and sync: a tab with the link status, last sync and its result, the imported count, incoming prices awaiting review, and items hidden for being out of stock in the merchant's system (MER-041), Mart: the catalogs subscribed to and the "Enable additions automatically" option for each, a "Local price" tag for a product whose price was edited in this grocery, a centrally paused product cannot be enabled locally, and a sale price preview (MER-010)
 - Actions and what happens:
   - **Add**: product form: name, image, description, price, options, menu period, availability time. Saving creates it with the status "New product for review" in "Review requests" (MER-002, MER-010).
   - **Edit**: product edit dialog with a preview of the store price and sale price before saving; the price is applied or sent for review depending on the mode (MER-002).
@@ -1365,10 +1366,10 @@ A management tool depending on the merchant's operating type.
 
 Direct offer subscription to a platform offer, a merchant offer for review, and a recurring Hour Deal.
 
-- Elements: tabs: available, offer subscriptions, merchant offer, Hour Deal, results (MER-034), available: a card for each platform offer: the discount, minimum, duration, eligible branches, funding share for each party, and whether it combines with others (MKT-007), offer subscriptions: each branch's subscription to each platform offer with its status (active, paused until you approve a new share, ended), and scheduled Hour Deals with their status (MKT-007), funding: an explicit funding share "The platform funds … · you fund …" as an amount or a percentage before the subscribe button, and your share is fixed when your branch subscribes; and a note on the discount's effect on fees (MKT-007), merchant offer: fully funded by the merchant; a form with cities, branches, products, duration, stock, minimum, budget, combining rule; and its status (under review, approved, rejected with reason) (MKT-007), 30% hour schedule: the Hour Deal form: product, discount percentage, deal stock, once or recurring days, start and end hour, and a preview of what the customer sees and the price after the discount (MKT-017), current Hour Deal: product, price before and after, remaining stock, and a timer until the period ends (MKT-017), results: one table for each subscription: orders, discount value, your share, platform share, end date; it matches the offers line in the statement (MER-034)
+- Elements: tabs: available, offer subscriptions, merchant offer, Hour Deal, results (MER-034), available: a card for each platform offer: the discount, minimum, duration, eligible branches, funding share for each party, and whether it combines with others (MKT-007), offer subscriptions: each branch's subscription to each platform offer with its status (active, paused until you approve a new share, ended), and scheduled Hour Deals with their status (MKT-007), funding: an explicit funding share "The platform funds … · you fund …" as an amount or a percentage before the subscribe button, and your share is fixed when your branch subscribes; and a note on the discount's effect on fees (MKT-007), merchant offer: fully funded by the merchant; a form with cities, branches, products, duration, stock, minimum, budget, combining rule; and its status (under review, approved, rejected with reason) (MKT-007), 30% hour schedule: the branch's subscription to the Hour Deal (a platform offer): product, discount percentage, deal stock, once or recurring days, start and end hour, and a preview of what the customer sees and the price after the discount (MKT-017), current Hour Deal: product, price before and after, remaining stock, and a timer until the period ends (MKT-017), results: one table for each subscription: orders, discount value, your share, platform share, end date; it matches the offers line in the statement (MER-034)
 - Actions and what happens:
   - **Subscribe**: on a platform offer: choosing the branch, or "All branches" for the merchant manager, then a confirmation with your share and the duration: "The offer starts immediately after subscribing, and your share … of each discount is fixed". After that it becomes "Active" in offer subscriptions (MKT-007).
-  - **Create**: opens the merchant offer form or the Hour Deal form depending on the tab. A merchant offer is sent with the status "Under review" until the platform approves it; an Hour Deal is published automatically at its time (MKT-007, MKT-017).
+  - **Create**: opens the merchant offer form or the Hour Deal form depending on the tab. A merchant offer is sent with the status "Under review" until the platform approves it; the Hour Deal subscription (a platform offer) is published automatically at its time without review (MKT-007, MKT-017).
   - **End an offer subscription**: a red button with a confirmation: "The offer stops immediately for new orders in the selected branches". After that the status is "Ended" and its results remain in Results.
   - **Follow up**: opens the submitted merchant offer: its status (under review, approved, rejected), the rejection reason, and an "Edit and resubmit" button for a rejected one.
   - **Stop an Hour Deal**: confirmation: "The usual price returns immediately, and the next recurrence stops". After that the status is "Paused".
@@ -1444,7 +1445,7 @@ A reports center with flexible periods and comparison.
 
 Breakdown of dues, exemption, penalties, and loss charges.
 
-- Elements: tabs: live statement, payouts, fees invoice, archive (MER-045), dues account at the top of the page: three separate balances: "Pending capture" for orders not yet closed (amount held), "Due" for what was captured and has not reached you, and "Paid out to you" for the period; below them "Payout method": "Automatic when the order closes" or "Weekly after platform approval" (MER-008, PAY-006), net: the period summary on the first line: sales, platform fees and their tax, offers, refunds, loss charges, and penalties, net so far, next payout status, sales: a waterfall under the summary explaining how sales go down to the net, an item for each type, and the tax as a separate item (MER-008, PAY-022), contract fee and payment fee in each order's breakdown: source, products, the actual contract fee with the reason for its value written ("Exempt" with the exemption value, or "Cap reached"), payment fee, offers, tax, net (PAY-010, PAY-011, MER-007), Mart and pharmacy: a "Store percentage" column instead of the contract fee, with no payment fee column (PAY-011), merchant not registered for VAT: a "Product VAT" column deducted for each order without splitting (in a split order it is not deducted, and the merchant issues the products invoice), and an item for it in the waterfall (PAY-029), offers (merchant share) and refunds: two items in the waterfall, manual and its reason: the loss charge and the penalty are two separate lines, for each line the type (loss charge or penalty), amount, order or source, reason, status as a colored badge, last date to object (7 days from the decision notification), and an "Object" button beside it (MER-008, SUP-006), payouts: reference, period, amount, method (automatic by splitting, or weekly by approval), status, bank reference, date (PAY-006), fees invoice: monthly, the total of each fee type and the loss charges and penalties, tax separate, the total, and an indicator of whether the month's lines match it; ad fees are not included, as they have the ad invoice (PAY-022), archive: the order result is one card with the products invoice, the statement line, and the linked payout, and the ad invoices (MER-045)
+- Elements: tabs: live statement, payouts, fees invoice, archive (MER-045), the selected branch's dues account at the top of the page, and "All branches" with their total for the merchant manager: three separate balances: "Pending capture" for orders not yet closed (amount held), "Due" for what was captured and has not reached you, and "Paid out to you" for the period; below them "Payout method": "Automatic when the order closes" or "Weekly after platform approval" (MER-008, PAY-006), net: the period summary on the first line: sales, platform fees and their tax, offers, refunds, loss charges, and penalties, net so far, next payout status, sales: a waterfall under the summary explaining how sales go down to the net, an item for each type, and the tax as a separate item (MER-008, PAY-022), contract fee and payment fee in each order's breakdown: source, products, the actual contract fee with the reason for its value written ("Exempt" with the exemption value, or "Cap reached"), payment fee, offers, tax, net (PAY-010, PAY-011, MER-007), Mart and pharmacy: a "Store percentage" column instead of the contract fee, with no payment fee column (PAY-011), merchant not registered for VAT: a "Product VAT" column deducted for each order without splitting (in a split order it is not deducted, and the merchant issues the products invoice), and an item for it in the waterfall (PAY-029), offers (merchant share) and refunds: two items in the waterfall, manual and its reason: the loss charge and the penalty are two separate lines, for each line the type (loss charge or penalty), amount, order or source, reason, status as a colored badge, last date to object (7 days from the decision notification), and an "Object" button beside it (MER-008, SUP-006), payouts per branch to its bank account: reference, period, amount, method (automatic by splitting, or weekly by approval), status, bank reference, date (PAY-006), fees invoice: monthly, the total of each fee type and the loss charges and penalties, tax separate, the total, and an indicator of whether the month's lines match it; ad fees are not included, as they have the ad invoice (PAY-022), archive: the order result is one card with the products invoice, the statement line, and the linked payout, and the ad invoices (MER-045)
 - Actions and what happens:
   - **Order search**: filters the order breakdown to the order and opens its card with the statement line, the payout, and the products invoice.
   - **Statement**: downloads the statement for the period and branch (Excel or PDF) with the same numbers as the screen (MER-008).
@@ -1463,7 +1464,7 @@ Breakdown of dues, exemption, penalties, and loss charges.
   - Platform staff see the same archive from the merchant page in the admin dashboard (MER-045)
 - Requirements: MER-008 PAY-006 PAY-025 PAY-010 PAY-011 PAY-022 MER-045 MER-043
 - Navigates to: MD02 MD08 MD12
-- Special states: failed transfer: red badge "Failed · not paid" with the reason if it came from the bank (PAY-006); payout awaiting approval: the amount is an estimate that changes until approval; objection period expired: the button is disabled with "Objection period ended on …" (SUP-006); "Potential" loss charge: in a different color, and not counted in the net until it becomes "Charged"; month not finished: "This month's fees invoice is issued after it ends"; split share failed: red badge "Failed · not paid", and the amount stays in "Due" until Finance retries it (PAY-006); payment gateway without splitting: "Payout method" is weekly by approval, and the payout shows "Awaiting approval" (PAY-006); your new bank account is awaiting Finance approval: your share stays in "Due" with "Arrives after the account is approved" (MER-001)
+- Special states: failed transfer: red badge "Failed · not paid" with the reason if it came from the bank (PAY-006); payout awaiting approval: the amount is an estimate that changes until approval; objection period expired: the button is disabled with "Objection period ended on …" (SUP-006); "Potential" loss charge: in a different color, and not counted in the net until it becomes "Charged"; month not finished: "This month's fees invoice is issued after it ends"; split share failed: red badge "Failed · not paid", and the amount stays in "Due" until Finance retries it (PAY-006); payment gateway without splitting: "Payout method" is weekly by approval, and the payout shows "Awaiting approval" (PAY-006); the branch's new bank account is awaiting Finance approval: the branch's share stays in "Due" with "Arrives after the account is approved" (MER-001)
 
 #### MD08 — Ratings and Reports
 
@@ -1514,7 +1515,7 @@ Shows the merchant their store's quality indicators compared with the average of
 
 Branches, their status, devices, and permissions.
 
-- Elements: Location and branch data: city, preparation time, minimum order, for display (MER-001). Status: the first column after the name, with a status badge: Open now, Busy (busy mode) until a time, Temporarily paused until a time, Outside hours, Awaiting platform approval. Hours: weekly hours and special days per branch (MER-004). Delivery: the branch zone within the limits of its city (MER-046). Devices: type, connection status, and last connection (MER-042). Team: number of staff, the branch manager, and a link to manage them. Branch link and QR (INT-009). Editing: hours, special days, and temporary pause directly; name, location, and city by request to the platform
+- Elements: Location and branch data: city, preparation time, minimum order, the payout bank account (defaults to the merchant's account), and cashier integration, for display (MER-001, MER-011). Status: the first column after the name, with a status badge: Open now, Busy (busy mode) until a time, Temporarily paused until a time, Outside hours, Awaiting platform approval. Hours: weekly hours and special days per branch (MER-004). Delivery: the branch zone within the limits of its city (MER-046). Devices: type, connection status, and last connection (MER-042). Team: number of staff, the branch manager, and a link to manage them. Branch link and QR (INT-009). Editing: hours, special days, and temporary pause directly; name, location, and city by request to the platform
 - Actions and what happens:
   - **Request new branch**: a form: name, location on the map, city, hours, preparation time, minimum order. After submission the branch shows as "Awaiting platform approval" and is not visible to customers, and a notification arrives with the approval or with a request to complete it and its reason.
   - **Allowed edit**: hours and special days are saved immediately and appear to customers; platform fields are locked, with "Request a change" next to them, which creates a conversation in Communication with the Platform.
@@ -1606,7 +1607,7 @@ Topic, owner, attachments, and tickets.
 
 What the merchant edits and what is display-only.
 
-- Elements: Name and cover subject to review: a card titled "Subject to review". Hours and special days. Sound and printer. QR, store link, and branch links (INT-009). Cashier: link status, the systems available to you, and a "My system is not listed" button (MER-011). Contract, display-only: a "Display only" card with understandable values and examples: contract type, order fee and cap (PAY-010), payment fee (PAY-011), exemption for menu-link orders (enabled or disabled) (MER-007), tax on platform fees (PAY-022), and tax registration: the VAT number, or "Not registered: with split payments (the default mode) you issue the products invoice yourself and its VAT stays with you; without it, the platform issues the whole order's invoice on your behalf and product VAT is deducted from your dues" (PAY-029). Operation type: display-only with "Set by the platform and determines the fee model". Category and classification: "Placement only" (MER-009). Granted price-edit mode for the store price, and the markup rate in your contract (MER-002, PAY-009). Systems linked through the partners API: system name, what it can access, branches (INT-012). Products API link: status, last sync, and a link to the link tab in Products (MER-041)
+- Elements: Name and cover subject to review: a card titled "Subject to review". Hours and special days. Sound and printer. QR, store link, and branch links (INT-009). Cashier: link status, the systems available to you, and a "My system is not listed" button (MER-011). Contract, display-only: a "Display only" card with understandable values and examples: contract type, order fee and cap (PAY-010), payment fee (PAY-011), exemption for menu-link orders (enabled or disabled) (MER-007), tax on platform fees (PAY-022), and tax registration: the VAT number, or "Not registered: with split payments (the default mode) you issue the products invoice yourself and its VAT stays with you; without it, the platform issues the whole order's invoice on your behalf and product VAT is deducted from your dues" (PAY-029). Operation type: display-only with "Set by the platform and determines the fee model". Category and classification: "Placement only" (MER-009). Granted price-edit mode for the store price, and the markup rate in each branch's contract (MER-002, PAY-009). Systems linked through the partners API: system name, what it can access, branches (INT-012). Products API link: status, last sync, and a link to the link tab in Products (MER-041)
 - Actions and what happens:
   - **Allowed edit**: enables the allowed fields. Name and cover are sent for review with "Awaiting review" and the old ones remain for customers until accepted; sound and printer are saved immediately.
   - **QR**: downloads a print-ready QR for the store link or the selected branch.
@@ -1679,7 +1680,7 @@ Start work and view current status and earnings.
   - Best hours are below the fold because they are for planning, not for the moment
 - Requirements: DRV-001 DRV-003 DRV-030 PAY-026 DRV-027 DRV-007 DRV-023 DRV-012
 - Navigates to: D02 D07 D08 D03 D11 D13
-- Special states: account awaiting approval: the switch is disabled, and a "Your application is under review" bar with a link to D13 (DRV-001); onboarding not passed: a bar "Complete onboarding to receive your first task" with a link to D13 (DRV-012); negative dues account before the balance lockout threshold: work is normal with a yellow bar showing the balance; at −50: the "balance lockout" state and a "Task reception stopped" bar until payment (PAY-026) (second preview); suspected fake location or impossible jumps: "Your tasks are suspended pending review" with the reason, and the switch is disabled until support lifts the suspension (DRV-027); modified phone (root/jailbreak): "You cannot work from this phone" with the reason (DRV-027); ban from the penalty ladder (24 hours or permanent): the bar states the step, the reason, the end time, and a link to the appeal in D11 (DRV-023); expired document: a yellow reminder only (DRV-006); task in progress: a "Current task" card at the top of the screen opens D03 instead of the "Orders" button; city or service disabled by the platform: "The service is temporarily disabled in your city"; network outage while working: a bar "No network: your events are saved and sent when you are back"
+- Special states: account awaiting approval: the switch is disabled, and a "Your application is under review" bar with a link to D13 (DRV-001); onboarding not passed: a bar "Complete onboarding to receive your first task" with a link to D13 (DRV-012); negative dues account before the balance lockout threshold: work is normal with a yellow bar showing the balance; at −50: the "balance lockout" state and a "Task reception stopped" bar until payment (PAY-026) (second preview); suspected fake location or impossible jumps: "Your tasks are suspended pending review" with the reason, and the switch is disabled until support lifts the suspension (DRV-027); modified phone (root/jailbreak): "You cannot work from this phone" with the reason (DRV-027); ban from the penalty ladder (24 hours or permanent): the bar states the step, the reason, the end time, and a link to the objection in D11 (DRV-023); expired document: a yellow reminder only (DRV-006); task in progress: a "Current task" card at the top of the screen opens D03 instead of the "Orders" button; city or service disabled by the platform: "The service is temporarily disabled in your city"; network outage while working: a bar "No network: your events are saved and sent when you are back"
 
 #### D02 — Available Tasks
 
@@ -1831,7 +1832,7 @@ Net, incentives, loss charges and penalties, and their reasons.
 - Actions and what happens:
   - **Open task**: opens the task statement (second preview): delivery fee, tax, platform percentage, fee, tip and the time it was added if it was late, wait time at the store, and any delivery offer (PAY-014).
   - **Statement**: opens the live statement for the selected period with all movements (fees, tips, incentives, loss charges, penalties, reversal entries, payouts) with a PDF export button.
-  - **Dispute**: opens D11_2 filled with the selected loss charge or penalty; the window is 7 days from the decision notification, after which "Dispute period ended" shows (DRV-023).
+  - **Objection**: opens D11_2 filled with the selected loss charge or penalty; the window is 7 days from the decision notification, after which "Objection period ended" shows (DRV-023).
   - **Switch period**: Day/Week/Month changes only the numbers and the list, not the balance.
 - UX decisions:
   - One large number (the balance) on top, with its breakdown beneath as a sum equal to the number
@@ -1839,7 +1840,7 @@ Net, incentives, loss charges and penalties, and their reasons.
   - Payout status is a clear word and color, and a failed one is red and not confused with paid
 - Requirements: PAY-014 PAY-025 PAY-006 INT-014 DRV-005 PAY-026 PAY-024
 - Navigates to: D11 D10
-- Special states: late tip: a notification "The customer added a tip of [amount] to order [number]" and it appears in the same task's statement (DRV-005); negative balance: the number is red with "Deducted from your next payout", and at the balance lockout threshold (−50) a "Task reception stopped" bar and a payment link (PAY-026); payout failed: "Failed · not paid" with a link to update the STC Pay account in D10 (PAY-006, INT-014); deduction not yet approved: does not appear in the balance (PAY-026); reversal entry after a dispute is accepted: a green line "Refunded: your dispute on [number] was accepted"; task whose driver was replaced: per (PAY-014), and any compensation to the first driver is a manual line with its reason; STC Pay wallet not yet approved: "Your payout arrives after Finance approves your number", and nothing is sent before then (INT-014)
+- Special states: late tip: a notification "The customer added a tip of [amount] to order [number]" and it appears in the same task's statement (DRV-005); negative balance: the number is red with "Deducted from your next payout", and at the balance lockout threshold (−50) a "Task reception stopped" bar and a payment link (PAY-026); payout failed: "Failed · not paid" with a link to update the STC Pay account in D10 (PAY-006, INT-014); deduction not yet approved: does not appear in the balance (PAY-026); reversal entry after an objection is accepted: a green line "Refunded: your objection on [number] was accepted"; task whose driver was replaced: per (PAY-014), and any compensation to the first driver is a manual line with its reason; STC Pay wallet not yet approved: "Your payout arrives after Finance approves your number", and nothing is sent before then (INT-014)
 
 #### D08 — My Performance
 
@@ -1849,7 +1850,7 @@ One page with filters for 10 orders, 30 orders, 30 days, and custom.
 - Actions and what happens:
   - **Change period**: switches the numbers between periods (DRV-017), and custom opens a two-date picker; the displayed score changes, while the level and its badge do not change and "Your level is from the last 30 days" is written beneath them.
   - **Indicator details**: opens the indicator dialog: the value, the target, the score from the weight, and the orders that affected it with a link to each order.
-  - **Dispute**: from a specific note opens D11_2 linked to the order and the note.
+  - **Objection**: from a specific note opens D11_2 linked to the order and the note.
 - Validation and error messages:
   - Custom period: start before end, and not later than today
 - UX decisions:
@@ -1867,7 +1868,7 @@ Targets, benefits, progress, budget, and duration.
 - Elements: Target. Progress. Peak incentive. Level benefits: in the driver's city, in numbers, with "Fixed on the task the moment you accept it" (DRV-015). City incentive. Expiry. The five-level ladder with its thresholds (DRV-015). Score remaining to the next level. The four incentive types: for the driver's city only (DRV-006). Each incentive's card: days and hours, incentive amount, status (active, ending, budget exhausted)
 - Actions and what happens:
   - **Details**: opens the incentive with its settings (DRV-006), how your progress is calculated, and the tasks that were counted.
-  - **Dispute a note**: opens D11_2 linked to the incentive or note (for example a task that was not counted).
+  - **Object to a note**: opens D11_2 linked to the incentive or note (for example a task that was not counted).
   - **Invite a driver**: in the referral incentive: shares an invitation link; invitees and their status appear.
 - UX decisions:
   - The level ladder is horizontal with the current level highlighted so the driver knows where they are and what comes next
@@ -1899,26 +1900,26 @@ Operating data, bank, deposit, equipment, and services.
 - Navigates to: D11 D12
 - Special states: edit under review: an "Under review" badge on the item; verification rejected: the reason and an "Upload another file" button; closure request open: a "Closure request is being settled" bar and the closure button is disabled; resident driver: the "Hadaf deliveries" link does not appear; first STC Pay number under review: "Your payout will arrive after Finance approves your number"; changing an approved number keeps the old one active until the new one is approved (INT-014)
 
-#### D11 — My Tickets and Disputes
+#### D11 — My Tickets and Objections
 
-A ticket linked to a task, or a dispute of a loss charge, penalty, or penalty step.
+A ticket linked to a task, or an objection of a loss charge, penalty, or penalty step.
 
-- Elements: Task, reason, evidence, amount if any, messages. Dispute decision: accepted (reversal entry) or rejected with the reason (PAY-025). Tabs: All, My disputes, Actions (penalty ladder: warning, then priority lowered for a week, then a 24-hour ban, then operations review, then a permanent ban). Penalty-ladder step notice: the reason, the next step, and the last date to dispute: 7 days from the notice (DRV-023). Dispute response counter (DRV-023). Help reports: linked to the order and stage, including the emergency report (DRV-020, ORD-014)
+- Elements: Task, reason, evidence, amount if any, messages. Objection decision: accepted (reversal entry) or rejected with the reason (PAY-025). Tabs: All, My objections, Actions (penalty ladder: warning, then priority lowered for a week, then a 24-hour ban, then operations review, then a permanent ban). Penalty-ladder step notice: the reason, the next step, and the last date to object to: 7 days from the notice (DRV-023). Objection response counter (DRV-023). Help reports: linked to the order and stage, including the emergency report (DRV-020, ORD-014)
 - Actions and what happens:
-  - **Ticket**: opens a new ticket form: topic (help with a task, financial inquiry, dispute a loss charge or penalty, dispute a penalty step, closure request), task, description, attachments; after sending it appears in the list with the status "Open".
+  - **Ticket**: opens a new ticket form: topic (help with a task, financial inquiry, object to a loss charge or penalty, object to a penalty step, closure request), task, description, attachments; after sending it appears in the list with the status "Open".
   - **Reply**: sends a message in the ticket; it is saved with no network and sent when back.
-  - **Attach**: attaches an image or document to the ticket or dispute.
-  - **Dispute**: opens D11_2 for the selected loss charge, penalty, or penalty step, within 7 days of the decision notification (DRV-023); if accepted on a deduction it appears as a reversal entry in D07.
+  - **Attach**: attaches an image or document to the ticket or objection.
+  - **Objection**: opens D11_2 for the selected loss charge, penalty, or penalty step, within 7 days of the decision notification (DRV-023); if accepted on a deduction it appears as a reversal entry in D07.
 - Validation and error messages:
-  - Dispute reason at least 10 characters: "Write your dispute reason in at least 10 characters"
+  - Objection reason at least 10 characters: "Write your objection reason in at least 10 characters"
   - The topic is required
 - UX decisions:
   - Penalty-ladder actions are at the top of the screen because they directly affect the driver's work
   - Each item shows its status as a colored badge and the time remaining to respond
-  - The dispute form shows the amount, the reason, and the deadline before the input field
+  - The objection form shows the amount, the reason, and the deadline before the input field
 - Requirements: DRV-020 DRV-023 PAY-025 DRV-004
 - Navigates to: D07
-- Special states: permanent ban by a staff decision without the gradual steps (fraud, location spoofing, account sharing, abuse of a customer): a red card with the reason and a dispute link (DRV-023); dispute period ended: the button is disabled with "Dispute period ended"; response deadline passed with no response: a "Response late" badge; no tickets: "No messages · If you face a problem on a task, use the Help button"
+- Special states: permanent ban by a staff decision without the gradual steps (fraud, location spoofing, account sharing, abuse of a customer): a red card with the reason and an objection link (DRV-023); objection period ended: the button is disabled with "Objection period ended"; response deadline passed with no response: a "Response late" badge; no tickets: "No messages · If you face a problem on a task, use the Help button"
 
 #### D12 — Hadaf Deliveries
 
@@ -2131,12 +2132,12 @@ Merchants, branches, contracts, and onboarding requests.
 
 A unified file containing all the settings of the merchant and its branches without scattering.
 
-- Elements: Overview, Operations and zone: each branch's zone on a map: its city boundaries or a manual zone inside them (MER-046), and the hours, preparation time, and minimum, Products: store-price edit permission mode (MER-002) and percentage, and for each product the store price with the sale price beside it, calculated with the markup rate in the contract; platform staff do not enter the sale price by hand, Contract: its type (PAY-009), value, markup rate, and effective date, and the exempt menu link, and tax registration: registered with its VAT number or not registered (PAY-029), Offers, ads, and campaigns, Dues, Team, Support and log: platform chats with the merchant (ADM-010), the edit log with actor and values before and after, and bank account changes, a fixed header visible in all tabs: name, type and ordering method, city, number of branches, account manager, status (active, disabled), and the "Message merchant" and "Instant disable" buttons, Preferred captain (MER-038): preferred drivers with their live status (online, offline), tier, and equipment, and a field to add by driver number, Self-pickup: enabled or not, its discount, its distance for each branch, and who funds the discount (EXT-006), Shops conversion: menu readiness (number of valid products)
+- Elements: Overview, Operations and zone: each branch's zone on a map: its city boundaries or a manual zone inside them (MER-046), and the hours, preparation time, and minimum, Products: store-price edit permission mode (MER-002) and percentage, and for each product in each branch the store price with the sale price beside it, calculated with the markup rate in the branch's contract; platform staff do not enter the sale price by hand, Contract: its type (PAY-009), value, markup rate, and effective date, any branch-specific contract percentage or markup rate, and the exempt menu link, and tax registration: registered with its VAT number or not registered (PAY-029), Offers, ads, and campaigns, Dues, Team, Support and log: platform chats with the merchant (ADM-010), the edit log with actor and values before and after, and bank account changes, a fixed header visible in all tabs: name, type and ordering method, city, number of branches, account manager, status (active, disabled), and the "Message merchant" and "Instant disable" buttons, Preferred captain (MER-038): preferred drivers with their live status (online, offline), tier, and equipment, and a field to add by driver number, Self-pickup: enabled or not, its discount, its distance for each branch, and who funds the discount (EXT-006), Shops conversion: menu readiness (number of valid products)
 - Actions and what happens:
   - **Edit setting**: makes the current tab's fields editable. "Save" shows a before/after difference summary and asks for confirmation; it applies to new orders only and is recorded in "Support and log".
   - **Shops conversion**: a window that checks menu readiness; with no valid products the button stays disabled "Cannot publish: 0 valid products". The confirmation "Convert to a menu for new orders" (MER-053).
   - **Menu permissions**: window: choose the mode, and the percentage for "Within a percentage" (MER-002).
-  - **Percentage**: window: contract type (a percentage agreed with the merchant, or a fee per new customer at each branch), its value, the markup rate by which the sale price is calculated from the store price, and effective date. The confirmation gives an example: "Selling price 110 and percentage 10% = 11 to the platform" (PAY-009). No confirmed order changes.
+  - **Percentage**: window: contract type (a percentage agreed with the merchant, or a fee per new customer at each branch), its value, the markup rate by which the sale price is calculated from the store price, and effective date, with an optional per-branch customization of the percentage or markup rate while the merchant's contract stays for the other branches. The confirmation gives an example: "Selling price 110 and percentage 10% = 11 to the platform" (PAY-009). No confirmed order changes.
   - **Branch zone**: for each branch: choose "City boundaries" or "Manual zone" and draw on the map; anything outside the branch's city boundaries is clipped while drawing (DSP-002). Saving applies it to new orders, offers, and campaigns (MER-046); a customer outside the branch's city cannot order from it.
   - **Link**: creates an exempt menu link and copies it, and it can be stopped. What is deducted from its orders (PAY-009).
   - **Add preferred captain**: the number of an approved driver in the branch's city; added to the list, and the branch's order is offered to them first as a task offer for 30 seconds (MER-038).
@@ -2450,7 +2451,7 @@ Order templates, scheduling, and targeting via OneSignal.
 
 Reconciliation, settlements, liabilities, and closing.
 
-- Elements: The nine tabs (ADM-036): each tab has a number for what awaits action (open differences, accounts awaiting approval), Months status bar: the current is open, the previous awaiting closing, and the oldest closed; and the daily entry balance check result (PAY-005), "Needs your attention" first in the overview: accounts awaiting approval, failed transfers, reconciliation differences, entries not sent to Odoo, a month ready for closing; each item has a button that opens its place, Overview: collected and held (with the count of open orders), undisbursed dues (with the count of accounts), payments sent, open differences with count and amount, drivers' negative balances and those stopped from tasks (PAY-026), liabilities and those expiring this month, and held driver deposits separated from their dues accounts; each number opens its list, Collection and reconciliation: each payment operation with its status (held, collected, hold released, refunded, failed), its method, Moyasar reference, and actual fee (PAY-027), Daily reconciliation (INT-001): a line equation: collected − actual Moyasar fee = expected in bank, against what was actually deposited; the difference in red with a flag button; and the payment fee taken from merchants is a separate revenue line (PAY-027), Dues and payouts: the live statement and the dues list (PAY-006) with columns: select, account and its type, due, deductions (commission, fees, ad, loss charge, penalty), net, statement, status, bank reference, transfer date, transfer statuses: "Awaiting approval" then PAY-006 statuses, and "Failed" with the Moyasar reason, payout method in the dues list: a column showing for each account "Automatic by splitting" (the base mode for merchants) or "Manual approval" (an emergency mode without splitting, and manual payouts) or "Automatic STC Pay"; automatic ones appear with their status and reference, with no checkbox and no approve button (PAY-006, INT-014), Bulk selection: a checkbox for each row and "Select all" in the header; and when selected, a fixed dark bar above the table: the number of accounts, their net total, and an "Approve N payouts" button (not "Confirm"), Rows that cannot be approved: shown with a disabled checkbox and a written reason: negative balance (PAY-026), or a payout prepared by the current user (ADM-002), Driver deposit refund: a row in the payouts list that goes through the same approval (PAY-024), Liabilities: the single table with its items and columns (PAY-031), and a total-reconciliation line with wallet and points balances in the ledger, Invoices: the platform invoice and customer purchase orders, and each merchant's statement and monthly fees invoice with its lines (PAY-022, PAY-007), and ad invoices (MKT-003), Tax: platform fee tax separately (PAY-022), the tax included in tips (15%), and the percentage's effective date, Refunds: each refund with its type (full, partial) and source (card, wallet), and each compensation with its reward status (claimed, lapsed), its actor, reason, and liable party, and the order link and the reversal entry, Financial reports: the "Finance" reports from the reports center (net revenue by components, order profitability, collection and reconciliation, dues and payouts, liabilities, refunds, expected balance) with the same filters, Closing and controls: each month's status and who closed it and when, a link to the financial audit log (A26), and the roles' financial limits for reading (edited in A22), Entries: a table of the latest entries: entry number, time, description, debit, credit, reference; and the reversal entry with a "Reversal" badge and a link to its original instead of editing the row, Odoo: last successful send, the count of entries waiting, and a resend button
+- Elements: The nine tabs (ADM-036): each tab has a number for what awaits action (open differences, accounts awaiting approval), Months status bar: the current is open, the previous awaiting closing, and the oldest closed; and the daily entry balance check result (PAY-005), "Needs your attention" first in the overview: accounts awaiting approval, failed transfers, reconciliation differences, entries not sent to Odoo, a month ready for closing; each item has a button that opens its place, Overview: collected and held (with the count of open orders), undisbursed dues (with the count of accounts), payments sent, open differences with count and amount, drivers' negative balances and those stopped from tasks (PAY-026), liabilities and those expiring this month, and held driver deposits separated from their dues accounts; each number opens its list, Collection and reconciliation: each payment operation with its status (held, collected, hold released, refunded, failed), its method, Moyasar reference, and actual fee (PAY-027), Daily reconciliation (INT-001): a line equation: collected − actual Moyasar fee = expected in bank, against what was actually deposited; the difference in red with a flag button; and the payment fee taken from merchants is a separate revenue line (PAY-027), Dues and payouts: the live statement and the dues list (PAY-006) with columns: select, account and its type, due, deductions (commission, fees, ad, loss charge, penalty), net, statement, status, bank reference, transfer date, transfer statuses: "Awaiting approval" then PAY-006 statuses, and "Failed" with the Moyasar reason, payout method in the dues list: a column showing for each account "Automatic by splitting" (the base mode for merchants) or "Manual approval" (an emergency mode without splitting, and manual payouts) or "Automatic STC Pay"; automatic ones appear with their status and reference, with no checkbox and no approve button (PAY-006, INT-014), Bulk selection: a checkbox for each row and "Select all" in the header; and when selected, a fixed dark bar above the table: the number of accounts, their net total, and an "Approve N payouts" button (not "Confirm"), Rows that cannot be approved: shown with a disabled checkbox and a written reason: negative balance (PAY-026), or a payout prepared by the current user (ADM-002), Driver deposit refund: a row in the payouts list that goes through the same approval (PAY-024), Liabilities: the single table with its items and columns (PAY-031), and a total-reconciliation line with wallet and points balances in the ledger, Invoices: the platform invoice and customer purchase orders, and each branch's statement and monthly fees invoice with its lines (PAY-022, PAY-007), and ad invoices (MKT-003), Tax: platform fee tax separately (PAY-022), the tax included in tips (15%), and the percentage's effective date, Refunds: each refund with its type (full, partial) and source (card, wallet), and each compensation with its reward status (claimed, lapsed), its actor, reason, and liable party, and the order link and the reversal entry, Financial reports: the "Finance" reports from the reports center (net revenue by components, order profitability, collection and reconciliation, dues and payouts, liabilities, refunds, expected balance) with the same filters, Closing and controls: each month's status and who closed it and when, a link to the financial audit log (A26), and the roles' financial limits for reading (edited in A22), Entries: a table of the latest entries: entry number, time, description, debit, credit, reference; and the reversal entry with a "Reversal" badge and a link to its original instead of editing the row, Odoo: last successful send, the count of entries waiting, and a resend button
 - Actions and what happens:
   - **Approve payouts individually or in bulk**: "Approve" on the row for one account, or the "Approve N payouts" bar for the selection. Both open a confirmation: each account with its masked IBAN and amount, the total, that sending via Moyasar cannot be stopped after approval, and the excluded rows and their reason. After approval (PAY-006) rows become "In progress" then "Sent" with the bank reference or "Failed" with the reason, and a message "N payouts sent for execution" appears
   - **Retry failed**: on a "Failed" payout: a confirmation shows the Moyasar or STC Pay reason and the current account details (the new IBAN if edited). It resends the payout with the same amount without a new approval, unless the IBAN changed, in which case it needs a new approval
@@ -2458,12 +2459,12 @@ Reconciliation, settlements, liabilities, and closing.
   - **Close**: for a month "awaiting closing": a confirmation shows the month summary (total entries, open differences, incomplete transfers) and asks to type the month's name because it cannot be reversed. After it the month becomes "Closed" with the actor's name and time (ADM-036)
   - **Export**: exports the current tab with the same period and filters to Excel or PDF with numbers matching the screen, and is recorded in the audit log
   - **Open a number to its list**: clicking a number in the overview opens the relevant tab filtered by what it was computed from
-  - **Open dues account statement**: a side panel with the live statement of the merchant or driver (PAY-006) with loss charges and penalties each on its own line, the previous carried-forward balance, and the net; and an "Approve" button if the account is due
+  - **Open dues account statement**: a side panel with the live statement of the branch or driver (PAY-006) with loss charges and penalties each on its own line, the previous carried-forward balance, and the net; and an "Approve" button if the account is due
   - **Select all / Clear selection**: "Select all" selects only the approvable rows in the filtered page; "Clear selection" hides the bulk bar
   - **Flag a difference**: in daily reconciliation: a note and classification of the difference (late deposit, different fee, missing operation); the difference stays "Open" until resolved by an entry, and the flag is recorded with the staff member's name
   - **Retry failed payment operation**: for a collection or hold-release operation that failed at Moyasar: resubmits the same request with its identifier to prevent duplication, and the status updates when Moyasar responds
   - **Resend entries**: sends the waiting entries to Odoo in order and shows how many succeeded and failed
-  - **Issue fees invoice**: for each merchant after month end: a preview of the lines (including loss charges and penalties, excluding ad fees), tax, and total; after confirmation it is issued and appears in the merchant's statement and cannot be edited; correction (PAY-007)
+  - **Issue fees invoice**: for each branch after month end: a preview of the lines (including loss charges and penalties, excluding ad fees), tax, and total; after confirmation it is issued and appears in the branch's statement and cannot be edited; correction (PAY-007)
   - **Open order**: from the refunds tab opens the order file in A03
 - Validation and error messages:
   - The approve button in the window is disabled until "I reviewed each account's statement" is checked
@@ -2483,20 +2484,20 @@ Reconciliation, settlements, liabilities, and closing.
 - Special states: Closed month: its entries are read-only (ADM-036); Open reconciliation difference: a red row in daily reconciliation and a number on the collection and reconciliation tab until resolved; Daily balance check failed (PAY-005): a red alert at the top of the page with the date and difference; Odoo down: a yellow bar "Entries are saved in the ledger and waiting to be sent (N)", and orders and payouts work; Failed payout: stays "Failed" and is not counted in payments sent (PAY-006); Bulk approval partially succeeded: a message "N sent and M failed", and the failed are visible with a "Retry failed" button; Account with a negative balance: it is not paid (PAY-026); and the driver in balance lockout has a "Stopped from tasks" badge; Payout prepared by the current user: its checkbox is disabled with the badge "Approved by someone else"; No dues on schedule: "No accounts due in this period" with the next payout date; Companies: hidden at launch, and a "Companies" filter appears when enabled later; Split payments unavailable (emergency mode): a yellow bar "Payments reach the platform account; merchant payouts by manual approval", and orders work (PAY-006, PAY-029); automatic payout failed (splitting or STC Pay): "Failed" badge and a retry button for whoever has "Approve payouts" (PAY-006, INT-014)
 #### A19 — Support and Tickets
 
-Context, evidence, decision, satisfaction, and dispute.
+Context, evidence, decision, satisfaction, and object to.
 
-- Elements: Tickets: a list with the tabs "Mine" and "Unassigned" first, then "All"; by type: not delivered, missing and damaged, Mart damage, disputes, financial; each ticket shows: type, order number, customer or party, age, assigned agent, and a red badge for exceeding the trust limit, Ticket header: type, order number (SUP-001), report time since delivery (accepted within one hour only, SUP-005), assigned agent, open-order button, call button, three cards above the ticket before the decision: evidence, trust, financial authority, Trust: refund rate, number of orders and refunds, badge for exceeding the trust limit, and no automatic refund (SUP-004, SUP-007), and the count of notifications or restriction, Evidence file: its content (SUP-002) and the delivery photo, Damage (reported items): item, quantity, price, reason, Financial authority: the agent's role, what they can execute without approval, their role's amount limit, and that anything above it is escalated (ADM-043), Reply: the ticket conversation, each message with its time and the agent's name, Support decisions log on the ticket: reason, liable party, evidence, amounts per party, executor and time, dispute status, Dispute: the text of the dispute by the charged merchant or driver (within 7 days of the decision notification) and its attachments, and the supervisor's decision; the customer has no objection, Satisfaction: the customer's rating of the resolution after closing, Support decision window: refunded items, reason, refunded to (the original payment method or refund credit in the wallet), "Who is liable for the loss?" with three cards (merchant, driver, the platform), loss charge amount, evidence, result of the role-limit check; and a confirm button that writes the full effect, such as "Refund [amount] to the customer and charge it to the merchant", Repeat-order credit window: amount and reason (MKT-002), Calling: masked-call buttons and call recording after the call center is connected (INT-013)
+- Elements: Tickets: a list with the tabs "Mine" and "Unassigned" first, then "All"; by type: not delivered, missing and damaged, Mart damage, objections, financial; each ticket shows: type, order number, customer or party, age, assigned agent, and a red badge for exceeding the trust limit, Ticket header: type, order number (SUP-001), report time since delivery (accepted within one hour only, SUP-005), assigned agent, open-order button, call button, three cards above the ticket before the decision: evidence, trust, financial authority, Trust: refund rate, number of orders and refunds, badge for exceeding the trust limit, and no automatic refund (SUP-004, SUP-007), and the count of notifications or restriction, Evidence file: its content (SUP-002) and the delivery photo, Damage (reported items): item, quantity, price, reason, Financial authority: the agent's role, what they can execute without approval, their role's amount limit, and that anything above it is escalated (ADM-043), Reply: the ticket conversation, each message with its time and the agent's name, Support decisions log on the ticket: reason, liable party, evidence, amounts per party, executor and time, objection status, Objection: the text of the objection by the charged merchant or driver (within 7 days of the decision notification) and its attachments, and the supervisor's decision; the customer has no objection, Satisfaction: the customer's rating of the resolution after closing, Support decision window: refunded items, reason, refunded to (the original payment method or refund credit in the wallet), "Who is liable for the loss?" with three cards (merchant, driver, the platform), loss charge amount, evidence, result of the role-limit check; and a confirm button that writes the full effect, such as "Refund [amount] to the customer and charge it to the merchant", Repeat-order credit window: amount and reason (MKT-002), Calling: masked-call buttons and call recording after the call center is connected (INT-013)
 - Actions and what happens:
   - **Reply**: sends the message immediately in the ticket conversation, and the party receives a notification that opens the ticket
   - **Transfer**: a list of agents or teams (support supervisor, finance, operations) with a mandatory note; ownership moves and the recipient's name appears on the ticket, and the transfer is logged
-  - **Refund within authority**: opens the support decision window. On confirm, the customer is refunded and the amount is charged to the liable party with a linked loss-charge entry (or recorded as a platform expense), and the party receives a notification with the reason and sees it in their statement with a dispute button within 7 days (SUP-003, PAY-025). Above the role limit the button becomes "Escalate for approval" and is sent to a higher role without executing (ADM-043)
+  - **Refund within authority**: opens the support decision window. On confirm, the customer is refunded and the amount is charged to the liable party with a linked loss-charge entry (or recorded as a platform expense), and the party receives a notification with the reason and sees it in their statement with an objection button within 7 days (SUP-003, PAY-025). Above the role limit the button becomes "Escalate for approval" and is sent to a higher role without executing (ADM-043)
   - **Manual penalty**: opens the penalty window (A04): party, amount, reason, evidence, destination of the amount (PAY-025); a decision independent of loss allocation, and it is logged (ADM-043)
-  - **Close**: a confirmation showing a summary of what was executed; a request to rate the resolution is sent to the customer; the support decision is final for the customer, and the charged merchant or driver may dispute it within 7 days of the decision notification (SUP-003)
+  - **Close**: a confirmation showing a summary of what was executed; a request to rate the resolution is sent to the customer; the support decision is final for the customer, and the charged merchant or driver may object to it within 7 days of the decision notification (SUP-003)
   - **Take ticket**: the "Mine" button assigns the unassigned ticket to the current agent and shows their name to others; if another agent got there first, "[Name] took it moments ago" is shown
   - **Open order**: opens the order file in A03; from there, the cancellation window after the grace period (reason, liable party, amounts per party) for whoever has the permission
   - **Repeat-order credit**: opens its window; on confirm, promotional credit is added to the customer directly and logged (MKT-002)
   - **Masked call**: calls the party without revealing their number, and the call and its recording are logged against the order and the agent (INT-013). Before the connection, the button is disabled with the tooltip "Call center not connected"
-  - **Accept dispute / Reject dispute**: accepting amends the decision with a reversal entry for the charged amount; rejecting requires a reason. Both notify the party and are logged in the audit log
+  - **Accept objection / Reject objection**: accepting amends the decision with a reversal entry for the charged amount; rejecting requires a reason. Both notify the party and are logged in the audit log
   - **Reverse decision**: reverses a previous support decision with a reversal entry linked to its original, after a reason is written
 - Validation and error messages:
   - Reason and liable party are mandatory; the confirm button is disabled until both are complete
@@ -2508,12 +2509,12 @@ Context, evidence, decision, satisfaction, and dispute.
 - Permissions:
   - Tickets and conversations: admin, support supervisor, support agent; operations is read-only, without cancel and refund buttons
   - Refund, compensation, assigning the liable party, repeat-order credit, loss charge, and penalty: (ADM-043)
-  - Reverse decision, accept or reject dispute, and ticket assignment: support supervisor and admin, and finance for reversing a decision
+  - Reverse decision, accept or reject objection, and ticket assignment: support supervisor and admin, and finance for reversing a decision
 - UX decisions:
   - One primary button "Refund within authority"; the penalty has a different color and is placed away from it; close is at the other end
 - Requirements: SUP-002 SUP-004 ADM-043 SUP-003 SUP-007 SUP-009 MKT-002 INT-013 PAY-025 PAY-003 ADM-042 SUP-001
 - Navigates to: A03 A04 A13 A26
-- Special states: ticket being worked on by another agent: their name is visible, it opens read-only, and a "Request transfer" button replaces the decision buttons (ADM-042); customer exceeded the trust limit (SUP-007): red badge "Exceeded trust limit · Support supervisor decision"; repeated exceedance: badge "Customer notified" then "Restricted" (SUP-007); order delivered more than an hour ago: no new report on it in all sections including the Mart (SUP-005, SUP-009); and the customer's general ticket does not reopen the support decision (SUP-003); amount above the role limit: "Awaiting support supervisor approval" and not executed before approval; open dispute on a support decision: badge "Dispute" in the list and the ticket header; "Not delivered" report: shows delivery evidence instead of the photo (SUP-002)
+- Special states: ticket being worked on by another agent: their name is visible, it opens read-only, and a "Request transfer" button replaces the decision buttons (ADM-042); customer exceeded the trust limit (SUP-007): red badge "Exceeded trust limit · Support supervisor decision"; repeated exceedance: badge "Customer notified" then "Restricted" (SUP-007); order delivered more than an hour ago: no new report on it in all sections including the Mart (SUP-005, SUP-009); and the customer's general ticket does not reopen the support decision (SUP-003); amount above the role limit: "Awaiting support supervisor approval" and not executed before approval; open objection on a support decision: badge "Objection" in the list and the ticket header; "Not delivered" report: shows delivery evidence instead of the photo (SUP-002)
 
 #### A20 — Team and Shifts
 
@@ -2626,7 +2627,7 @@ A single non-deletable log for every financial change or change to roles, permis
 - Navigates to: A22 A18 A03
 - Special states: no results for the filter: "No events match these conditions" with a clear-filters button; MCP event: "MCP" badge and the original request text, and a financial change appears with the agent's approval inside the dashboard; event approved by two people (such as a wallet freeze): the requester and approver and the time of each; rejected event: a light red row and the rejection reason
 
-Shared states for all pages: clear loading without fake numbers; an empty state that explains the next step; an error with retry; network loss preserves inputs; an unavailable permission hides the action; new user with no orders: "Suggestions for you" is replaced by "Most ordered in your city" and the current-order card does not appear; the page is never empty.; address outside coverage: the page moves to C24 (no driver or coverage) with a change-address button.; section disabled in the city: it disappears from the sections grid and the remaining sections move up in the city's order.; store closed now: it appears with the label "Closed · opens 4:00 PM" at the end of the row and is not shown as available.; store outside the customer's city: it does not appear in any row, nor in "Suggestions for you".; pharmacy order in progress: the current-order card says "Your order from the pharmacy" without any medicine name.; no offers or discounted products in the city: the whole row is hidden instead of showing it empty..
+Shared states for all pages: clear loading without fake numbers; an empty state that explains the next step; an error with retry; network loss preserves inputs; an unavailable permission hides the action
 
 ## Reports
 
@@ -2650,7 +2651,7 @@ Shared states for all pages: clear loading without fake numbers; an empty state 
 - Delays and compensations: late orders, delay duration, and compensation amount
 - Cancellations: cancelled orders by reason and who cancelled them
 - Driver waiting at your store: how long the driver waits for your order after arriving
-- Late penalties: penalties and loss charges, their reasons, disputes, and decisions; no automatic financial calculation
+- Late penalties: penalties and loss charges, their reasons, objections, and decisions; no automatic financial calculation
 - Availability and working hours: actual opening hours, temporary closure, busy mode, and auto-accept
 
 **Customers**
@@ -2661,7 +2662,7 @@ Shared states for all pages: clear loading without fake numbers; an empty state 
 **Ratings and Reports**
 - Ratings: overall rating and its trend, each item's rating, and comments
 - Reports: by reason: missing, wrong, quality, delay
-- Disputes: your disputes and their outcome
+- Objections: your objections and their outcome
 
 **Marketing**
 - Offer performance: the dashboard shows for each offer: orders, sales, your cost, new customers, and average order value
@@ -2717,7 +2718,7 @@ Shared states for all pages: clear loading without fake numbers; an empty state 
 - Shifts and login hours: those logged in in the morning, evening, and night, and each driver's hours
 - Driver earnings: delivery, tip, incentives, penalties, and net
 - Incentives and their impact: the cost of each incentive, extra orders, and cost per extra order
-- Penalties and sanctions: penalties and loss charges, their reasons, disputes, and decisions; no automatic financial calculation
+- Penalties and sanctions: penalties and loss charges, their reasons, objections, and decisions; no automatic financial calculation
 - Delivery companies: each company's performance and dues
 - Deposits: paid, refunded, and deducted
 
@@ -2730,7 +2731,7 @@ Shared states for all pages: clear loading without fake numbers; an empty state 
 - Menu link: orders from links, and the value of the waiver
 - Cashier integration: stores connected per system, integration failures, and "Another system" requests
 - Pauses and closures: temporary pause, and closure during working hours
-- Merchant penalties: penalties and loss charges, their reasons, disputes, and decisions; no automatic financial calculation
+- Merchant penalties: penalties and loss charges, their reasons, objections, and decisions; no automatic financial calculation
 
 **Customers**
 - New, active, and lapsed customers: per city and period
@@ -3306,14 +3307,14 @@ Pages: C09 C10 C11 C12 C24
 
 Rules:
 - Credit has three types: refund (does not expire), compensation (14 days), and promotional (14 days).
-- Promotional credit comes from the referral prize, the loyalty program, gifts, and cashback. Each promotional credit specifies who funds it: the platform or the merchant
+- Promotional credit comes from the referral prize, the loyalty program, gifts and cashback. For each promotional credit it is set who funds it: the platform or the branch
 - The customer does not top up their wallet and does not withdraw from it.
 - Any compensation reaches the customer as a reward with a notification. The customer taps the notification and the reward page opens with a "Claim reward" button. When pressed, the amount reaches their wallet immediately
 - The reward lapses if not claimed within 24 hours of the notification's arrival.
 - The system spends the credit that expires first before the others, and spends refund credit last.
 - The wallet shows each credit with its type and expiry date.
 - Wallet credit is allowed in both write-in order payments: delivery and the products invoice.
-- Promotional credit funded by a merchant is deducted from them only when actually used in an order from any of their branches; if it expires unused, the merchant pays nothing.
+- Promotional credit funded by a branch is spent only on orders from that branch, and is deducted from it only when actually used; if it expires unused, the branch pays nothing.
 - Balances migrated from the current app are refund credit (SYS-020).
 - A reward not claimed within 24 hours returns to the platform with a reversal entry, and "Compensation lapsed" appears in the order file; support can grant a new compensation, and the lapsed reward is not reactivated.
 
@@ -3322,6 +3323,7 @@ Acceptance criteria:
 - Spending starts with the credit nearest to expiry
 - A reward not claimed within 24 hours lapses.
 - A lapsed reward cannot be claimed, and its reversal entry appears in the ledger.
+- Promotional credit funded by the Olaya branch is not spent on an order from the same merchant's Al Malqa branch.
 
 Pages: C20 C23 A13 A14 A15
 
@@ -3374,20 +3376,21 @@ Pages: A18 A26
 #### PAY-006 — Settlements and Payouts [Launch-critical]
 
 Rules:
-- The system shows a real-time statement for each merchant, freelance driver, and company
+- The system shows a real-time statement for each branch, freelance driver and company; the merchant manager sees their branches' statements and their total.
 - How a merchant is paid depends on whether the payment gateway supports payment splitting (Split Payment), as recorded in the integration settings (INT-001): if it does, the merchant's share is split when the order is captured and arrives automatically with no manual approval; if not, the platform holds the merchant's dues and pays them out itself through Moyasar's payment distribution service on the payout date, by manual approval
 - On the payout date (weekly for merchants the platform pays out, and on its date for companies) the system prepares the dues list, and no payout from it is sent without manual approval. Payouts by splitting and freelance driver payouts through STC Pay (INT-014) are automatic and do not enter the approval list.
 - The holder of the "Approve payouts" permission approves after reviewing the account statement: one account, or selects several accounts and approves them together.
 - Delivery companies' dues are paid to the company only
 - Each transfer appears with its status, bank reference, and date. Statuses: in progress, sent, or failed
 - Freelance driver payouts are weekly on the same day as merchant payouts, automatically through STC Pay with no manual approval (INT-014).
-- A merchant whose new bank account is awaiting finance approval does not enter the payout list (MER-001).
+- A branch whose new bank account is awaiting finance approval does not enter the payout list (MER-001).
 - In a manual payout (without splitting) an unregistered merchant's balance is paid out after deducting product VAT; with splitting it is not deducted (PAY-029).
 - When splitting is supported, the merchant's share is split when the order is captured after closing (not at hold), and equals their net in the statement: products minus the commission or contract fee, the payment fee, the tax on platform fees, and their share of offers; product VAT inside their share is borne by them and is not deducted by the platform (PAY-029).
-- The share of a merchant whose new bank account is awaiting Finance approval (MER-001) stays in their dues account as "Due", is not split, and arrives after approval.
-- Penalties, loss charges, and refunds that occur after an order has been split are recorded on the merchant's dues account and deducted from the merchant's later shares, or from the next payout if the merchant is paid manually.
+- The share of a branch whose new bank account is awaiting Finance approval (MER-001) stays in its dues account as "Due", is not split, and arrives after approval.
+- Penalties, loss charges and refunds that occur after the order is split are recorded on its branch's dues account and deducted from that branch's later shares, or from its next payout if its method is manual; they do not touch the dues of another branch of the merchant.
 - Each split is recorded in the ledger (PAY-005) with its gateway reference, and shows in the merchant's dues account as "In progress", then "Sent" or "Failed"; a failed one returns to being due, visible to Finance in A18, and is not counted as paid.
 - Changing the splitting setting applies to new orders only, is saved on each order, and is recorded in the audit log.
+- Each branch has its own dues account and payout: each order's share is split to, or paid out to, its branch's bank account, and the branch's loss charges, penalties and order refunds are deducted from its dues only.
 
 Acceptance criteria:
 - A failed transfer does not appear as paid
@@ -3397,6 +3400,7 @@ Acceptance criteria:
 - Gateway that supports splitting: for a delivered order the merchant's share arrives automatically and the account does not appear in the approval list.
 - Gateway that does not support splitting: the due amount stays with the platform and appears in the approval list on the payout date.
 - Unregistered merchant, splitting active, products at selling price 115, 10% contract percentage: 101.77 is split to the merchant before the payment fee, and product VAT is not deducted from them (PAY-029).
+- A merchant with two branches: a penalty on the Olaya branch is deducted from Olaya's dues and does not touch Al Malqa's dues.
 
 Pages: D07 MD07 A18 A26
 
@@ -3421,13 +3425,14 @@ Rules:
 - The contract percentage is always calculated on the selling price minus only the merchant's share of the discount.
 - From an exempt menu link, the contract percentage or the per-customer contract fee is not deducted; the payment fee and the customer service fee remain.
 - These two contracts are for restaurants and Shops with a menu; Mart and pharmacies use their own percentages (PAY-012).
-- The restaurant or Shops contract stores the markup rate agreed with the merchant, which is configurable per merchant; a copy of it is saved on each order.
+- The restaurant or Shops contract stores the markup rate agreed with the merchant. The merchant's contract is the default for all its branches, and platform staff can customize the contract percentage or markup rate for a specific branch; each order saves its branch's contract.
 
 Acceptance criteria:
 - The contract type is one of percentage or per-customer-and-branch fee.
 - An item with a selling price of 110 and a contract percentage of 10%: the platform deducts 11.
 - Fee contract: no percentage is deducted from the merchant; only the customer fee is deducted (PAY-010).
-- Changing a merchant's markup rate changes sale prices for new orders only.
+- Changing a merchant's or a branch's markup rate changes sale prices for new orders only.
+- A branch given a markup rate of 8% while its merchant's contract says 10%: its sale price = its store price × 1.08, and the other branches stay at 10%.
 
 Pages: A06
 
@@ -3589,10 +3594,10 @@ Acceptance criteria:
 
 Pages: C09
 
-#### PAY-022 — Merchant statement and monthly fees [Launch-critical]
+#### PAY-022 — Branch statement and its monthly fees invoice [Launch-critical]
 
 Rules:
-- The monthly fees invoice aggregates contract fees or the Mart and pharmacy percentage, payment fees, cashier fees, loss charges, and penalties, with the details and source of each order; advertising fees are not included, as they have the ad invoice when deducted (MKT-003).
+- The monthly fees invoice is issued for each branch separately in the merchant's name with the branch details, and aggregates contract fees or the Mart and pharmacy percentage, payment fees, cashier fees, loss charges and penalties, with the details and source of each order; ad fees are not included, as they have the ad invoice when deducted (MKT-003).
 - Exemptions and merchant type are applied to each order before aggregation.
 - The default accounting tax is 15% on platform fees; it is shown separately and the sum of the lines matches the statement.
 - Refund and reversal are entries linked to the original; accounting integration is through Odoo.
@@ -3601,7 +3606,7 @@ Rules:
 Acceptance criteria:
 - An exempt linked order carries no contract fee.
 - Mart and pharmacy carry no payment fees.
-- The sum of the month's lines equals the merchant statement.
+- The total of the month's lines equals the branch statement.
 - Platform fees of 100 SAR in the month appear on the fees invoice as 100 + 15 tax = 115.
 - An ad approved during the month does not appear on the fees invoice, and its deduction appears in the statement with the ad invoice number.
 
@@ -3643,7 +3648,7 @@ Rules:
 - The destination of the loss charge: refunding what the customer actually paid, or covering the loss; the destination of the penalty: the platform or compensation to the customer. Compensation is not a refund of an amount the customer paid.
 - "Platform" is a possible liable party in a loss charge with a written reason, and is recorded as an expense on the platform.
 - The loss charge and the penalty appear as two separate lines in the statement, each with its type; and "compensation" is added to the customer as a reward (PAY-002).
-- The deduction remains in effect during the appeal with the status "Under appeal", and is reversed with a reversal entry if the appeal is accepted.
+- The deduction remains in effect during the objection with the status "Under objection", and is reversed with a reversal entry if the objection is accepted.
 
 Acceptance criteria:
 - No financial entry is created merely because of a 10-minute delay.
@@ -3769,37 +3774,38 @@ Pages: M07 A07
 #### MER-001 — Merchant and its branches [Launch-critical]
 
 Rules:
-- The system stores the merchant, its branches, contracts, bank account, and users.
-- Each branch has a location, a city, hours, duration, and a minimum.
+- The system saves the merchant, its branches, contracts, bank accounts and users; each branch is run as if it were an independent store in operations and money.
+- Each branch has its location, city, hours, preparation time, minimum and zone, a payout bank account (defaults to the merchant's account), and its own cashier integration and devices.
 - Changing the bank account requires validation and a log; activation is by platform decision based on completeness of the operational data.
 - No mandatory compliance or license requirements in this PRD except for the HRDF (Hadaf) program.
-- A finance employee approves the new bank account after matching the account holder's name with the establishment's name; merchant payouts stop until approval, and a notification of the change reaches the merchant manager's phone.
+- A finance staff member approves the new bank account of the merchant or a branch after matching its holder's name with the business name; the affected branch's payouts stop until approval, and a notification of the change reaches the merchant manager's mobile.
 - Merchant activation requires: branches with their locations and hours, the contract, the bank account, and a menu or catalog with products that have prices.
 - Business data includes VAT registration: registered with its VAT number, or not registered (PAY-029).
 
 Acceptance criteria:
 - A branch manager does not see another branch's finances.
 - The bank change is visible in the audit log.
-- A new unapproved bank account stops the merchant's payout and no money is sent to it.
+- A new unapproved bank account stops the payout of the branch it belongs to, and no money is sent to it.
 
 Pages: MD15 A05 A06
 
 #### MER-002 — Menu, prices, and permissions [Launch-critical]
 
 Rules:
-- Each product has a store price, and the system calculates the sale price = store price × (1 + the markup rate) agreed with the merchant in their contract (PAY-009). The customer sees only the sale price and never sees the store price, the merchant sees both prices, and all calculations are on the sale price.
+- Each product in each branch has a store price, and the system calculates the sale price = store price × (1 + markup rate) in the branch's contract (PAY-009). The customer sees only the sale price and never sees the store price, the merchant sees both prices, and all calculations are on the sale price.
 - Modes for the merchant's edits to the store price: prohibited, needs review, within a percentage, full; price limits are measured against the approved price (the last price approved by the platform), not against the merchant's last edit.
 - The price limits are an absolute percentage for raising or lowering; an edit outside it goes to review, and prohibited does not allow a price edit.
 - The approved price remains for the customer until an edit that needs review is accepted; the preview shows the store price and the sale price together.
 - The merchant's permission is set by the platform, then the merchant manager distributes permissions to merchant staff within its limits.
 - A new product for restaurants and Shops follows the price permission mode: it appears immediately in "full" and "within a percentage", and goes to review in "needs review".
-- The store price and the markup rate are one per merchant across all its branches, while availability and hours are per branch.
+- The menu is shared by the merchant and inherited by each branch, and each branch has its own store price, availability and hours, as with groceries (MER-010); changing a price in one branch does not change it in another.
 
 Acceptance criteria:
 - Two edits do not each accumulate a 5% raise beyond the price limits.
 - An employee does not exceed the merchant's permission ceiling.
-- A product whose store price is 30 and whose merchant's markup rate is 10%: its sale price is 33; the customer sees 33 and does not see 30, and fees and percentage are calculated on 33.
+- A product with a store price of 30 and its branch's markup rate of 10%: its sale price is 33; the customer sees 33 and does not see 30, and fees and the percentage are calculated on 33.
 - The merchant sees the store price and the sale price of each product in their app and dashboard, and the store price is not shown to the customer on any page.
+- Raising a product's store price in the Olaya branch does not change its price in the Al Malqa branch, and the product stays in both branches' menu.
 
 Pages: M05 M06 MD03 MD13 A06 A08
 
@@ -3864,20 +3870,21 @@ Acceptance criteria:
 
 Pages: MD13
 
-#### MER-008 — Financial statement [Important]
+#### MER-008 — Financial statement per branch [Important]
 
 Rules:
-- A live page (PAY-006) shows for each order: the product value, the commission or contract fee or Mart and pharmacy percentage, the payment fee (not shown for Mart and pharmacy), discounts, advertising and cashier fees, loss charges and penalties, compensations, refunds, the tax on platform fees separately, and the net.
-- The monthly fees invoice is independent of this page (PAY-022).
+- A live page per branch (PAY-006) showing for each order: products value, the commission or contract fee or the Mart and pharmacy percentage, the payment fee (not shown for Mart and pharmacy), the branch's share of offer discounts, ad and cashier fees, loss charges and penalties, compensations, refunds, tax on platform fees separately, and the net.
+- Each branch's monthly fees invoice is independent of this page (PAY-022).
 - Statement export.
-- Each loss charge or penalty on the merchant in the statement carries a visible type and status; the statuses are: potential, charged, under appeal, accepted, rejected.
-- An appeal button for each loss charge or penalty.
-- The page opens with the merchant's dues account, in three separate balances: "Pending capture" (orders not yet closed, amount held), "Due" (captured, not yet paid out to the merchant), and "Paid out to you" for the period; below it a "Payout method" line: "Automatic when the order closes" or "Weekly after platform approval", and each order shows which of the two it was paid by (PAY-006).
+- Every loss charge or penalty on the branch in its statement carries a visible type and status; the statuses are: Potential, Charged, Under objection, Accepted, Rejected
+- An objection button for each loss charge or penalty.
+- The page opens with the branch's dues account in three separate balances: "Pending capture" (orders not yet closed, amount held), "Due" (captured, not yet paid out to the branch), and "Paid out to you" for the period; below it a "Payout method" line: "Automatic when the order closes" or "Weekly after platform approval", and each order shows which of the two it was paid by (PAY-006). The merchant manager also has "All branches" with their total.
 
 Acceptance criteria:
 - Each line is linked to its order or its source (ad, cashier integration, report).
-- When an appeal is accepted, the status changes and the system issues a reversal entry.
+- When an objection is accepted, the status changes and the system issues a reversal entry.
 - The total of "Pending capture", "Due", and "Paid out to you" for the period matches the net of its orders in the statement.
+- A loss charge on one branch does not appear in another branch's statement and is not deducted from its dues.
 
 Pages: MD02 MD07
 
@@ -3918,13 +3925,14 @@ Rules:
 - The platform chooses the first batch of systems after verifying their interfaces, and only the available systems are shown to the merchant.
 - The evaluation list: Foodics, Marn, Sapaad, Touché, NCR Aloha, Oracle Simphony, iiko, berryPOS, and Odoo POS for restaurants; Rewaa, Qoyod, Snad, Loyverse, Geidea, and EZPOS for Shops and Mart.
 - The order is sent to the linked system, and items and the products invoice are imported when integration is available; it is not assumed that all systems are supported at launch.
-- Another program creates an integration request to the platform; the fee is set per store according to the system and size.
+- Another program creates an integration request to the platform; the fee is set per branch according to the system and size.
 - The manual products invoice is an alternative to integration, optional for menu and Mart and mandatory for write-in.
-- At launch, cashier integration is built only for the systems the platform approves, and the platform decides for each store whether it is linked.
+- At launch, cashier integration is built only for the systems the platform approves, and the platform decides per branch whether it is connected; each branch has its own system and integration.
 
 Acceptance criteria:
 - Another program creates a request in its own name.
 - The absence of integration or of a products invoice in a menu order does not block order fulfillment.
+- Two branches of one merchant with different cashier systems are each connected to their own system.
 
 Pages: MD13
 
@@ -4256,7 +4264,7 @@ Rules:
 - Restaurants, Shops with a menu, and Mart can import their products directly from their system; there is no product integration for pharmacies because they work by write-in.
 - The system syncs prices and stock automatically.
 - A price change received through the integration is subject to review ( MER-002 ).
-- Not a launch requirement: it is built after the cashier integration, and the platform decides for each store whether it is integrated.
+- Not a launch requirement: built after the cashier integration, and the platform decides per branch whether to link it.
 
 Acceptance criteria:
 - When a product is out of stock in the merchant's system, the system hides it in the app.
@@ -4317,7 +4325,7 @@ Rules:
 - All merchants are under contract; the operating type is restaurants, Mart, pharmacies, Shops.
 - Restaurants are menu, Mart is catalog, pharmacy is write-in, Shops is menu or write-in with conversion from the admin page.
 - The branch zone defaults to the limits of the city it is in (DSP-002), and platform staff can draw a manual zone for the branch within its city; offers and campaigns follow the branch zone.
-- The merchant page gathers the establishment, branches, operations, products, contract, marketing, finance, permissions, and support; the contract is one per merchant and applies to all its branches.
+- The merchant page brings together the business, branches, operations, products, contract, marketing, finance, permissions, and support; and the merchant's contract is the default for all its branches and can be customized for a branch (PAY-009).
 
 Acceptance criteria:
 - Converting a Shops merchant to menu keeps the history and old orders.
@@ -4608,13 +4616,13 @@ Acceptance criteria:
 
 Pages: D12
 
-#### DRV-023 — Penalty Ladder and Appeal [Launch-critical]
+#### DRV-023 — Penalty Ladder and Objection [Launch-critical]
 
 Rules:
 - Five consecutive steps are applied to the driver: warning, then priority reduction for a week, then a 24-hour ban, then operations review, then a permanent ban.
 - In fraud, location spoofing, account sharing, and abuse of a customer, platform staff jump directly to a permanent ban without progression, after a review; the system does not ban anyone automatically.
 - The driver receives a notification of the reason for each step.
-- The driver may appeal within 7 days of the decision notification, and receives a response within 48 hours
+- The driver may object to within 7 days of the decision notification, and receives a response within 48 hours
 - Ladder steps are carried out manually by an operations employee or support supervisor after review, not automatically by the system.
 - Violations that move the driver one step: a confirmed report, or leaving without permission, or an emergency report that platform staff deemed a violation (ORD-014).
 - The driver returns to the start of the ladder after 90 days with no violation.
@@ -5450,7 +5458,7 @@ Pages: C01 C02 C03 C04 C05 C06 C07 MD01 MD14 A22
 #### MKT-015 — Ad Spend Dashboard [Important]
 
 Rules:
-- The merchant page shows their ad spend and their promotional credit.
+- Each branch's page shows its ad spend and the promotional credit it funded for its customers (PAY-002).
 - The page shows the orders and new customers resulting from each ad.
 
 Acceptance criteria:
