@@ -124,6 +124,51 @@ for _pid, _rid in DEC5.PAGE_REFS_ADD:
 DEC.DECISIONS.extend((n, t, d, _ids3.get(n, [])) for n, t, d in DEC5.DECISIONS)
 DEC.SETTING_ADD.extend(DEC5.SETTING_ADD)
 
+# الجولة السادسة: جلسة تدقيق نموذج المجال (المصطلحات، وبانتظار قرار الدعم، ولا اعتذار بعد القبول، ومهلة البلاغ)
+import b4_decisions6 as DEC6
+import b4_terms6 as TERMS6
+for _rid, (_n, _title) in DEC6.TITLE.items():
+    _touch(_rid, _n)['title'] = _title
+for _n, _rid, _old, _new in DEC6.REPLACE:
+    _r = _touch(_rid, _n)
+    _k = next((k for k in ('rules', 'acceptance') if any(x.startswith(_old) for x in _r[k])), None)
+    assert _k, (_rid, _old)
+    _r[_k] = [(_new if x.startswith(_old) else x) for x in _r[_k] if _new is not None or not x.startswith(_old)]
+for _n, _rid, _kind, _txt in DEC6.ADD:
+    _r = _touch(_rid, _n)
+    _r['rules' if _kind == 'R' else 'acceptance'].append(_txt)
+for _n, _rid, _old, _new in TERMS6.TERMS:
+    _r = _touch(_rid, _n)
+    _k = next((k for k in ('rules', 'acceptance') if _old in _r[k]), None)
+    assert _k, (_rid, _old)
+    _r[_k] = [(_new if x == _old else x) for x in _r[_k]]
+for _start, _col, _old, _new in DEC6.EXAMPLE_EDITS6:
+    _i = next(i for i, x in enumerate(D['financialExamples']) if x[0].startswith(_start))
+    assert _old in D['financialExamples'][_i][_col], (_start, _old)
+    D['financialExamples'][_i][_col] = D['financialExamples'][_i][_col].replace(_old, _new)
+for _start, _old, _new in DEC6.QUALITY_EDITS6:
+    _i = next(i for i, x in enumerate(D['quality']) if x.startswith(_start))
+    assert _old in D['quality'][_i], (_start, _old)
+    D['quality'][_i] = D['quality'][_i].replace(_old, _new)
+def _deep6(x, old, new, hit):
+    if isinstance(x, str):
+        if old in x:
+            hit[0] += 1
+        return x.replace(old, new)
+    if isinstance(x, list):
+        return [_deep6(y, old, new, hit) for y in x]
+    if isinstance(x, dict):
+        return {k: _deep6(y, old, new, hit) for k, y in x.items()}
+    return x
+
+
+for _key, _old, _new in DEC6.OWNER_STR_EDITS:
+    _hit = [0]
+    D[_key] = _deep6(D[_key], _old, _new, _hit)
+    assert _hit[0], (_key, _old)
+DEC.DECISIONS.extend((n, t, d, _ids3.get(n, [])) for n, t, d in DEC6.DECISIONS)
+DEC.SETTING_ADD.extend(DEC6.SETTING_ADD6)
+
 DEC.DECISIONS.sort(key=lambda x: x[0])
 DEC.SETTING_EDITS.update(DEC3.SETTING_EDITS)
 DEC.SETTING_EDITS.update(DEC4.SETTING_EDITS)
@@ -140,10 +185,24 @@ for _i, _row in DEC.SETTING_EDITS.items():
 for _a, _b, _c, _g, _refs in DEC.SETTING_ADD:
     D['settings'].append([_a, _b, _c])
     SETTING_REFS_ADD.append((len(D['settings']) - 1, _g, _refs))
+_found6 = set()
+for _row in D['settings']:
+    if _row[0] in DEC6.SETTING_EDITS6:
+        _found6.add(_row[0])
+        _row[:] = list(DEC6.SETTING_EDITS6[_row[0]])
+assert _found6 == set(DEC6.SETTING_EDITS6), set(DEC6.SETTING_EDITS6) - _found6
 for _pid, _k, _old, _new in DEC.PAGE_EDITS:
     _p = next(p for p in D['pages'] if p['id'] == _pid)
     _p[_k] = [_new if x == _old else x for x in _p[_k]]
     assert _new in _p[_k]
+for _pid, _k, _old, _new in TERMS6.PAGE_EDITS6:
+    _p = next(p for p in D['pages'] if p['id'] == _pid)
+    if isinstance(_p[_k], list):
+        assert _old in _p[_k], (_pid, _k, _old)
+        _p[_k] = [(_new if x == _old else x) for x in _p[_k] if _new is not None or x != _old]
+    else:
+        assert _p[_k] == _old, (_pid, _k, _old)
+        _p[_k] = _new
 
 # 3) مراجعة الصفحات: عناصر ناقصة، وسلوك الإجراءات، وصفحات جديدة، ومعاينات محسّنة
 import b4_ux as UXM
