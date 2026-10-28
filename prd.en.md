@@ -1,6 +1,6 @@
-# Mahallat Platform Specification — Version 4.9
+# Mahallat Platform Specification — Version 4.10
 
-26 October 2026 · Revision 2026-10-05-final · 234 requirements · 93 pages. The requirements are the reference.
+28 October 2026 · Revision 2026-10-05-final · 233 requirements · 93 pages. The requirements are the reference.
 
 ## Order states by type
 
@@ -266,10 +266,11 @@ One definition for each number, used on all pages and reports, so the same numbe
 | Delivery fee | Restaurants and Shops: 9 SAR including 3 km + 1.5 per km, bounds 9–25; Mart and pharmacies: 12 SAR including 3 km + 1.5 per km, bounds 12–30 | System-wide, with an optional setting per region and per city |
 | Delivery distance measurement | Air distance (straight line) | Or road distance through Google Maps; each region and each city has its own method, and when road distance is unavailable: air distance × road factor |
 | Driver negative balance limit | −50 SAR | When reached, the driver enters "balance lockout" and receives no new tasks until payment |
-| Payment splitting for merchants | Off until the payment provider confirms support in writing | System-wide; the admin changes it under Integrations and it applies to new orders |
+| Payment splitting for merchants | Always on through Moyasar | The only way merchants are paid: a wallet per branch and a weekly payout; no setting to turn it off (PAY-006) |
 | Road factor | 1.3 | System-wide, and per region or city; used when road distance is unavailable: air distance × the factor |
 | Idle period | 30 days | System-wide; defines the "Idle" segment in coupons and campaigns |
 | Pharmacy retention of a medicine whose refund was declined | 7 days | Then destroyed without a refund |
+| Maximum hold duration | 24 hours | System-wide; after it the full amount is captured and whatever support decides is carried out as a refund |
 
 ## Financial transaction examples
 
@@ -283,13 +284,13 @@ One definition for each number, used on all pages and reports, so the same numbe
 | Mart: same 100, merchant percentage 4% | Sale price does not change with a change in the merchant percentage alone | Merchant commission 4; markup rate 5 is independent |
 | Driver: full delivery 12, illustrative platform percentage 10% | The customer's discount does not change the driver pay base | Net delivery without tax 10.43; platform percentage 1.04; due 9.39; tip is independent |
 | Fee-contract restaurant: new customer at the branch, two orders at selling price 20 then 40 | Customer pays the selling price | Fee 2 then 5; continues until the customer's total at the branch reaches 30; no percentage |
-| Restaurant not registered for VAT, without splitting (emergency mode), 10% contract percentage: products at selling price 115 | Customer pays 115 including VAT; the platform issues a platform invoice for the entire order | Product VAT 15 + commission 11.50 + its VAT 1.73 are deducted; merchant receives 86.77 before the payment fee |
-| Restaurant not registered for VAT, splitting active, 10% contract percentage: products at selling price 115 | Customer pays 115 including VAT and the amount reaches the merchant directly<br/>The merchant issues the products invoice, and the platform issues its invoice for delivery and service only | Commission 11.50 + its VAT 1.73 are deducted; merchant receives 101.77 before the payment fee; product VAT 15 stays with them |
+| Restaurant not registered for VAT, 10% contract percentage: products at selling price 115 | Customer pays 115 including VAT and the merchant's share enters its branch's Moyasar wallet<br/>The merchant issues the products invoice, and the platform issues its invoice for delivery and service only | Commission 11.50 + its VAT 1.73 are deducted; merchant receives 101.77 before the payment fee; product VAT 15 stays with them |
 
 ## Integrations
 
-- **Moyasar** — hold, capture, and refund, plus merchant payouts: by payment splitting if the gateway supports it, otherwise through the payment distribution service (Launch-critical)
+- **Moyasar** — hold, capture, and refund, plus merchant payouts by payment splitting into each branch's wallet with weekly payouts (Launch-critical)
 - **STC Pay** — automatic payouts of freelance driver dues (Launch-critical)
+- **4jawaly** — verification code SMS messages (Launch-critical)
 - **OpenLoyalty** — points, referral, and reward rules (Launch-critical)
 - **Adjust** — source, links, and referral (Launch-critical)
 - **OneSignal** — order and marketing notifications (Launch-critical)
@@ -310,15 +311,14 @@ One definition for each number, used on all pages and reports, so the same numbe
 - Finance is shown only to authorized users; a log of who did what, when, and before and after; manual payouts are approved by a different person.
 - Home, sections, placements, values, and keys come from the server; exception order is branch, then city, then region, then global, per the value's setting.
 - Three separate environments; daily backups and a restore drill; measurable performance targets; monitoring of payment, the scheduler, and integrations.
-- The release is an update to the same store apps; migration of accounts, balances, and contracts with a pilot phase and reconciliation, and the old system is read-only at cutover.
+- The release is an update to the same store apps under the new platform rules; no accounts, balances, or contracts are migrated from the current app.
 - Acceptance tests for every requirement, financial examples in halalas, and tests of photo paths, permissions, loss charge and penalty, and customer non-responsiveness.
 
 ## Before go-live
 
 - **CFG-01 Specific operating values before launch**: the default driver platform percentage and tier benefits, delivery fees per city, small-refund, loss-charge, penalty, and negative-balance limits, and messages. Filled in settings; not hardcoded.
-- **INT-SEL Providers and the first integration batch**: approve the mobile/WhatsApp code channel, the payment methods actually tested with Moyasar, the first cashier systems, and the call center provider when it starts.
-- **INT-PAY Payment splitting and driver payouts**: written confirmation from Moyasar on whether it supports payment splitting and on what terms (when the share is split, its fees, and recovery after a split), and confirmation of the STC Pay integration details for automatic payouts: the payout interface available to businesses, amount and count limits, its fees, and how the wallet holder's name is verified. The outcome decides the splitting setting and the driver payout limits.
-- **DATA-01 Migration inventory**: count the existing accounts, addresses, balances, contracts, dues, and products and match them before and after the move; no count is assumed in the document.
+- **INT-SEL Providers and the first integration batch**: connect 4jawaly for verification code messages, the payment methods actually tested with Moyasar, the first cashier systems, and the call center provider when it starts.
+- **INT-PAY Payment splitting and driver payouts**: written confirmation from Moyasar of the payment splitting terms (when the share is split, its fees, and recovery after a split), and confirmation of the STC Pay integration details for automatic payouts: the payout interface available to businesses, amount and count limits, its fees, and how the wallet holder's name is verified. The STC Pay outcome decides the driver payout limits.
 
 ## Pages
 
@@ -660,7 +660,7 @@ Access to balance, cards, addresses, tip, language, and support.
   - **Auto tip (switch)**: new: turning it off is immediate with no confirmation and shows "We turned off the auto tip", so it is not added to later orders. Turning it on opens the amount or percentage selection (CUS-010).
   - **Language**: new: switches the app language and direction immediately without signing in again, and saves the choice in the account.
   - **Notifications**: new: turning off stops promotional notifications only, after a confirmation explaining that order status and reward notifications remain because they concern your orders and their deadlines (24 hours for the reward).
-  - **Sign in**: new (for a visitor): mobile number and code channel (text message or WhatsApp), then the verification code (CUS-001).
+  - **Sign in**: new (for a visitor): mobile number, then the verification code by SMS (CUS-001).
 - Validation and error messages:
   - Empty name: "Enter your name".
   - Mobile number in a non-Saudi format: "Enter a mobile number of 9 digits starting with 5".
@@ -1445,7 +1445,7 @@ A reports center with flexible periods and comparison.
 
 Breakdown of dues, exemption, penalties, and loss charges.
 
-- Elements: tabs: live statement, payouts, fees invoice, archive (MER-045), the selected branch's dues account at the top of the page, and "All branches" with their total for the merchant manager: three separate balances: "Pending capture" for orders not yet closed (amount held), "Due" for what was captured and has not reached you, and "Paid out to you" for the period; below them "Payout method": "Automatic when the order closes" or "Weekly after platform approval" (MER-008, PAY-006), net: the period summary on the first line: sales, platform fees and their tax, offers, refunds, loss charges, and penalties, net so far, next payout status, sales: a waterfall under the summary explaining how sales go down to the net, an item for each type, and the tax as a separate item (MER-008, PAY-022), contract fee and payment fee in each order's breakdown: source, products, the actual contract fee with the reason for its value written ("Exempt" with the exemption value, or "Cap reached"), payment fee, offers, tax, net (PAY-010, PAY-011, MER-007), Mart and pharmacy: a "Store percentage" column instead of the contract fee, with no payment fee column (PAY-011), merchant not registered for VAT: a "Product VAT" column deducted for each order without splitting (in a split order it is not deducted, and the merchant issues the products invoice), and an item for it in the waterfall (PAY-029), offers (merchant share) and refunds: two items in the waterfall, manual and its reason: the loss charge and the penalty are two separate lines, for each line the type (loss charge or penalty), amount, order or source, reason, status as a colored badge, last date to object (7 days from the decision notification), and an "Object" button beside it (MER-008, SUP-006), payouts per branch to its bank account: reference, period, amount, method (automatic by splitting, or weekly by approval), status, bank reference, date (PAY-006), fees invoice: monthly, the total of each fee type and the loss charges and penalties, tax separate, the total, and an indicator of whether the month's lines match it; ad fees are not included, as they have the ad invoice (PAY-022), archive: the order result is one card with the products invoice, the statement line, and the linked payout, and the ad invoices (MER-045)
+- Elements: tabs: live statement, payouts, fees invoice, archive (MER-045), the selected branch's dues account at the top of the page, and "All branches" with their total for the merchant manager: three separate balances: "Pending capture" for orders not yet closed (amount held), "Due" for what was captured and entered the branch's Moyasar wallet but has not reached you, and "Paid out to you" for the period; below them the next weekly payout date (MER-008, PAY-006), net: the period summary on the first line: sales, platform fees and their tax, offers, refunds, loss charges, and penalties, net so far, next payout status, sales: a waterfall under the summary explaining how sales go down to the net, an item for each type, and the tax as a separate item (MER-008, PAY-022), contract fee and payment fee in each order's breakdown: source, products, the actual contract fee with the reason for its value written ("Exempt" with the exemption value, or "Cap reached"), payment fee, offers, tax, net (PAY-010, PAY-011, MER-007), Mart and pharmacy: a "Store percentage" column instead of the contract fee, with no payment fee column (PAY-011), merchant not registered for VAT: no product VAT is deducted from them, and they issue the products invoice themselves (PAY-029), offers (merchant share) and refunds: two items in the waterfall, manual and its reason: the loss charge and the penalty are two separate lines, for each line the type (loss charge or penalty), amount, order or source, reason, status as a colored badge, last date to object (7 days from the decision notification), and an "Object" button beside it (MER-008, SUP-006), payouts per branch to its bank account: reference, period, amount, method (weekly from the branch's Moyasar wallet), status, bank reference, date (PAY-006), fees invoice: monthly, the total of each fee type and the loss charges and penalties, tax separate, the total, and an indicator of whether the month's lines match it; ad fees are not included, as they have the ad invoice (PAY-022), archive: the order result is one card with the products invoice, the statement line, and the linked payout, and the ad invoices (MER-045)
 - Actions and what happens:
   - **Order search**: filters the order breakdown to the order and opens its card with the statement line, the payout, and the products invoice.
   - **Statement**: downloads the statement for the period and branch (Excel or PDF) with the same numbers as the screen (MER-008).
@@ -1464,7 +1464,7 @@ Breakdown of dues, exemption, penalties, and loss charges.
   - Platform staff see the same archive from the merchant page in the admin dashboard (MER-045)
 - Requirements: MER-008 PAY-006 PAY-025 PAY-010 PAY-011 PAY-022 MER-045 MER-043
 - Navigates to: MD02 MD08 MD12
-- Special states: failed transfer: red badge "Failed · not paid" with the reason if it came from the bank (PAY-006); payout awaiting approval: the amount is an estimate that changes until approval; objection period expired: the button is disabled with "Objection period ended on …" (SUP-006); "Potential" loss charge: in a different color, and not counted in the net until it becomes "Charged"; month not finished: "This month's fees invoice is issued after it ends"; split share failed: red badge "Failed · not paid", and the amount stays in "Due" until Finance retries it (PAY-006); payment gateway without splitting: "Payout method" is weekly by approval, and the payout shows "Awaiting approval" (PAY-006); the branch's new bank account is awaiting Finance approval: the branch's share stays in "Due" with "Arrives after the account is approved" (MER-001)
+- Special states: failed transfer: red badge "Failed · not paid" with the reason if it came from the bank (PAY-006); next weekly payout: the amount is an estimate and changes until the payout date; objection period expired: the button is disabled with "Objection period ended on …" (SUP-006); "Potential" loss charge: in a different color, and not counted in the net until it becomes "Charged"; month not finished: "This month's fees invoice is issued after it ends"; split share failed: red badge "Failed · not paid", and the amount stays in "Due" until Finance retries it (PAY-006); the branch's new bank account is awaiting Finance approval: the branch's share stays in "Due" with "Arrives after the account is approved" (MER-001)
 
 #### MD08 — Ratings and Reports
 
@@ -2451,7 +2451,7 @@ Order templates, scheduling, and targeting via OneSignal.
 
 Reconciliation, settlements, liabilities, and closing.
 
-- Elements: The nine tabs (ADM-036): each tab has a number for what awaits action (open differences, accounts awaiting approval), Months status bar: the current is open, the previous awaiting closing, and the oldest closed; and the daily entry balance check result (PAY-005), "Needs your attention" first in the overview: accounts awaiting approval, failed transfers, reconciliation differences, entries not sent to Odoo, a month ready for closing; each item has a button that opens its place, Overview: collected and held (with the count of open orders), undisbursed dues (with the count of accounts), payments sent, open differences with count and amount, drivers' negative balances and those stopped from tasks (PAY-026), liabilities and those expiring this month, and held driver deposits separated from their dues accounts; each number opens its list, Collection and reconciliation: each payment operation with its status (held, collected, hold released, refunded, failed), its method, Moyasar reference, and actual fee (PAY-027), Daily reconciliation (INT-001): a line equation: collected − actual Moyasar fee = expected in bank, against what was actually deposited; the difference in red with a flag button; and the payment fee taken from merchants is a separate revenue line (PAY-027), Dues and payouts: the live statement and the dues list (PAY-006) with columns: select, account and its type, due, deductions (commission, fees, ad, loss charge, penalty), net, statement, status, bank reference, transfer date, transfer statuses: "Awaiting approval" then PAY-006 statuses, and "Failed" with the Moyasar reason, payout method in the dues list: a column showing for each account "Automatic by splitting" (the base mode for merchants) or "Manual approval" (an emergency mode without splitting, and manual payouts) or "Automatic STC Pay"; automatic ones appear with their status and reference, with no checkbox and no approve button (PAY-006, INT-014), Bulk selection: a checkbox for each row and "Select all" in the header; and when selected, a fixed dark bar above the table: the number of accounts, their net total, and an "Approve N payouts" button (not "Confirm"), Rows that cannot be approved: shown with a disabled checkbox and a written reason: negative balance (PAY-026), or a payout prepared by the current user (ADM-002), Driver deposit refund: a row in the payouts list that goes through the same approval (PAY-024), Liabilities: the single table with its items and columns (PAY-031), and a total-reconciliation line with wallet and points balances in the ledger, Invoices: the platform invoice and customer purchase orders, and each branch's statement and monthly fees invoice with its lines (PAY-022, PAY-007), and ad invoices (MKT-003), Tax: platform fee tax separately (PAY-022), the tax included in tips (15%), and the percentage's effective date, Refunds: each refund with its type (full, partial) and source (card, wallet), and each compensation with its reward status (claimed, lapsed), its actor, reason, and liable party, and the order link and the reversal entry, Financial reports: the "Finance" reports from the reports center (net revenue by components, order profitability, collection and reconciliation, dues and payouts, liabilities, refunds, expected balance) with the same filters, Closing and controls: each month's status and who closed it and when, a link to the financial audit log (A26), and the roles' financial limits for reading (edited in A22), Entries: a table of the latest entries: entry number, time, description, debit, credit, reference; and the reversal entry with a "Reversal" badge and a link to its original instead of editing the row, Odoo: last successful send, the count of entries waiting, and a resend button
+- Elements: The nine tabs (ADM-036): each tab has a number for what awaits action (open differences, accounts awaiting approval), Months status bar: the current is open, the previous awaiting closing, and the oldest closed; and the daily entry balance check result (PAY-005), "Needs your attention" first in the overview: accounts awaiting approval, failed transfers, reconciliation differences, entries not sent to Odoo, a month ready for closing; each item has a button that opens its place, Overview: collected and held (with the count of open orders), undisbursed dues (with the count of accounts), payments sent, open differences with count and amount, drivers' negative balances and those stopped from tasks (PAY-026), liabilities and those expiring this month, and held driver deposits separated from their dues accounts; each number opens its list, Collection and reconciliation: each payment operation with its status (held, collected, hold released, refunded, failed), its method, Moyasar reference, and actual fee (PAY-027), Daily reconciliation (INT-001): a line equation: collected − actual Moyasar fee = expected in bank, against what was actually deposited; the difference in red with a flag button; and the payment fee taken from merchants is a separate revenue line (PAY-027), Dues and payouts: the live statement and the dues list (PAY-006) with columns: select, account and its type, due, deductions (commission, fees, ad, loss charge, penalty), net, statement, status, bank reference, transfer date, transfer statuses: "Awaiting approval" then PAY-006 statuses, and "Failed" with the Moyasar reason, payout method in the dues list: a column showing for each account "Automatic by splitting" (merchants: weekly payout from the branch's Moyasar wallet) or "Manual approval" (delivery companies and deposit refunds) or "Automatic STC Pay"; automatic ones appear with their status and reference, with no checkbox and no approve button (PAY-006, INT-014), Bulk selection: a checkbox for each row and "Select all" in the header; and when selected, a fixed dark bar above the table: the number of accounts, their net total, and an "Approve N payouts" button (not "Confirm"), Rows that cannot be approved: shown with a disabled checkbox and a written reason: negative balance (PAY-026), or a payout prepared by the current user (ADM-002), Driver deposit refund: a row in the payouts list that goes through the same approval (PAY-024), Liabilities: the single table with its items and columns (PAY-031), and a total-reconciliation line with wallet and points balances in the ledger, Invoices: the platform invoice and customer purchase orders, and each branch's statement and monthly fees invoice with its lines (PAY-022, PAY-007), and ad invoices (MKT-003), Tax: platform fee tax separately (PAY-022), the tax included in tips (15%), and the percentage's effective date, Refunds: each refund with its type (full, partial) and source (card, wallet), and each compensation with its reward status (claimed, lapsed), its actor, reason, and liable party, and the order link and the reversal entry, Financial reports: the "Finance" reports from the reports center (net revenue by components, order profitability, collection and reconciliation, dues and payouts, liabilities, refunds, expected balance) with the same filters, Closing and controls: each month's status and who closed it and when, a link to the financial audit log (A26), and the roles' financial limits for reading (edited in A22), Entries: a table of the latest entries: entry number, time, description, debit, credit, reference; and the reversal entry with a "Reversal" badge and a link to its original instead of editing the row, Odoo: last successful send, the count of entries waiting, and a resend button
 - Actions and what happens:
   - **Approve payouts individually or in bulk**: "Approve" on the row for one account, or the "Approve N payouts" bar for the selection. Both open a confirmation: each account with its masked IBAN and amount, the total, that sending via Moyasar cannot be stopped after approval, and the excluded rows and their reason. After approval (PAY-006) rows become "In progress" then "Sent" with the bank reference or "Failed" with the reason, and a message "N payouts sent for execution" appears
   - **Retry failed**: on a "Failed" payout: a confirmation shows the Moyasar or STC Pay reason and the current account details (the new IBAN if edited). It resends the payout with the same amount without a new approval, unless the IBAN changed, in which case it needs a new approval
@@ -2481,7 +2481,7 @@ Reconciliation, settlements, liabilities, and closing.
   - No direct edit of any party's balance (PAY-005)
 - Requirements: PAY-005 PAY-006 PAY-031 INT-014 ADM-036 PAY-022 PAY-027 PAY-029 INT-001 INT-010 PAY-024 ADM-002 PAY-018 PAY-026 PAY-007 PAY-003 FLT-002
 - Leads to: A03 A26 A22 A21 A10
-- Special states: Closed month: its entries are read-only (ADM-036); Open reconciliation difference: a red row in daily reconciliation and a number on the collection and reconciliation tab until resolved; Daily balance check failed (PAY-005): a red alert at the top of the page with the date and difference; Odoo down: a yellow bar "Entries are saved in the ledger and waiting to be sent (N)", and orders and payouts work; Failed payout: stays "Failed" and is not counted in payments sent (PAY-006); Bulk approval partially succeeded: a message "N sent and M failed", and the failed are visible with a "Retry failed" button; Account with a negative balance: it is not paid (PAY-026); and the driver in balance lockout has a "Stopped from tasks" badge; Payout prepared by the current user: its checkbox is disabled with the badge "Approved by someone else"; No dues on schedule: "No accounts due in this period" with the next payout date; Companies: hidden at launch, and a "Companies" filter appears when enabled later; Split payments unavailable (emergency mode): a yellow bar "Payments reach the platform account; merchant payouts by manual approval", and orders work (PAY-006, PAY-029); automatic payout failed (splitting or STC Pay): "Failed" badge and a retry button for whoever has "Approve payouts" (PAY-006, INT-014)
+- Special states: Closed month: its entries are read-only (ADM-036); Open reconciliation difference: a red row in daily reconciliation and a number on the collection and reconciliation tab until resolved; Daily balance check failed (PAY-005): a red alert at the top of the page with the date and difference; Odoo down: a yellow bar "Entries are saved in the ledger and waiting to be sent (N)", and orders and payouts work; Failed payout: stays "Failed" and is not counted in payments sent (PAY-006); Bulk approval partially succeeded: a message "N sent and M failed", and the failed are visible with a "Retry failed" button; Account with a negative balance: it is not paid (PAY-026); and the driver in balance lockout has a "Stopped from tasks" badge; Payout prepared by the current user: its checkbox is disabled with the badge "Approved by someone else"; No dues on schedule: "No accounts due in this period" with the next payout date; Companies: hidden at launch, and a "Companies" filter appears when enabled later; automatic payout failed (splitting or STC Pay): "Failed" badge and a retry button for whoever has "Approve payouts" (PAY-006, INT-014)
 #### A19 — Support and Tickets
 
 Context, evidence, decision, satisfaction, and object to.
@@ -2573,7 +2573,7 @@ Every report with a custom period, comparison, export, and scheduling.
 
 Configurable values, permissions, keys, and connection status.
 
-- Elements: Connection status bar at the top of all tabs: Moyasar, STC Pay, Odoo, OneSignal, OpenLoyalty, PostHog, Adjust, Google Maps (usage percentage of the cap), call center; each badge opens the Integrations tab, Tabs: fees, windows, dispatch, batching, home, roles, feature flags, integrations, security, quality and trust, languages, calculation basis, settings log (ADM-034): for each value: name, type (percentage, amount, duration, count, list), unit, allowed limits, the global value and the selected level's value side by side, version, effective date, the scheduled version if any, last editor, Level selector: global ← region ← city, and "a specific branch" where the setting supports it; and the priority: branch, then city, then region, then global (ADM-034); the inherited value is gray "Inherits global/region" and the overridden one carries an "Override" badge, Currency and time: SAR next to every amount, and the city's time zone next to every effective date (SYS-012), Setting edit panel: the global value (read-only), the source of the current value, allowed limits, new value, "Effective immediately / on date", reason, and below it the setting's versions (scheduled, effective, and previous), Approved rules (ADM-034): locked "Approved rule · read-only under the contract" without an edit button, Dispatch: the twelve dispatch algorithm settings (DSP-001) with their global values and a city-override column, Roles: the list of roles with the number of agents in each role (the six built-in roles and a custom role); a permission × role matrix with values execute/read-only/no access, highlighting the column of the role being edited and the modified cell in a different color until saved; and the role editor: name, role scope (cities and branches), amount limit for financial actions, permissions, Security: two-step verification read-only with no off switch, and idle time before the session expires (ADM-001), Feature flags: a feature × city table with its stages (SYS-006), and the city's pilot group of merchants and drivers (SYS-019), and the minimum allowed version per app and platform, Quality and trust: the "Quality" badge thresholds (MKT-014), and the customer refund-rate threshold and what happens when it recurs (SUP-007), and no automatic refund (SUP-004), and the report window of one hour from delivery in all sections including the Mart (SUP-005, SUP-009), Languages: data rows (SYS-013), and each text with its key and translations, and the count of missing texts per language; notification templates are in A17, Calculation basis (read-only): a table of basis, tax, and invoice (products, platform, fees, or ad invoice) per amount type, and the rounding rules (PAY-029), Integrations: for each integration: status, environment (test/live for Moyasar), last successful operation, number of errors today, test button; for Moyasar a "Payment splitting for merchants" switch (on, the base mode; or off, an emergency mode) that is not turned on before the provider confirms in writing and applies to new orders (PAY-006); for STC Pay the last successful payout and the number of failed ones (INT-014); and for Google Maps: the two caps and the cost so far (SYS-021); and for PostHog and Adjust: the list of events sent (INT-008); and MCP: read by default, Call center: a "Later · not connected" card in Integrations (INT-013)
+- Elements: Connection status bar at the top of all tabs: Moyasar, STC Pay, Odoo, OneSignal, OpenLoyalty, PostHog, Adjust, Google Maps (usage percentage of the cap), call center; each badge opens the Integrations tab, Tabs: fees, windows, dispatch, batching, home, roles, feature flags, integrations, security, quality and trust, languages, calculation basis, settings log (ADM-034): for each value: name, type (percentage, amount, duration, count, list), unit, allowed limits, the global value and the selected level's value side by side, version, effective date, the scheduled version if any, last editor, Level selector: global ← region ← city, and "a specific branch" where the setting supports it; and the priority: branch, then city, then region, then global (ADM-034); the inherited value is gray "Inherits global/region" and the overridden one carries an "Override" badge, Currency and time: SAR next to every amount, and the city's time zone next to every effective date (SYS-012), Setting edit panel: the global value (read-only), the source of the current value, allowed limits, new value, "Effective immediately / on date", reason, and below it the setting's versions (scheduled, effective, and previous), Approved rules (ADM-034): locked "Approved rule · read-only under the contract" without an edit button, Dispatch: the twelve dispatch algorithm settings (DSP-001) with their global values and a city-override column, Roles: the list of roles with the number of agents in each role (the six built-in roles and a custom role); a permission × role matrix with values execute/read-only/no access, highlighting the column of the role being edited and the modified cell in a different color until saved; and the role editor: name, role scope (cities and branches), amount limit for financial actions, permissions, Security: two-step verification read-only with no off switch, and idle time before the session expires (ADM-001), Feature flags: a feature × city table with its stages (SYS-006), and the city's pilot group of merchants and drivers (SYS-019), and the minimum allowed version per app and platform, Quality and trust: the "Quality" badge thresholds (MKT-014), and the customer refund-rate threshold and what happens when it recurs (SUP-007), and no automatic refund (SUP-004), and the report window of one hour from delivery in all sections including the Mart (SUP-005, SUP-009), Languages: data rows (SYS-013), and each text with its key and translations, and the count of missing texts per language; notification templates are in A17, Calculation basis (read-only): a table of basis, tax, and invoice (products, platform, fees, or ad invoice) per amount type, and the rounding rules (PAY-029), Integrations: for each integration: status, environment (test/live for Moyasar), last successful operation, number of errors today, test button; for Moyasar "Payment splitting for merchants" is always on with no switch to turn it off, with the status of the last split and the last weekly payout (PAY-006); for STC Pay the last successful payout and the number of failed ones (INT-014); and for Google Maps: the two caps and the cost so far (SYS-021); and for PostHog and Adjust: the list of events sent (INT-008); and MCP: read by default, Call center: a "Later · not connected" card in Integrations (INT-013)
 - Actions and what happens:
   - **Edit**: opens the edit panel at the selected level. "Immediately" creates a version effective now, and "On date" a scheduled version with a "Scheduled" badge (ADM-034). A message "Version [number] scheduled to take effect [date]" appears
   - **Test connection**: sends a probe request and shows the result within seconds: "Working · response time" or "Failed" with the provider's message, and updates the status badge; it creates no financial operation and no notification to a customer
@@ -2789,16 +2789,17 @@ Pages: D12
 #### CUS-001 — Account and Language [Launch-critical]
 
 Rules:
-- Sign-up and login with a phone number or WhatsApp and a verification code; no Google or Apple sign-in.
+- Registration and login with a phone number and a verification code by SMS; no Google or Apple sign-in.
 - Browsing is available before sign-up, and login is requested at an action that needs an account.
 - Arabic and English in the apps and both dashboards.
 - The customer changes their phone number from the app with a code sent to the new number.
 - "Delete my account" is available inside the app with a warning that promotional credit and points are forfeited; refund credit is returned to the customer's card via support before deletion.
-- The login code is sent by WhatsApp first, and by text message automatically if that fails.
+- The verification code arrives by SMS through 4jawaly, and is not sent by WhatsApp.
 
 Acceptance criteria:
 - Browsing does not ask for a verification code.
 - Login does not create two accounts for the same number.
+- The customer is not offered the option to receive the code by WhatsApp.
 
 Pages: C14
 
@@ -3294,12 +3295,15 @@ Rules:
 - The amount stays held on the customer's payment method until the order is closed, then the system captures what is due and releases the hold on the remainder.
 - The order is closed in one of these cases: delivery, ending the order due to unresponsiveness (ORD-008), returning the medicine to the pharmacy (PHR-010), or a support decision on a cancellation or in the "Awaiting support decision" state. In a support decision, only what support specified is captured.
 - The system releases the hold in full if the customer cancels within the window, or if no driver is found and the customer chooses a refund.
-- Payment methods available: mada, Visa, Mastercard, Apple Pay, and STC Pay, as supported by Moyasar, and all of them support holds.
+- Payment methods are mada, Visa, Mastercard, and Apple Pay through Moyasar, all supporting hold then capture; no STC Pay for the customer, no installments at launch (PAY-015), and no cash on delivery.
 - Platform staff disable any payment method from settings without an app update.
+- An amount stays on hold for at most 24 hours from the hold: if the order is not closed within that time, the system captures the full held amount and the order stays open, and whatever support decides afterwards is carried out as a refund (PAY-003).
 
 Acceptance criteria:
-- The system does not capture the amount before the order is closed in one of the listed cases.
+- The system does not capture the amount before the order is closed in one of the listed ways, or before the hold reaches 24 hours.
 - If the payment notification is repeated, the system does not repeat the capture.
+- Neither STC Pay nor installments appear among the customer's payment methods.
+- An order "Awaiting support decision" whose hold has reached 24 hours: the full amount is captured, and a later support decision to return part of it is carried out as a refund, not a hold release.
 
 Pages: C09 C10 C11 C12 C24
 
@@ -3315,7 +3319,6 @@ Rules:
 - The wallet shows each credit with its type and expiry date.
 - Wallet credit is allowed in both write-in order payments: delivery and the products invoice.
 - Promotional credit funded by a branch is spent only on orders from that branch, and is deducted from it only when actually used; if it expires unused, the branch pays nothing.
-- Balances migrated from the current app are refund credit (SYS-020).
 - A reward not claimed within 24 hours returns to the platform with a reversal entry, and "Compensation lapsed" appears in the order file; support can grant a new compensation, and the lapsed reward is not reactivated.
 
 Acceptance criteria:
@@ -3373,34 +3376,32 @@ Acceptance criteria:
 
 Pages: A18 A26
 
-#### PAY-006 — Settlements and Payouts [Launch-critical]
+#### PAY-006 — Settlements and Payouts by Payment Splitting [Launch-critical]
 
 Rules:
 - The system shows a real-time statement for each branch, freelance driver and company; the merchant manager sees their branches' statements and their total.
-- How a merchant is paid depends on whether the payment gateway supports payment splitting (Split Payment), as recorded in the integration settings (INT-001): if it does, the merchant's share is split when the order is captured and arrives automatically with no manual approval; if not, the platform holds the merchant's dues and pays them out itself through Moyasar's payment distribution service on the payout date, by manual approval
-- On the payout date (weekly for merchants the platform pays out, and on its date for companies) the system prepares the dues list, and no payout from it is sent without manual approval. Payouts by splitting and freelance driver payouts through STC Pay (INT-014) are automatic and do not enter the approval list.
+- Payment splitting (Split Payment) through Moyasar is the only way merchants are paid: when the order is captured, the branch's share is split into its Moyasar wallet, and branch wallet balances appear in the admin dashboard; the platform does not hold merchant dues or pay them out itself.
+- On the weekly payout date Moyasar pays each branch's wallet balance to its bank account automatically, without manual approval. The system prepares a manual approval list only for what the platform pays out itself: delivery company dues on their schedule, and driver deposit refunds; freelance driver payouts via STC Pay (INT-014) are automatic and do not enter the approval list.
 - The holder of the "Approve payouts" permission approves after reviewing the account statement: one account, or selects several accounts and approves them together.
 - Delivery companies' dues are paid to the company only
 - Each transfer appears with its status, bank reference, and date. Statuses: in progress, sent, or failed
 - Freelance driver payouts are weekly on the same day as merchant payouts, automatically through STC Pay with no manual approval (INT-014).
-- A branch whose new bank account is awaiting finance approval does not enter the payout list (MER-001).
-- In a manual payout (without splitting) an unregistered merchant's balance is paid out after deducting product VAT; with splitting it is not deducted (PAY-029).
-- When splitting is supported, the merchant's share is split when the order is captured after closing (not at hold), and equals their net in the statement: products minus the commission or contract fee, the payment fee, the tax on platform fees, and their share of offers; product VAT inside their share is borne by them and is not deducted by the platform (PAY-029).
-- The share of a branch whose new bank account is awaiting Finance approval (MER-001) stays in its dues account as "Due", is not split, and arrives after approval.
-- Penalties, loss charges and refunds that occur after the order is split are recorded on its branch's dues account and deducted from that branch's later shares, or from its next payout if its method is manual; they do not touch the dues of another branch of the merchant.
+- The wallet balance of a branch whose new bank account is awaiting Finance approval is not paid out (MER-001).
+- The branch's share is split when the order is captured after closing (not at hold), and equals its net in the statement: products minus the commission or contract fee, the payment fee, the tax on platform fees, and its share of offers; the product VAT inside its share is borne by the merchant and is not deducted by the platform (PAY-029).
+- The share of a branch whose new bank account is awaiting Finance approval (MER-001) stays in its Moyasar wallet as "Due", is not paid out, and reaches it on the first payout date after approval.
+- Penalties, deductions, compensations, and refunds that occur after the order is split are recorded on its branch's dues account and deducted from its Moyasar wallet through the admin dashboard integration before the weekly payout; whatever the wallet balance does not cover is carried forward on the branch and deducted from its next shares, and it never touches the dues of another branch of the merchant.
 - Each split is recorded in the ledger (PAY-005) with its gateway reference, and shows in the merchant's dues account as "In progress", then "Sent" or "Failed"; a failed one returns to being due, visible to Finance in A18, and is not counted as paid.
-- Changing the splitting setting applies to new orders only, is saved on each order, and is recorded in the audit log.
-- Each branch has its own dues account and payout: each order's share is split to, or paid out to, its branch's bank account, and the branch's loss charges, penalties and order refunds are deducted from its dues only.
+- Each branch has its own dues account and Moyasar wallet: each order's share is split into its branch's wallet, and the branch's deductions, penalties, and order refunds are deducted from its wallet alone.
 
 Acceptance criteria:
 - A failed transfer does not appear as paid
-- No payout prepared by the platform (a merchant without splitting, a company, or a deposit refund) is sent without an approval recorded under the approver's name and time.
+- No payout prepared by the platform (a delivery company or a deposit refund) is sent without an approval recorded under the approver's name and time.
 - Selecting 10 accounts and approving them sends 10 payouts and records an approval for each account.
 - The statement shows all deductions, compensations, and offers
-- Gateway that supports splitting: for a delivered order the merchant's share arrives automatically and the account does not appear in the approval list.
-- Gateway that does not support splitting: the due amount stays with the platform and appears in the approval list on the payout date.
-- Unregistered merchant, splitting active, products at selling price 115, 10% contract percentage: 101.77 is split to the merchant before the payment fee, and product VAT is not deducted from them (PAY-029).
+- A delivered order's branch share enters its Moyasar wallet at capture and reaches its bank account on the weekly payout date without appearing in the approval list.
+- Unregistered merchant, products at selling price 115, 10% contract percentage: 101.77 is split to them before the payment fee, and no product VAT is deducted from them (PAY-029).
 - A merchant with two branches: a penalty on the Olaya branch is deducted from Olaya's dues and does not touch Al Malqa's dues.
+- A 200 penalty on a branch whose wallet balance is 50 before the payout: 50 is deducted, and 150 is carried forward on the branch and deducted from its next shares.
 
 Pages: D07 MD07 A18 A26
 
@@ -3532,7 +3533,7 @@ Acceptance criteria:
 
 Pages: D07
 
-#### PAY-015 — Installments and pay later [Important]
+#### PAY-015 — Installments and pay later [Later]
 
 Rules:
 - The customer pays by installments or deferral through an approved provider (Tabby or Tamara) when available via Moyasar.
@@ -3601,7 +3602,6 @@ Rules:
 - Exemptions and merchant type are applied to each order before aggregation.
 - The default accounting tax is 15% on platform fees; it is shown separately and the sum of the lines matches the statement.
 - Refund and reversal are entries linked to the original; accounting integration is through Odoo.
-- The statement of an unregistered merchant shows, for each order without splitting, the deducted "Product VAT" line separately from platform fees and their VAT (PAY-029); on a split order it is not deducted.
 
 Acceptance criteria:
 - An exempt linked order carries no contract fee.
@@ -3717,21 +3717,17 @@ Rules:
 - The accountant approves the table before coding, and then the examples are declared final.
 - Each merchant has an option platform staff set when adding it: registered for VAT or not registered; a registered merchant must have its VAT number (15 digits) entered. The option covers all merchants: restaurants, Shops, Mart and pharmacies.
 - A registered merchant is responsible for issuing the tax products invoice under its own VAT number, and the platform issues the platform invoice for the delivery fee and service fee.
-- Unregistered merchant without splitting (an emergency mode in which payments reach the platform account): the platform issues the platform invoice for the entire order: product value, delivery fee and service fee, and bears it.
-- When paying out an unregistered merchant without splitting, the VAT included in the product price (15 of every 115) is deducted, in addition to the platform commission and its 15% VAT.
 - Changing the registration status or VAT number applies to new orders only; it is saved on each order and recorded in the audit log.
 - All invoices the platform issues are issued automatically through Odoo on command from the system (INT-010), except the products invoice of a registered merchant, which the merchant issues itself.
-- VAT on delivery fees and service fees is always on the platform: it issues its invoice for them and remits it, and it is never deducted from the merchant, registered or not, with or without splitting. Product VAT is on the merchant; the platform remits it only for an unregistered merchant when payments reach its account without splitting, and deducts it from that merchant's balance.
-- Payment splitting is the default mode (PAY-006): the product value reaches the merchant directly and does not pass through the platform account; the platform issues the platform invoice only for delivery fees and service fees, and the fees invoice on the merchant, while the merchant issues the products invoice and its VAT stays with them, registered or not.
-- The absence of splitting is an emergency mode (a gateway that does not support it, or a failure), in which payments reach the platform account: a registered merchant issues the invoice for their products, and for an unregistered merchant the platform issues the invoice for the entire order, bears it, and deducts product VAT from their balance. Each order records whether its payments were split, so a change of mode applies to new orders only.
+- VAT on delivery fees, service fees, and the tip is on the platform in every case: it issues its invoice for them and remits it, and it is not deducted from the merchant, registered or not. Product VAT is always on the merchant, and the platform does not remit it on their behalf.
+- Payment splitting is the only model (PAY-006): the product value reaches the branch's Moyasar wallet and never passes through the platform's account; so the platform issues the platform invoice for delivery fees, service fees, and the tip, and the fee invoice to the merchant only, while the merchant issues the products invoice and its VAT stays with them, registered or not.
 
 Acceptance criteria:
 - 1.525 becomes 1.53.
 - Each row in "Financial operation examples" matches the calculation output in halalas.
-- Unregistered merchant, without splitting, products at selling price 115, 10% contract percentage: product VAT 15, commission 11.50 and its VAT 1.73 are deducted, so the merchant receives 86.77 before the payment fee.
 - Registered merchant, same order: no product VAT is deducted; only the commission 11.50 and its VAT 1.73, so the merchant receives 101.77 before the payment fee.
 - A "Registered" merchant cannot be saved without a 15-digit VAT number.
-- Order with a 12 SAR delivery fee: its VAT of 1.57 appears on the platform invoice and is not deducted from the merchant's balance, with or without splitting.
+- Order with a 12 SAR delivery fee: its VAT of 1.57 appears on the platform invoice and is not deducted from the merchant's balance.
 - Unregistered merchant, splitting active, products at selling price 115, 10% contract percentage: the platform issues no invoice for the products and does not deduct their VAT; it deducts only the commission 11.50 and its VAT 1.73, so the merchant receives 101.77 before the payment fee and bears the product VAT of 15 themselves.
 - Unregistered merchant, splitting active: the merchant issues the products invoice, and the platform issues none for it.
 
@@ -3792,7 +3788,7 @@ Pages: MD15 A05 A06
 #### MER-002 — Menu, prices, and permissions [Launch-critical]
 
 Rules:
-- Each product in each branch has a store price, and the system calculates the sale price = store price × (1 + markup rate) in the branch's contract (PAY-009). The customer sees only the sale price and never sees the store price, the merchant sees both prices, and all calculations are on the sale price.
+- Each product in each branch has a store price entered by the merchant and a sale price set by the platform: either manually per product, or by a markup rate on the merchant's or branch's whole menu, so the sale price = store price × (1 + markup rate) in the branch's contract (PAY-009); a manual price takes precedence over the rate. The customer sees only the sale price and never sees the store price, the store price is used in reports and analytics, the merchant sees both prices, and all calculations are on the sale price.
 - Modes for the merchant's edits to the store price: prohibited, needs review, within a percentage, full; price limits are measured against the approved price (the last price approved by the platform), not against the merchant's last edit.
 - The price limits are an absolute percentage for raising or lowering; an edit outside it goes to review, and prohibited does not allow a price edit.
 - The approved price remains for the customer until an edit that needs review is accepted; the preview shows the store price and the sale price together.
@@ -3806,6 +3802,7 @@ Acceptance criteria:
 - A product with a store price of 30 and its branch's markup rate of 10%: its sale price is 33; the customer sees 33 and does not see 30, and fees and the percentage are calculated on 33.
 - The merchant sees the store price and the sale price of each product in their app and dashboard, and the store price is not shown to the customer on any page.
 - Raising a product's store price in the Olaya branch does not change its price in the Al Malqa branch, and the product stays in both branches' menu.
+- A menu with a 10% markup, and a product with a store price of 30 for which a platform employee entered a manual sale price of 35: the customer sees 35, and the other products are at store price × 1.10.
 
 Pages: M05 M06 MD03 MD13 A06 A08
 
@@ -3878,7 +3875,7 @@ Rules:
 - Statement export.
 - Every loss charge or penalty on the branch in its statement carries a visible type and status; the statuses are: Potential, Charged, Under objection, Accepted, Rejected
 - An objection button for each loss charge or penalty.
-- The page opens with the branch's dues account in three separate balances: "Pending capture" (orders not yet closed, amount held), "Due" (captured, not yet paid out to the branch), and "Paid out to you" for the period; below it a "Payout method" line: "Automatic when the order closes" or "Weekly after platform approval", and each order shows which of the two it was paid by (PAY-006). The merchant manager also has "All branches" with their total.
+- The page opens with the branch's dues account in three separate balances: "Pending capture" (orders not yet closed, amount held), "Due" (captured and in the branch's Moyasar wallet, not yet paid out), and "Paid out to you" for the period; below it the next weekly payout date (PAY-006). The merchant manager also has "All branches" with their total.
 
 Acceptance criteria:
 - Each line is linked to its order or its source (ad, cashier integration, report).
@@ -5367,11 +5364,12 @@ Rules:
 - The merchant targets their store's previous customers through the platform by segment, city, and zone.
 - The merchant does not get customers' numbers; audience counts and results are shown.
 - Frequency limits, budget, and templates are set by the platform.
-- Store customer campaigns are free at launch and go through platform approval. Segments: new, repeat, and idle, with the same idle period as in MKT-001. The limit is one message per week per customer from the same store.
+- Store customer campaigns have a price that the platform sets per region and per city and can change at any time, and a price of zero makes them free; the merchant sees the price before sending, the campaign goes through platform approval, and its price is deducted from the branch's dues after approval with a separate tax invoice like an ad (MKT-003). Segments: new, repeat, and lapsed with the same inactivity period as in MKT-001. The limit is one message per week per customer from the same store.
 
 Acceptance criteria:
 - Results are aggregated and do not reveal customers' numbers.
 - The zone excludes a customer who is not served.
+- The platform set one campaign price in Riyadh and another in Jeddah: a merchant in Jeddah sees the Jeddah price before sending, and nothing is deducted before approval.
 
 Pages: MD05 A14 A17
 
@@ -5560,12 +5558,12 @@ Rules:
 - Sandbox environment, then production
 - Daily reconciliation with the Moyasar report
 - All displayed payment methods support authorization then capture through Moyasar (PAY-001).
-- The integration settings record whether the payment gateway supports payment splitting (Split Payment), as confirmed in writing by the provider; this capability decides how merchants are paid (PAY-006).
+- Payment splitting (Split Payment) is always on, with no setting to turn it off: each order's share is split into its branch's Moyasar wallet, and Moyasar pays the wallets out weekly (PAY-006).
 
 Acceptance criteria:
 - Successful, failed, and refunded payments appear in their correct state.
 - Before launch, the results of the authorization, capture, cancellation, and refund trial are documented for each approved payment method, and what concerns Moyasar is confirmed in writing. This is an item in the manual acceptance checklist (SYS-014).
-- Before launch, written confirmation is obtained on whether the payment gateway supports payment splitting, the setting is configured accordingly, and the chosen method is tested. This is an item on the manual acceptance checklist (SYS-014).
+- Before launch, splitting into branch wallets, weekly payouts from them, and deductions from them are tested, and whatever concerns Moyasar is confirmed in writing. This is an item on the manual acceptance checklist (SYS-014).
 
 Pages: A18 A22
 
@@ -5634,11 +5632,13 @@ Rules:
 - All invoices are issued automatically through Odoo on command from the platform system (admin dashboard); no staff member issues an invoice manually inside Odoo: the platform invoice for the order, the merchant's monthly fees invoice, the ad invoice, cashier invoices, and the credit note on refund.
 - The system sends the issue command at the event: the platform invoice when the order is captured, the fees invoice at month close, the ad invoice when the ad is approved and its amount deducted, and the credit note on refund; it saves the invoice number and link on the order, statement or ad and sends it to the customer or merchant.
 - If Odoo is down, issuing commands queue and are retried automatically in order without duplicates, and the number pending is shown in Accounts.
+- Odoo is connected to the ZATCA Fatoora e-invoicing system: every invoice and credit note the platform issues is issued as an approved e-invoice there.
 
 Acceptance criteria:
 - An Odoo outage does not stop orders
 - Capturing an order issues the platform invoice in Odoo with no staff involvement, and its number appears in the order file.
 - Repeating the issue command for the same order does not create two invoices.
+- The platform invoice for a captured order appears as approved in Fatoora, and its number is saved on the order.
 
 Pages: A18 A22
 
@@ -5959,21 +5959,6 @@ Acceptance criteria:
 - A new city is opened with a flag without a new release.
 
 Pages: A22
-
-#### SYS-020 — Migration from the Current App [Launch-critical]
-
-Rules:
-- The new version ships as an update to the same app, with the same identifier in both stores.
-- What will be migrated is scoped to: merchants and their contracts and branches, menus, drivers and their documents and insurance, customers and their addresses and balances, and untransferred dues.
-- Balances enter the ledger as opening entries. The migration is done with scripts that are tried first on the staging environment
-- Counts and totals are reconciled before and after the migration.
-- The migration is done at a quiet time, and the old system stays read-only for a period.
-- All migrated customer balances enter as "refund credit", always non-expiring, borne by the platform.
-
-Acceptance criteria:
-- After the migration, the total of balances equals what it was before.
-- When the customer signs in with their number, they find their addresses and balance.
-- A migrated customer's balance appears in their wallet as refund credit with no expiry date.
 
 #### SYS-021 — Maps and Call Cost [Launch-critical]
 

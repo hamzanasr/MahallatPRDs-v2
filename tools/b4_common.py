@@ -183,6 +183,26 @@ for _n, _rid, _kind, _txt in DEC7.ADD:
     _r['rules' if _kind == 'R' else 'acceptance'].append(_txt)
 DEC.DECISIONS.extend((n, t, d, _ids3.get(n, [])) for n, t, d in DEC7.DECISIONS)
 
+# الجولة الثامنة: مراجعة نموذج المال والإطلاق (التقسيم النظام الوحيد، ولا نقل من التطبيق الحالي)
+import b4_decisions8 as DEC8
+for _n, _rid in DEC8.DROP:
+    assert _rid in _by, _rid
+    D['requirements'] = [r for r in D['requirements'] if r['id'] != _rid]
+    _ids3.setdefault(_n, []).append(_rid)
+for _rid, (_n, _title) in DEC8.TITLE.items():
+    _touch(_rid, _n)['title'] = _title
+for _n, _rid, _old, _new in DEC8.REPLACE:
+    _r = _touch(_rid, _n)
+    _k = next((k for k in ('rules', 'acceptance') if any(x.startswith(_old) for x in _r[k])), None)
+    assert _k, (_rid, _old)
+    _r[_k] = [(_new if x.startswith(_old) else x) for x in _r[_k] if _new is not None or not x.startswith(_old)]
+for _n, _rid, _kind, _txt in DEC8.ADD:
+    _r = _touch(_rid, _n)
+    _r['rules' if _kind == 'R' else 'acceptance'].append(_txt)
+for _n, _rid, _p in DEC8.PRIORITY:
+    _touch(_rid, _n)['priority'] = _p
+DEC.DECISIONS.extend((n, t, d, _ids3.get(n, [])) for n, t, d in DEC8.DECISIONS)
+
 DEC.DECISIONS.sort(key=lambda x: x[0])
 DEC.SETTING_EDITS.update(DEC3.SETTING_EDITS)
 DEC.SETTING_EDITS.update(DEC4.SETTING_EDITS)
@@ -217,6 +237,40 @@ for _pid, _k, _old, _new in TERMS6.PAGE_EDITS6:
     else:
         assert _p[_k] == _old, (_pid, _k, _old)
         _p[_k] = _new
+
+# الجولة الثامنة: الإعدادات والأمثلة والتكاملات وبنود «قبل التشغيل»
+_found8 = set()
+for _row in D['settings']:
+    if _row[0] in DEC8.SETTING_EDITS8:
+        _found8.add(_row[0])
+        _row[:] = list(DEC8.SETTING_EDITS8[_row[0]])
+assert _found8 == set(DEC8.SETTING_EDITS8), set(DEC8.SETTING_EDITS8) - _found8
+for _a, _b, _c, _g, _refs in DEC8.SETTING_ADD8:
+    D['settings'].append([_a, _b, _c])
+    SETTING_REFS_ADD.append((len(D['settings']) - 1, _g, _refs))
+for _start in DEC8.EXAMPLE_DROP8:
+    assert any(x[0].startswith(_start) for x in D['financialExamples']), _start
+    D['financialExamples'] = [x for x in D['financialExamples'] if not x[0].startswith(_start)]
+for _start, _col, _old, _new in DEC8.EXAMPLE_EDITS8:
+    _i = next(i for i, x in enumerate(D['financialExamples']) if x[0].startswith(_start))
+    assert _old in D['financialExamples'][_i][_col], (_start, _old)
+    D['financialExamples'][_i][_col] = D['financialExamples'][_i][_col].replace(_old, _new)
+for _row in D['integrations']:
+    if _row[0] in DEC8.INTEGRATIONS_DESC8:
+        _row[1] = DEC8.INTEGRATIONS_DESC8[_row[0]]
+for _where, _name, _desc, _st in DEC8.INTEGRATION_ADD8:
+    _i = next(i for i, x in enumerate(D['integrations']) if x[0] == _where)
+    D['integrations'].insert(_i + 1, [_name, _desc, _st])
+for _start, _new in DEC8.QUALITY_EDITS8:
+    _i = next(i for i, x in enumerate(D['quality']) if x.startswith(_start))
+    D['quality'][_i] = _new
+for _id in DEC8.PRELAUNCH_DROP8:
+    assert any(x[0] == _id for x in D['open']), _id
+    D['open'] = [x for x in D['open'] if x[0] != _id]
+for _id, _old, _new in DEC8.PRELAUNCH_EDITS8:
+    _x = next(x for x in D['open'] if x[0] == _id)
+    _j = next(j for j, y in enumerate(_x) if isinstance(y, str) and _old in y)
+    _x[_j] = _x[_j].replace(_old, _new)
 
 # 3) مراجعة الصفحات: عناصر ناقصة، وسلوك الإجراءات، وصفحات جديدة، ومعاينات محسّنة
 import b4_ux as UXM

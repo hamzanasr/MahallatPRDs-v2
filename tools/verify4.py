@@ -34,7 +34,9 @@ for r in D['requirements']:
 for rid in sorted(changed):
     if rid not in ORIG:
         continue
-    r = ORIG[rid]; f = next(x for x in D['requirements'] if x['id'] == rid)
+    r = ORIG[rid]; f = next((x for x in D['requirements'] if x['id'] == rid), None)
+    if f is None:
+        continue  # متطلب حذفه المالك (SYS-020، القرار 138)
     a = nums(' '.join(r['rules'] + r['acceptance'])); b = nums(' '.join(f['rules'] + f['acceptance']))
     lost = collections.Counter(a) - collections.Counter(b)
     if lost: print('EDIT-LOST-NUMBERS', rid, dict(lost))

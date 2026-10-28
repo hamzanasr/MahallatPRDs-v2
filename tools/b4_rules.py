@@ -99,7 +99,7 @@ def settings_section(num):
 INT_REFS = {'ميسر': ['INT-001', 'PAY-001', 'PAY-006'], 'STC Pay': ['INT-014', 'PAY-006'], 'OpenLoyalty': ['MKT-010', 'MKT-013'], 'Adjust': ['INT-008', 'MKT-013'],
             'OneSignal': ['INT-004', 'ADM-007'], 'PostHog': ['INT-008'], 'Odoo': ['INT-010', 'PAY-005'],
             'Google Maps': ['SYS-021', 'ORD-011'], 'MCP': ['INT-011'], 'الكاشير وواجهات الشركاء': ['MER-011', 'INT-012', 'MER-041'],
-            'الكول سنتر': ['INT-013']}
+            'الكول سنتر': ['INT-013'], 'فورجوالي (4jawaly)': ['CUS-001']}
 
 
 def integrations_section(num):
@@ -115,7 +115,7 @@ def integrations_section(num):
 # ---------------------------------------------------------------- الجودة
 QUALITY_REFS = [['ADM-001', 'MER-037', 'ADM-043'], ['SYS-013', 'CUS-001'], ['SYS-018', 'SYS-004'], ['SYS-012', 'PAY-029'],
                 ['SYS-010', 'SYS-005'], ['ADM-002', 'ADM-043', 'PAY-006'], ['SYS-006', 'SYS-007', 'SYS-002', 'ADM-034'],
-                ['SYS-014', 'SYS-015', 'SYS-017'], ['SYS-020', 'SYS-019'], ['SYS-014']]
+                ['SYS-014', 'SYS-015', 'SYS-017'], ['SYS-019'], ['SYS-014']]
 
 
 def quality_section(num):
