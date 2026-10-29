@@ -203,6 +203,42 @@ for _n, _rid, _p in DEC8.PRIORITY:
     _touch(_rid, _n)['priority'] = _p
 DEC.DECISIONS.extend((n, t, d, _ids3.get(n, [])) for n, t, d in DEC8.DECISIONS)
 
+# الجولة التاسعة: تصحيحات 4.11 (لا تحويل آلي، والانتقال من المنصة الحالية، والإبلاغ للهيئة العامة للنقل)
+import b4_decisions9 as DEC9
+D['revision'] = DEC9.REVISION
+for _after, _n, _new in DEC9.NEW_REQ:
+    assert _new['id'] not in _by, _new['id']
+    _i = next(i for i, x in enumerate(D['requirements']) if x['id'] == _after)
+    D['requirements'].insert(_i + 1, copy.deepcopy(_new))
+    _by[_new['id']] = D['requirements'][_i + 1]
+    _ids3.setdefault(_n, []).append(_new['id'])
+for _n, _rid, _old, _new in DEC9.REPLACE:
+    _r = _touch(_rid, _n)
+    _k = next((k for k in ('rules', 'acceptance') if any(x.startswith(_old) for x in _r[k])), None)
+    assert _k, (_rid, _old)
+    _r[_k] = [(_new if x.startswith(_old) else x) for x in _r[_k] if _new is not None or not x.startswith(_old)]
+for _n, _rid, _kind, _txt in DEC9.ADD:
+    _r = _touch(_rid, _n)
+    _r['rules' if _kind == 'R' else 'acceptance'].append(_txt)
+_first9 = {}  # عدد ما أُدرج «أولاً» في كل قائمة، ليبقى بترتيب كتابته
+for _n, _rid, _kind, _after, _txt in DEC9.INSERT:
+    _r = _touch(_rid, _n)
+    _l = _r['rules' if _kind == 'R' else 'acceptance']
+    if _after is None:
+        _j = _first9.get((_rid, _kind), 0)
+        _first9[(_rid, _kind)] = _j + 1
+    else:
+        _j = next((j + 1 for j, x in enumerate(_l) if x.startswith(_after)), None)
+        assert _j is not None, (_rid, _after)
+    _l.insert(_j, _txt)
+for _n, _rid, _p in DEC9.PRIORITY:
+    _touch(_rid, _n)['priority'] = _p
+for _pid, _rid in DEC9.PAGE_REFS_ADD:
+    _p = next(p for p in D['pages'] if p['id'] == _pid)
+    if _rid not in _p['refs']:
+        _p['refs'].append(_rid)
+DEC.DECISIONS.extend((n, t, d, _ids3.get(n, [])) for n, t, d in DEC9.DECISIONS)
+
 DEC.DECISIONS.sort(key=lambda x: x[0])
 DEC.SETTING_EDITS.update(DEC3.SETTING_EDITS)
 DEC.SETTING_EDITS.update(DEC4.SETTING_EDITS)
@@ -272,6 +308,24 @@ for _id, _old, _new in DEC8.PRELAUNCH_EDITS8:
     _j = next(j for j, y in enumerate(_x) if isinstance(y, str) and _old in y)
     _x[_j] = _x[_j].replace(_old, _new)
 
+# الجولة التاسعة: الإعدادات والتكاملات والجودة وبنود «قبل التشغيل»
+_found9 = set()
+for _row in D['settings']:
+    if _row[0] in DEC9.SETTING_EDITS9:
+        _found9.add(_row[0])
+        _row[:] = list(DEC9.SETTING_EDITS9[_row[0]])
+assert _found9 == set(DEC9.SETTING_EDITS9), set(DEC9.SETTING_EDITS9) - _found9
+for _row in D['integrations']:
+    if _row[0] in DEC9.INTEGRATIONS9:
+        _row[1], _row[2] = DEC9.INTEGRATIONS9[_row[0]]
+for _start, _new in DEC9.QUALITY_EDITS9:
+    _i = next(i for i, x in enumerate(D['quality']) if x.startswith(_start))
+    D['quality'][_i] = _new
+for _id, _old, _new in DEC9.PRELAUNCH_EDITS9:
+    _x = next(x for x in D['open'] if x[0] == _id)
+    _j = next(j for j, y in enumerate(_x) if isinstance(y, str) and _old in y)
+    _x[_j] = _x[_j].replace(_old, _new)
+
 # 3) مراجعة الصفحات: عناصر ناقصة، وسلوك الإجراءات، وصفحات جديدة، ومعاينات محسّنة
 import b4_ux as UXM
 UX_MOCKS, UX_MOCKS2 = UXM.apply(D, {r['id'] for r in D['requirements']}, HERE)
@@ -286,6 +340,8 @@ MODULES = [  # (البادئة, الاسم, المجموعة في الملف)
     ('MKT', 'العروض والإعلانات والولاء'), ('EXT', 'الخدمات'), ('INT', 'الربط مع الخدمات'), ('PHR', 'الصيدليات'),
     ('REP', 'التقارير'), ('SYS', 'البناء والتشغيل'), ('TAX', 'Taxi'),
 ]
+for _after, _m, _name in DEC9.MODULE_ADD:
+    MODULES.insert(next(i for i, x in enumerate(MODULES) if x[0] == _after) + 1, (_m, _name))
 MOD_NAME = dict(MODULES)
 
 SURF = [  # (المعرّف في الملف, الاسم, الوصف, رمز الصفحات)
@@ -301,6 +357,8 @@ REQ = {r['id']: r for r in D['requirements']}
 PAGES = {p['id']: p for p in D['pages']}
 USED = {}
 for p in D['pages']:
+    if p.get('sub'):  # الشاشة الفرعية تتبع صفحتها ولا تُعد صفحة (D11_2)
+        continue
     for r in p['refs']:
         USED.setdefault(r, []).append(p['id'])
 

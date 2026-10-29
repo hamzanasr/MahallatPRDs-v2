@@ -4,6 +4,8 @@ from b4_common import *
 import b4_front as F
 import b4_pages as P
 import b4_annex as X
+import b4_annex9 as A9
+import b4_open as H
 
 
 def markdown(fixes):
@@ -26,12 +28,18 @@ def markdown(fixes):
     for a, b, c in D['settings']:
         w('| %s | %s | %s |' % (a, b, c))
     w('')
+    w('### ' + A9.DEFAULTS_TITLE)
+    w('')
+    L.extend(A9.DEFAULTS_MD.split(chr(10)))
+    w('')
     w('## أمثلة العمليات المالية')
     w('')
     w('| المعطيات | حساب العميل | حساب التاجر أو المندوب |')
     w('|---|---|---|')
     for a, b, c in D['financialExamples']:
         w('| %s | %s | %s |' % (a, b, c))
+    w('')
+    w('> ' + DEC9.EXAMPLES_NOTE9)
     w('')
     w('## التكاملات')
     w('')
@@ -48,6 +56,7 @@ def markdown(fixes):
     for i, t, b in D['open']:
         w('- **%s %s**: %s' % (i, t, b))
     w('')
+    L.extend(H.open_md())
     w('## الصفحات')
     w('')
     for sid, name, desc, _ in SURF:
@@ -56,7 +65,7 @@ def markdown(fixes):
         for p in D['pages']:
             if p['surface'] != sid:
                 continue
-            w('#### %s — %s%s' % (p['id'], p['title'], ' (جديدة)' if p.get('new') else ''))
+            w('#### %s — %s%s' % (p['id'], p['title'], ' (جديدة)' if p.get('new') and not p.get('sub') else ''))
             w('')
             w(p['purpose'])
             w('')
@@ -109,8 +118,9 @@ def markdown(fixes):
             w('القواعد:')
             for x in rules:
                 w('- ' + x)
-            w('')
-            w('معيار القبول:')
+            if acc:  # متطلب بلا معيار قبول مستقل (TRN-003، TRN-004، TRN-006)
+                w('')
+                w('معيار القبول:')
             for x in acc:
                 w('- ' + x)
             u = USED.get(r['id'])
@@ -118,4 +128,10 @@ def markdown(fixes):
                 w('')
                 w('الصفحات: ' + ' '.join(u))
             w('')
+        for am, _sid, atitle, atext in A9.REQ_ANNEX:
+            if am == m:
+                w('### ' + atitle)
+                w('')
+                L.extend(atext.split(chr(10)))
+                w('')
     return '\n'.join(L)
