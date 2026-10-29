@@ -62,7 +62,7 @@ for p in D['pages']:
 txt = norm(s.find(id='settings').get_text(' '))
 for a, b, c in D['settings']:
     if norm(a) not in txt or norm(b).replace('؛', ' ')[:20] == '' : print('SETTING', a); bad += 1
-print('settings rows', len(s.find(id='settings').select('tbody tr')), 'of', len(D['settings']))
+print('settings rows', len(s.find(id='settings').select('.tbl-set tbody tr')), 'of', len(D['settings']))  # دون جدول «قيم افتراضية مضافة في 4.11»
 print('integrations rows', len(s.find(id='integrations').select('tbody tr')), 'of', len(D['integrations']))
 print('quality rows', len(s.find(id='quality').select('tbody tr')), 'of', len(D['quality']))
 print('reports', sum(len(sec.select('tbody tr')) for sec in s.select('details.rep#rep-merchant, details.rep#rep-admin')), 'of', sum(len(v) for v in D['reports'].values()))

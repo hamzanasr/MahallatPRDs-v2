@@ -72,7 +72,7 @@ def page_html(p, with_mock=True):
         if figs:
             desk = 'mk desk' in (m1 or '')
             mock = '<div class="mock-wrap%s">%s</div>' % (' pair' if len(figs) > 1 and not desk else '', ''.join(figs))
-    new_tag = ' <span class="tag p2">جديدة</span>' if p.get('new') else ''
+    new_tag = ' <span class="tag p2">%s</span>' % ('شاشة فرعية' if p.get('sub') else 'جديدة') if p.get('new') else ''
     pri_tag = (' ' + tag(p['priority'])) if p.get('priority') and p['priority'] != 'launch' else ''
     return ('<details class="page" id="p-%s"><summary><span class="pn"><bdi class="rid">%s</bdi> %s%s%s</span><span class="ps">%s</span></summary>'
             '<div class="pbody">%s<div class="pspec">'
@@ -95,7 +95,7 @@ def surface_section(num, sid, name, desc):
     body = ''.join(page_html(p) for p in pages)
     return ('<section id="s-%s"><h2><span class="num">%d</span>%s</h2>'
             '<p class="sub">%s تضم %d صفحة، مرتبة كما تُستعمل. تحت كل صفحة معاينة توضيحية وعناصرها وإجراءاتها والمتطلبات التي تحكمها. الحالات الخمس المشتركة في «حالات الصفحات المشتركة» لا تتكرر هنا.</p>%s</section>'
-            ) % (sid, num, esc(name), esc(desc), len(pages), body)
+            ) % (sid, num, esc(name), esc(desc), len([p for p in pages if not p.get('sub')]), body)
 
 
 # ---------------------------------------------------------------- المخططات

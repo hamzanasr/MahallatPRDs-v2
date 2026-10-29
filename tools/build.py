@@ -53,6 +53,8 @@ add('admin-detail', 'تفاصيل صفحات الإدارة', 'الواجهات'
 add('reports', 'التقارير', 'الواجهات', R.reports_section(nxt()))
 add('kpi', 'تعريف المؤشرات', 'الواجهات', X.annex_section('kpi', nxt()))
 add('catalog', 'فهرس المتطلبات', 'للتنفيذ', F.catalog_section(nxt(), FIXES))
+for _m, _sid, _title, _text in X.REQ_ANNEX:
+    add(_sid, _title, 'للتنفيذ', X.req_annex_section(_sid, nxt()))
 add('open', 'أسئلة مفتوحة', 'للتنفيذ', H.open_section(nxt()))
 
 nav_html = ''

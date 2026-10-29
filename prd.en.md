@@ -1,6 +1,6 @@
-# Mahallat Platform Specification — Version 4.10
+# Mahallat Platform Specification — Version 4.11
 
-28 October 2026 · Revision 2026-10-05-final · 233 requirements · 93 pages. The requirements are the reference.
+29 October 2026 · Revision 2026-10-29 · 240 requirements · 93 pages. The requirements are the reference.
 
 ## Order states by type
 
@@ -40,7 +40,7 @@ Every state an order passes through on each path: when it enters the state, who 
 
 ### Non-final state: Awaiting support decision
 
-The order enters it from any stage whenever its amounts are a staff decision, and stays in it until the support agent records what is captured and what is refunded for each party; it is then closed. Nothing is captured or refunded in it before the decision, except the full refund of the amount for an out-of-stock item.
+The order enters it from any stage whenever its amounts are a staff decision, and stays in it until the support agent records what is captured and what is refunded for each party; then it is closed. Nothing is captured or refunded in it before the decision, except the full refund for an out-of-stock item, and the automatic capture when 24 hours have passed since the hold (PAY-001), after which the decision is executed as a refund. Anything not resolved within 18 hours of the hold is escalated to the support supervisor.
 
 | Reason for entry | When | Actor | Reference |
 |---|---|---|---|
@@ -63,7 +63,7 @@ The order is closed without delivery with one of these states. Cancellation is a
 | Ended for non-responsiveness | After reviewing the evidence | Support agent | ORD-008 |
 | Returning to the pharmacy ← Returned | Medicine not delivered, then the return stop, with the return code entered or an operations decision | Driver and pharmacy | PHR-010 |
 
-> Internal state names are suggested for implementation. Of the states, the four ORD-001 customer-facing states and the final states are shown to the customer as written. Rejection, out-of-stock, non-payment, and no-show are reasons, not states. Every transition executes once on the server and records the actor and the time (ORD-001).
+> Internal status names are approved for development. What the customer sees of the four ORD-001 statuses, and the final statuses, are shown to them as written. Rejection, out-of-stock, non-payment and no-show are reasons, not statuses. Every transition executes once on the server and records the executor and time (ORD-001).
 
 ## Dispatch algorithm
 
@@ -103,7 +103,7 @@ When the held amount is captured, when it is refunded, and who gets what, when t
 | Customer non-responsiveness | Support agent | No refund, and the amount is captured | The fee and the tip | Their due as usual | ORD-008 DRV-005 |
 | Write-in order not paid within 10 minutes | System, then support | Bears the part of delivery that support decides, and the rest is refunded | What support decides, and the tip follows delivery | Nothing | ORD-013 |
 | Pharmacy order without a prescription | Support agent | The part of delivery that support decides | What support decides | Nothing | PHR-012 |
-| Medicine not delivered due to non-responsiveness | Operations | No refund of delivery, and the medicine price and the service fee are refunded after the pharmacy confirms its safety; if the refund is declined, the pharmacy keeps the medicine for 7 days for a new delivery order, then it is destroyed | The fee and the tip | Recovers the medicine | PHR-010 |
+| Medicine not delivered because of no response | Support or Operations | Delivery is not refunded; the medicine price and the service fee are refunded after the pharmacy confirms it is intact; if the refund is rejected, the pharmacy keeps it for 7 days for a new delivery order, then it is destroyed | Fee and tip | You restore the medicine | PHR-010 |
 | Self-pickup not collected by its owner | Support agent | What support decides | — | What support decides | EXT-006 |
 
 Every support decision in these cases is logged with the actor, the written reason, and the liable party, and the order stays "Awaiting support decision" and is not closed before it. "What support decides" means the cancellation screen asks the agent for the amount for each party or "nothing".
@@ -122,6 +122,7 @@ This table is the reference for the default distribution of permissions across t
 | Assignment and reassignment | ✓ | ✓ | ✓ | ✓ | — | — | DSP-002 ORD-004 |
 | Cancel an order after the window and refund | ✓ | ✓ | ✓ | — | — | — | ORD-004 |
 | Loss charge and penalty | ✓ | ✓ | ✓ | — | — | — | PAY-025 |
+| Refund of an undelivered medicine (within the role limit) | ✓ | ✓ | ✓ | ✓ | — | — | PHR-010 |
 | Compensation and repeat-order credit | ✓ | ✓ | ✓ | — | — | — | SUP-002 MKT-002 |
 | Reverse a financial decision with a reversing entry | ✓ | ✓ | — | — | ✓ | — | PAY-025 PAY-005 |
 | Tickets and chats | ✓ | ✓ | ✓ | Read only | — | — | SUP-001 |
@@ -143,8 +144,10 @@ This table is the reference for the default distribution of permissions across t
 | Ban merchants | ✓ | — | — | — | — | — | ADM-004 |
 | Second approval for freezing a wallet | ✓ | ✓ | — | — | — | — | ADM-013 |
 | Add points to a customer | ✓ | — | — | — | — | — | MKT-010 |
-| View the prescription photo | ✓ | ✓ | ✓ | — | — | — | PHR-012 ADM-001 |
+| Viewing the prescription photo (for the pharmacist in the merchant app only) | — | — | — | — | — | — | PHR-012 ADM-001 |
 | View the customer address | ✓ | ✓ | ✓ | ✓ | — | — | ADM-001 |
+
+**Account manager** is a seventh role in the admin dashboard (MER-014): admin assigns them a group of merchants; they see their merchants and those merchants' chats and reports, and have no financial permissions. The merchant's chats reach them and are visible to the support supervisor.
 
 "Read only": can see but takes no action.
 
@@ -194,7 +197,7 @@ A unified definition for every number in the dashboards and reports.
 
 One definition for each number, used on all pages and reports, so the same number appears with the same value wherever it is shown (ADM-030, ADM-006). The period is in Riyadh time (REP-001), and an order is attributed to its closing date. Amounts come from the ledger, not from the customer-facing UI.
 
-> These definitions are proposed to unify the calculation, and the owner approves or amends them.
+> These definitions are approved by the owner (29 October 2026) to standardize the calculation.
 
 ### Orders and money
 
@@ -266,11 +269,40 @@ One definition for each number, used on all pages and reports, so the same numbe
 | Delivery fee | Restaurants and Shops: 9 SAR including 3 km + 1.5 per km, bounds 9–25; Mart and pharmacies: 12 SAR including 3 km + 1.5 per km, bounds 12–30 | System-wide, with an optional setting per region and per city |
 | Delivery distance measurement | Air distance (straight line) | Or road distance through Google Maps; each region and each city has its own method, and when road distance is unavailable: air distance × road factor |
 | Driver negative balance limit | −50 SAR | When reached, the driver enters "balance lockout" and receives no new tasks until payment |
-| Payment splitting for merchants | Always on through Moyasar | The only way merchants are paid: a wallet per branch and a weekly payout; no setting to turn it off (PAY-006) |
+| Payment splitting for merchants | Always on through Moyasar | Each order's share is split into its branch wallet at capture; and no wallet balance is transferred to the bank without the accountant's approval (PAY-006) |
 | Road factor | 1.3 | System-wide, and per region or city; used when road distance is unavailable: air distance × the factor |
 | Idle period | 30 days | System-wide; defines the "Idle" segment in coupons and campaigns |
 | Pharmacy retention of a medicine whose refund was declined | 7 days | Then destroyed without a refund |
-| Maximum hold duration | 24 hours | System-wide; after it the full amount is captured and whatever support decides is carried out as a refund |
+| Maximum hold duration | 24 hours | System-wide; after that, the full amount is captured and whatever support decides is executed as a refund; and an unresolved case is escalated to the support supervisor at 18 hours |
+
+### Default values added in 4.11
+
+Values that had no default, approved by the owner (29 October 2026), and remain adjustable from settings.
+
+| # | Setting | Proposed assumption | Allowed range | Reason | Reference |
+|---|---|---|---|---|---|
+| 1 | Small refund limit | 25 SAR per decision | 0–50 SAR | Stays under the support agent limit (50 SAR), so a small refund does not need a second approval. "assumption" in usage: it classifies the report as a "small claim" in the queue and reports only, and does not mean an automatic refund | CFG-01 L319; SUP-004 L5265 |
+| 2 | Financial limit — Support agent | **50 SAR** per decision (owner decision, mandatory) | Fixed by owner decision | Owner decision | Corrects ADM-043 L5193 (which has 200) |
+| 3 | Financial limit — Support supervisor | **200 SAR** per decision (owner decision, mandatory) | Fixed by owner decision | Owner decision | Corrects ADM-043 L5193 (which has 1,000) |
+| 4 | Financial limit — Admin | No limit, and every decision is logged | — | Last step in the approval ladder: "anything above goes to admin" | ADM-043 L5193 |
+| 5 | Financial limit — Operations | 0 SAR | 0 only as long as the permission is not granted | The role has no cancellation, refund, loss charge, or penalty | L123–L125; ADM-043 L5198 |
+| 6 | Financial limit — Finance | 200 SAR for the reversal entry and accepting the objection "assumption" | 0–1,000 SAR | Equal to the support supervisor limit, because the two roles reverse each other's decisions (L126, L2097), and anything above it goes to admin. Finance does not originate loss charges or penalties | L124, L126; L2097 |
+| 7 | Financial limit — Sales | 0 SAR | 0 only | Has no financial permissions on orders | L123–L126 |
+| 8 | Financial limit — New custom role | 0 SAR until admin sets it | 0–200 SAR | The new role starts safe, and does not exceed the supervisor's limit without an explicit decision | A22 L2591; ADM-001 "least necessary permission" |
+| 9 | Single penalty cap (independent of the role limit) | No separate cap; the role limit is the effective cap "assumption" | — | The loss charge is limited to the proven loss (SUP-002 L5245), and the penalty is a manual decision subject to the executor's limit. This makes an additional figure unnecessary | CFG-01 L319; PAY-025 |
+| 10 | Target time to rule on the objection | **48 hours** everywhere (owner decision) | 24–72 hours | Owner decision. The number is written into SUP-006 L5289 ("target period" without a number) to match L260 and L4631 | SUP-006 L5289 |
+| 11 | Escalating an unanswered objection | At 48 hours it is automatically escalated to the support supervisor ("assumption" on the party) | Follows item 10 | Owner decision: an unanswered objection is escalated. We propose the support supervisor because they hold the authority to accept the objection (L2517) | SUP-006 |
+| 12 | Objection submission window | **7 days** from the decision notification (owner decision) | 3–14 days | Exists. Mentioned here for confirmation | L260; SUP-006 L5288 |
+| 13 | Escalating the "Awaiting support decision" status | **18 hours** from the hold, escalated to the support supervisor (owner decision) | 12–22 hours | 6 hours remain before automatic capture at 24 hours, and capture happens on time without change | L273; PAY-003 L3306; L109 |
+| 14 | Location distance from address warning | **300 meters**, and the actual distance is shown (owner decision) | 100–1,000 m | Owner decision. Format: in meters below 1 km ("350 m away"), and in kilometers above it ("1.4 km away") | CUS-002 L2819; C13 L627 |
+| 15 | Customer chat remaining after the order is closed | **24 hours**, a configurable setting (owner decision) | 0–72 hours | Owner decision. Note: MER-022 L4060 and M13 L980 close the **merchant**'s conversation with the customer when the order is closed. "Assumption": the setting applies only to the customer–driver conversation (CUS-008), and the merchant conversation remains as is. Needs owner confirmation | CUS-008 L2905, L2907 |
+| 16 | Marketing message limits | **No limit of any kind** (owner decision) | — | Owner decision. The existing limits are removed (see table C) | CFG-01 L319 |
+| 17 | Busy mode with a preparation cap | Stays +15 minutes for an hour, and the resulting time does not exceed 40 minutes (owner's decision) | Increase 5–15 min; duration 15–60 min | Owner decision. Available extension = 40 − longest preparation time. Example: if the time is 35 minutes, only +5 is shown | L250; MER-018 L4010; M09 L1167 |
+| 18 | Loyalty points to SAR conversion rate | **100 points = 1 SAR**, a setting per city or period (the value is an assumption) | 50–200 points per riyal | The minimum redemption is 500 points, so the first redemption is 5 SAR, a tangible amount without a large burden on the platform net | MKT-010 L5427, L5430 |
+| 19 | Points earning rate | 10 points per 1 SAR of platform net on the order "assumption" | 1–20 points per riyal | Without an earning rate, the conversion rate is meaningless. With item 18, the loyalty cost is about 10% of the platform net | MKT-010 L5425, L5427 |
+| 20 | Store customer campaign price per city | 0 SAR (free) at launch "assumption" | 0 or more | MKT-005 acknowledges that a zero price makes it free, and does not mention an assumption | MKT-005 |
+| 21 | Merchant campaign budget limit ("Higher than the platform limit for you") | No limit "assumption" | 0 = no limit | Consistent with the owner's decision to remove message limits. If a financial limit rather than a message limit is meant, it needs a separate decision | MD05 L1411; MKT-005 |
+| 22 | Repeated exceeding of the refund limit before restriction | Exceeding the limit (20%) in two consecutive reviews 30 days apart: a notice, then restriction on the third "assumption" | 2–4 times | SUP-007 says "if repeated" without a number | SUP-007 L5301 |
 
 ## Financial transaction examples
 
@@ -286,10 +318,12 @@ One definition for each number, used on all pages and reports, so the same numbe
 | Fee-contract restaurant: new customer at the branch, two orders at selling price 20 then 40 | Customer pays the selling price | Fee 2 then 5; continues until the customer's total at the branch reaches 30; no percentage |
 | Restaurant not registered for VAT, 10% contract percentage: products at selling price 115 | Customer pays 115 including VAT and the merchant's share enters its branch's Moyasar wallet<br/>The merchant issues the products invoice, and the platform issues its invoice for delivery and service only | Commission 11.50 + its VAT 1.73 are deducted; merchant receives 101.77 before the payment fee; product VAT 15 stays with them |
 
+> In restaurants, the commission is calculated on the selling price or as a per-customer fee according to the contract. If there is a markup on the menu, the contract determines where it goes, not the platform's rules.
+
 ## Integrations
 
 - **Moyasar** — hold, capture, and refund, plus merchant payouts by payment splitting into each branch's wallet with weekly payouts (Launch-critical)
-- **STC Pay** — automatic payouts of freelance driver dues (Launch-critical)
+- **STC Pay** — payout of driver dues after approval (Later; bank transfer at launch)
 - **4jawaly** — verification code SMS messages (Launch-critical)
 - **OpenLoyalty** — points, referral, and reward rules (Launch-critical)
 - **Adjust** — source, links, and referral (Launch-critical)
@@ -311,14 +345,43 @@ One definition for each number, used on all pages and reports, so the same numbe
 - Finance is shown only to authorized users; a log of who did what, when, and before and after; manual payouts are approved by a different person.
 - Home, sections, placements, values, and keys come from the server; exception order is branch, then city, then region, then global, per the value's setting.
 - Three separate environments; daily backups and a restore drill; measurable performance targets; monitoring of payment, the scheduler, and integrations.
-- The release is an update to the same store apps under the new platform rules; no accounts, balances, or contracts are migrated from the current app.
+- The release is an update to the same store apps with the new platform's rules. Accounts and contracts are not migrated from the current app; balances are transferred manually as opening balances (TRN-001), and reference data is used through a one-time export with consent (TRN-002).
 - Acceptance tests for every requirement, financial examples in halalas, and tests of photo paths, permissions, loss charge and penalty, and customer non-responsiveness.
 
 ## Before go-live
 
-- **CFG-01 Specific operating values before launch**: the default driver platform percentage and tier benefits, delivery fees per city, small-refund, loss-charge, penalty, and negative-balance limits, and messages. Filled in settings; not hardcoded.
+- **CFG-01 Specific operating values before launch**: The default platform percentage for drivers and tier benefits, delivery fees per city, limits for small refunds, loss charges, penalties, and negative balance (their defaults are in "Default values added in 4.11"). They are filled in Settings; not hard-coded.
 - **INT-SEL Providers and the first integration batch**: connect 4jawaly for verification code messages, the payment methods actually tested with Moyasar, the first cashier systems, and the call center provider when it starts.
-- **INT-PAY Payment splitting and driver payouts**: written confirmation from Moyasar of the payment splitting terms (when the share is split, its fees, and recovery after a split), and confirmation of the STC Pay integration details for automatic payouts: the payout interface available to businesses, amount and count limits, its fees, and how the wallet holder's name is verified. The STC Pay outcome decides the driver payout limits.
+- **INT-PAY Payment splitting and driver payouts**: Written confirmation from Moyasar of the payment splitting terms (when the share is split, its fees, and recovery after a split), and confirmation of the STC Pay integration details (later) for payouts after approval: the payout interface available to businesses, amount and count limits, its fees, and how the wallet holder's name is verified. The STC Pay outcome decides the driver payout limits.
+
+## Open questions
+
+What remains unresolved. For each question: what it is waiting on, who resolves it, and what is blocked until it is resolved. Nothing that depends on an open question is coded before it is resolved; a requirement that refers here states the question number.
+
+| Number | Question | Resolved by | Blocked until resolved | Requirements |
+|---|---|---|---|---|
+| **Q-01** | Written confirmation from Moyasar of the wallet model: a wallet per branch at capture, payout to the bank only on the platform's instruction after approval, deduction from the wallet before payout, holding a wallet until a new bank account is approved, and a daily reconciliation report | Owner with Moyasar | The actual Moyasar integration (the logic is built now) | PAY-006, INT-001 |
+| **Q-02** | Reporting to the Transport General Authority (TGA): the required data, its format and timing, and whether connecting to the delivery platforms system at the Communications Authority is required | Owner with Legal | REG-007 | REG-007, DRV-001 |
+| **Q-04** | Final terms of HRDF (Hadaf), and the list of controlled medicines or medicines prohibited from delivery. ("Wasfaty" is deferred: PHR-003 later) | Owner with Legal | Enabling pharmacies in production | REG-006, DRV-022, EXT-004, PHR-012 |
+| **Q-06** | Approval of the data retention policy, especially sharing the entrance photo without consent | Legal | Automatic deletion and archive | CUS-001, DRV-028, TRN-004 |
+| **Q-07** | Whether 4jawaly can send the code via WhatsApp, and the default channel | Owner with 4jawaly | WhatsApp channel (SMS works) | CUS-001 |
+
+### Resolved
+
+| Number | Decision | Dated |
+|---|---|---|
+| **Q-03** | Driver payouts at launch are by bank transfer after approval; STC Pay integration (INT-014) later | 29 October 2026, the owner |
+| **Q-01 (hold)** | mada, Visa, Mastercard, Apple Pay, and Google Pay all support hold then capture (PAY-001) | 29 October 2026, the owner |
+| **Q-05** | The chart of accounts, entries and fee basis table are approved (Appendix PAY-005) | 29 October 2026, the owner |
+| **Q-08** | The merchant's opening balance is paid from the platform's bank in the first approval cycle, and does not pass through the Moyasar wallet (TRN-001) | 29 October 2026 |
+| **Q-09** | The payout cycle is weekly by default, and it is a setting | 29 October 2026 |
+| **Q-10** | In prescription disputes, support relies on the pharmacist's description; it does not see the prescription photo | 29 October 2026 |
+| **Q-11** | The Mart markup is a fee on the merchant with 15% VAT in the fees invoice; the merchant invoices the customer at the full selling price | 29 October 2026 |
+| **Q-12** | Branch wallets at Moyasar on the balance sheet as a restricted asset with an offsetting liability | 29 October 2026 |
+| **Q-13** | Existing driver deposit: 50 SAR from each of the first two weeks, and the rest from the following weeks, without suspension | 29 October 2026 |
+| **Q-14** | The notifications button on the home screen opens a pop-up list of notifications from the last 30 days, and each notification opens its destination | 29 October 2026 |
+
+**The question is closed** by amending the relevant requirement and moving it to "Resolved" with the date and who resolved it.
 
 ## Pages
 
@@ -338,7 +401,7 @@ Access to the sections and stores available for the customer's address.
   - **Open an ad banner**: opens the linked store or offer; the offer terms appear before adding to the cart.
   - **See all**: opens the list of the section the row belongs to, in the same order as Home.
   - **Open a discounted product**: opens C08 inside its store, with the pre-discount price struck through.
-  - **Open notifications**: opens the customer's notifications list (open question: there is no notifications page in the current list).
+  - **Open notifications**: Opens the customer's notifications list (a pop-up list of notifications from the last 30 days, and each notification opens its destination).
 - UX decisions:
   - The current-order card sits above the sections because it is the first thing someone returning to the app during an open order looks for, and the status is a badge and steps, not text alone.
   - The full address in the header explains why these stores appear, and changing it takes one tap.
@@ -525,6 +588,7 @@ Review the amount, address, and out-of-stock policy before confirming payment.
 - Requirements: CRT-001 CRT-005 PAY-004 PAY-021 ORD-002 CRT-002 CRT-003 CRT-004 ORD-011 PAY-001 PAY-015 MER-032
 - Navigates to: C10 C12 C13 C08 C11
 - Special states: Empty cart (last item removed): return to the store page.; Disconnection after payment: the app queries the order without repeating it.; Cart expired (CRT-004): when opened "Your cart expired" and the app re-validates the items or starts a new cart.; Minimum not met: the pay button is disabled with the text "Add N SAR to reach the minimum".; Eligible for free delivery: the bar turns green "Delivery is free for this order" and the delivery line is 0.00.; The saved payment method was disabled by the platform (PAY-001): it disappears from the sheet, and another method must be chosen before payment.; Address outside the branch zone: the cart stays with its branch and does not move; a red message above the summary and the pay button is disabled, and "Open branch ..." appears with a new cart if another branch of the merchant covers the address (CRT-001).; Self-pickup order: no address, no delivery, no tip, and no free-delivery bar (PAY-021).; Hold in progress: the button is disabled with an indicator and the text "Holding…" so the request is not repeated, and the page is not closed by going back.; A delivery offer and a discount offer on products combine in the order; two discount offers on products do not combine, so only the one with the higher saving applies (MKT-007).
+
 #### C10 — My Orders
 
 Current and past orders with status, source, and fulfillment method.
@@ -623,7 +687,7 @@ Customer approval, or applying their pre-selected choice after 3 minutes.
 
 Managing locations, entry instructions, and no-answer handling.
 
-- Elements: saved locations: a list of addresses with an edit action on each, the default marked with a badge, and a "Driver adjusted the entrance location · saved" badge on an address whose entrance the driver corrected, "Use my current location" button: in the address picker list, distance warning: "Your current location is X km away from the chosen address" when choosing an address (CUS-002), add steps: set location -> details -> save, location confirmation: a "Location confirmed" badge on the map (CUS-002), short National Address (optional): when entered, the pin moves to its location, and the customer still has to confirm it, address name: Home / Work / Other (free text), building, floor, and apartment: three separate fields, instructions: entry instructions, entrance photo: an optional photo, leave it at the door: under "What should the driver do if I don't answer": "Call me and wait" or "Leave it at the door"
+- Elements: Saved locations: the address list with an edit for each address, the default with a badge, and a "Driver adjusted entrance location · saved" badge on the address whose entrance the driver corrected, "Use my current location" button: in the address picker list, Distance warning: "Your current location is [distance] from the chosen address" when choosing the address if it is 300 meters or more away (in meters under 1 km and in kilometers above) (CUS-002), Add steps: set location ← details ← save, Location confirmation: "Location confirmed" badge on the map (CUS-002), Short national address (optional): when entered, the pin moves to its location, and the customer still has to confirm it, Address name: Home / Work / Other (free text), Building, floor and apartment: three separate fields, Instructions: entry instructions, Entrance photo: an optional photo, Leave it at the door: under "What should the driver do if I don't answer": "Call me and wait" or "Leave it at the door"
 - Actions and what happens:
   - **Add**: opens "New address" with the map on the device location. On save the address is added and becomes the selected one for the current order if the customer came from C09, with the message "Address saved".
   - **Edit**: opens the same form with the address values. Moving the pin cancels the confirmation and requires a new confirmation before saving. Editing does not change the address of an existing paid order.
@@ -653,7 +717,7 @@ Access to balance, cards, addresses, tip, language, and support.
 
 - Elements: account details: name and masked mobile number, wallet and cards: a balance card with a "Reward awaiting collection" line if one exists, and the default card abbreviated to its last digits, addresses: their count and the default address, auto tip: the amount and what reaches the driver after its included 15% VAT (CUS-010), with an on/off switch, points and invitation: the number of available points, notifications: notification settings, language: Arabic / English buttons directly in the row instead of a sub-page, help: "Support" with two options "Help with an order" or "Help with the app" (SUP-001), visitor card: "Browse freely, sign in when you order" and a sign-in button
 - Actions and what happens:
-  - **Edit**: opens a name-edit dialog. The mobile number cannot be edited from here (see the questions). Saving updates the name immediately with "Your details were saved".
+  - **Edit**: Opens the name edit window. The mobile number cannot be edited from here; it is changed with a code sent to the new number (CUS-001). Saving updates the name immediately with "Your details were saved".
   - **Open wallet**: goes to C20, with the awaiting reward, if any, at the top of the page.
   - **Support**: a bottom sheet: "Help with an order" (latest orders, then C21 with the order context) and "Help with the app" (C21 with no order number).
   - **Sign out**: confirmation: "Sign out of this device? Your cart and addresses stay saved in your account". Afterwards the page shows in visitor state and browsing continues without a verification code.
@@ -934,7 +998,7 @@ A working screen for the merchant according to their type and branches.
 - Permissions:
   - The screen and ringing: the "Orders" permission at the branch (merchant manager, branch manager, authorized merchant staff, preparation account)
   - The "Hand over the order" button: the "Handover" permission only
-  - No reject button for any role (MER-006), and no financial amounts on the cards
+  - No reject button in Menu and Mart orders for any role (MER-006); a write-in order is rejected before the invoice is uploaded (ORD-004); and no monetary amounts on the cards
 - UX decisions:
   - The confirm button carries the duration and takes two-thirds of the width, and "Details" is a secondary button.
   - The circular timer is next to the −/+ control instead of a numeric keypad, for kitchen speed.
@@ -996,6 +1060,7 @@ Text chat between the merchant and the customer of an active order using hidden 
 - Requirements: MER-022
 - Navigates to: M02
 - Special states: empty chat: "Start the chat with the customer about this order" with the quick replies; new message from the customer: a count badge on the chat button in M02 and M04 and a short sound alert; order closed (delivered or cancelled): messages are read-only and the composer field is hidden with the text "The order is closed; messages cannot be sent" (MER-022); send failed: the message has a red mark and "Resend" without losing the text
+
 #### M03 — Order Handover
 
 Driver pickup by code; customer self-pickup by order number.
@@ -1489,6 +1554,7 @@ Reply, support decision, and objection.
 - Requirements: MER-027 SUP-006
 - Navigates to: MD07 MD14
 - Special states: published reply: appears as customers see it, with no reply field; rejected reply: "Reply rejected" badge with the reason; "Potential" loss charge or penalty: no object button until it becomes "Charged"; objection period expired: the button is disabled with the end date; no unreplied ratings: "You have replied to all ratings"
+
 #### MD14 — Store Quality (new)
 
 Shows the merchant their store's quality indicators compared with the average of stores in their category in the city, the status of the Quality badge, and what is missing.
@@ -1607,7 +1673,7 @@ Topic, owner, attachments, and tickets.
 
 What the merchant edits and what is display-only.
 
-- Elements: Name and cover subject to review: a card titled "Subject to review". Hours and special days. Sound and printer. QR, store link, and branch links (INT-009). Cashier: link status, the systems available to you, and a "My system is not listed" button (MER-011). Contract, display-only: a "Display only" card with understandable values and examples: contract type, order fee and cap (PAY-010), payment fee (PAY-011), exemption for menu-link orders (enabled or disabled) (MER-007), tax on platform fees (PAY-022), and tax registration: the VAT number, or "Not registered: with split payments (the default mode) you issue the products invoice yourself and its VAT stays with you; without it, the platform issues the whole order's invoice on your behalf and product VAT is deducted from your dues" (PAY-029). Operation type: display-only with "Set by the platform and determines the fee model". Category and classification: "Placement only" (MER-009). Granted price-edit mode for the store price, and the markup rate in each branch's contract (MER-002, PAY-009). Systems linked through the partners API: system name, what it can access, branches (INT-012). Products API link: status, last sync, and a link to the link tab in Products (MER-041)
+- Elements: Name and cover pending review: a card titled "Pending review", Special hours and days, Sound and printer, QR, store link and branch links (INT-009), Cashier: integration status, the systems available to you, and a "My system is not listed" button (MER-011), Contract for display: a "Display only" card with clear values and examples: contract type, order fee and cap (PAY-010), payment fee (PAY-011), menu link order exemption (on or off) (MER-007), platform fee tax (PAY-022), and VAT registration: the VAT number, or "Not registered: you issue the products invoice yourself and its tax remains your responsibility" (PAY-029), Operating type: display-only with "Set by the platform and determines the fee model", and the section and category "Display placement only" (MER-009), The price editing mode granted for the store price, and the markup rate in each branch's contract (MER-002, PAY-009), Systems connected through the partner API: system name, what it can access, branches (INT-012), API product integration: status, last sync, and a link to the integration tab in products (MER-041)
 - Actions and what happens:
   - **Allowed edit**: enables the allowed fields. Name and cover are sent for review with "Awaiting review" and the old ones remain for customers until accepted; sound and printer are saved immediately.
   - **QR**: downloads a print-ready QR for the store link or the selected branch.
@@ -1881,7 +1947,7 @@ Targets, benefits, progress, budget, and duration.
 
 Operating data, bank, deposit, equipment, and services.
 
-- Elements: Driver type. Vehicle and its photos: type, allowed services, and maximum distance, display-only (DRV-011). Equipment: with the effect of lacking a cooler bag (DRV-013). Bank and STC Pay: the IBAN for the deposit refund and account-closure settlement, and the STC Pay wallet (last 4 digits) for the automatic weekly earnings payout, and the status of each: approved or under review (INT-014). Deposit: amount and status (paid and held, or being refunded), separate from the dues account (PAY-024). Regular services. Optional files: to request the "Verified" badge. "Verified" badge and its explanation (DRV-007). Document expiry reminder: one yellow card that states explicitly that it does not stop tasks (DRV-006). Preferred navigation app. Chat language (Arabic, English, Urdu)
+- Elements: Driver type, Vehicle and its photos: type, allowed services and maximum distance, display only (DRV-011), Equipment: with the effect of lacking a cooling bag (DRV-013), Bank and STC Pay: the IBAN for the earnings payout after the accountant's approval, for the deposit refund, and for account-closure settlement, and the STC Pay wallet (last 4 digits) when INT-014 is enabled later, and the status of each: approved or under review (INT-014), Deposit: the amount and status (paid and held, or refund pending), separate from the dues account (PAY-024), Regular services, Optional files: to request a "Verified" badge, "Verified" badge and its explanation (DRV-007), Document expiry reminder: a single yellow card that states explicitly that it does not stop tasks (DRV-006), Preferred navigation app, Conversation language (Arabic, English, Urdu)
 - Actions and what happens:
   - **Edit**: opens the item for editing. Changing the vehicle, equipment, bank, or STC Pay number is sent for review and the old one stays active until approval; changing navigation and language is immediate.
   - **Upload file**: opens the camera or files; the optional file is sent for verification review, and its status shows (under review, accepted, rejected with the reason).
@@ -1920,6 +1986,17 @@ A ticket linked to a task, or an objection of a loss charge, penalty, or penalty
 - Requirements: DRV-020 DRV-023 PAY-025 DRV-004
 - Navigates to: D07
 - Special states: permanent ban by a staff decision without the gradual steps (fraud, location spoofing, account sharing, abuse of a customer): a red card with the reason and an objection link (DRV-023); objection period ended: the button is disabled with "Objection period ended"; response deadline passed with no response: a "Response late" badge; no tickets: "No messages · If you face a problem on a task, use the Help button"
+
+#### D11_2 — Objection Form
+
+A sub-screen of D11 opened from the "Object" button on a loss charge, penalty, penalty step, or performance note.
+
+- Elements: What is being objected to (the task or the note), Amount if any, Decision reason, Deadline for objection (7 days from the notice), Objection reason field, Attachments
+- Actions and what happens:
+  - **Send**: The objection is created with the status "Open" and appears in D11 with the response counter (48 hours)
+- Validation and error messages:
+  - Objection reason at least 10 characters: "Write the reason for your objection in at least 10 characters"
+- Requirements: DRV-023 SUP-006 PAY-025
 
 #### D12 — Hadaf Deliveries
 
@@ -1989,6 +2066,7 @@ Growth, problems, and what needs intervention.
 - Requirements: ADM-030 ADM-011 ADM-012
 - Navigates to: A02 A03 A05 A06 A21
 - Special states: nothing needs intervention: the bar cards show zero in a neutral color with the text "Nothing needs your intervention right now".; incomplete "Today" period: a "Partial until [time]" badge beside every number, and the comparison is with the same period of the previous day.; staff member with limited role scope: the numbers and the city list are for their cities only, and under the title "Your cities: [cities]".; role without financial reports permission: "Total sales" and "Platform revenue" are hidden, and the remaining cards expand.; no previous period (new city): "—" instead of the change percentage with the tooltip "No previous period".
+
 #### A02 — Operations Room
 
 Order, alert, its owner, and the parties map.
@@ -2039,7 +2117,7 @@ A full reference for the order, events, money, and evidence.
   - **Refund**: available after collection; before it, disabled with the hint "The amount is still held". Window: items or an amount, the reason, the liable party (merchant, driver, or platform), evidence. The confirm button is "Refund [amount] SAR to the customer" and states the impact on the liable party. It is refunded to the same payment method, and the entry is recorded (ADM-043) and appears as a loss charge in the liable party's statement with the right to object within 7 days, or as an expense on the platform (PAY-025). Above the role limit it goes to "Awaiting approval" in A04.
   - **Compensation**: window: the compensation amount, the reason, the source (platform or a penalty on a party) (PAY-025). The confirm button is "Give the customer a reward of [amount] SAR". The customer receives a notification of the reward to collect within 24 hours, otherwise it lapses with a reversal entry (PAY-002); and the entry is recorded. Subject to the role limit.
   - **Cancel because of**: appears only after the customer's grace period and only for those with permission, and opens the cancellation window; save conditions (ORD-004). The confirm button is red "Cancel the order and refund [amount] SAR". After it: status "Canceled by support", the full amount hold is released, the task is withdrawn from the driver, the customer, merchant, and driver are notified, the loss charge and penalty, if any, are recorded in A04 as effective (or awaiting approval above the role limit) with the right to object, and the causing party is counted in the cancellation rate.
-  - **Reassign**: window: a table of eligible drivers by priority index or a driver number, and a mandatory reason; this is how an emergency report after acceptance is handled (ORD-014). Confirming withdraws the task from the current driver and notifies them of the reason, sends it to the new one as a binding assignment like acceptance, and records the event. After the driver has picked up the order, the warning "The order is with the current driver" appears (see the question).
+  - **Reassign**: Dialog: a table of eligible drivers with priority index or a driver number, and a mandatory reason; this is how an emergency report after acceptance is handled (ORD-014). Confirmation pulls the task from the current driver and notifies them of the reason, sends it to the new one as an assignment binding like acceptance, and logs the event. After the driver has picked up the order, a warning "The order is with the current driver" appears, and reassignment at that point is for the support agent and support supervisor only, with a mandatory reason.
   - **Message / Send**: sends to the party selected in the chat tab; it appears for them in the app linked to the order, and is saved in the file with the staff member's name and time.
   - **No-response decision**: appears after the support deadline from "arrived" (ORD-008). A window shows the evidence (staying near the customer and for how long, calls, messages) and the three decision options with a written reason; the impact of each option per ORD-008.
   - **Amounts decision (out-of-stock item or unpaid)**: for an order "Awaiting support decision" because of an out-of-stock item (MER-032) or unpaid (ORD-004): a window with fields for how much of the delivery the customer bears, what is refunded to them, what is paid to the driver, the loss charge or penalty on the merchant for the out-of-stock item if any, and a written reason (ORD-013). The order is closed only after saving.
@@ -2072,7 +2150,7 @@ Imposing, reviewing, and objecting, by authorized decision only.
 
 - Elements: Order: order number or report, Liable party: merchant or driver, or the platform for a loss charge (platform expense), Type: loss charge (to the extent of an actual loss) or penalty (a sanction beyond the loss); each is a separate line in the statement (PAY-025), Reason: written, Amount and its destination (PAY-025): for a loss charge, refunding what the customer paid or covering the loss, and for a penalty, the platform or customer compensation, Evidence, Actor: with the date and execution time for each entry, Approval: the actor's role limit and the text "Within your limit, so it is executed without approval" or "Above your limit, so it is sent for approval"; and what awaits approval in a separate card beside the form with "Approve" and "Reject" buttons in the same row, Objection: its status in the log, and its window is 7 days from the decision notification (SUP-006), summary at the top of the page: awaiting approval (count and amount), open objections, effective this month, reversal entries; each number opens its list, filters: period, city, party, approval status, objection status, Impact before saving: for a driver, their dues account balance after the deduction, the balance lockout threshold (−50), and that the deposit is not touched (PAY-026); for a merchant, that the amount is deducted from their dues and appears in their statement, Reversal entry in the log under its original, linked to it (↳) with its reason and actor, Entry details when opened: evidence, objection text and support's reply, values before and after (SUP-003)
 - Actions and what happens:
-  - **Manual add**: form: order or report, type (loss charge or penalty), liable party, amount, destination, reason, evidence. The save button "Save and deduct [amount] SAR" is disabled until the reason and evidence are complete. Within the role limit it is recorded as effective immediately, deducted, and the party receives a notification (PAY-025); above it, it is recorded as "Awaiting approval" (PAY-026). A loss charge on the platform is recorded as an expense with no deduction. If the deduction brings the driver to the balance lockout threshold (PAY-026), the confirmation says so.
+  - **Manual add**: Form: the order or report, the type (loss charge or penalty), the responsible party, the amount, the outcome, the reason, the evidence. The save button "Save and deduct [amount] SAR" is disabled until the reason and evidence are complete. Within the role limit it is recorded as effective immediately, deducted, and the party receives a notification (PAY-025); above it, it is recorded as "Awaiting approval" (ADM-043). A loss charge on the platform is recorded as an expense without deduction. If the deduction brings the driver to the lockout limit (PAY-026), this is stated in the confirmation.
   - **Approve**: for the higher role only, and the actor cannot approve their own entry. Confirmation "[Amount] SAR will be deducted from [party]'s dues". After it the entry becomes effective, the approver and time are recorded, and the party is notified.
   - **Reverse**: window with a mandatory reason and confirmation "Reverse [amount] SAR to [party]". Creates a reversal entry of the same amount linked to the original without deleting it; the amount returns to the party and they are notified. If the original's month is closed, the reversal is recorded in the open month.
   - **Compensate**: directs the amount of an effective penalty (all or part) as compensation to the same order's customer, who receives it as a reward (PAY-002); a confirmation states the amount and the customer. The destination becomes "Customer compensation" and the entry is recorded (PAY-025).
@@ -2166,7 +2244,7 @@ A unified file containing all the settings of the merchant and its branches with
 
 Primary, secondary, and public, and merchant product review.
 
-- Elements: Catalogs: for each catalog its type (primary: common grocery products, secondary: specialized categories, public: merchant suggestions after approval), its status, and the number of grocery stores subscribed to it; catalogs are for the Mart only, Central products: search by name or barcode and a filter for catalog and status, Reference store prices: with a "Sale price +5%" column beside them, Catalog subscriptions: for each grocery store its catalogs, and the state of the "Enable additions automatically" option (off by default), Local customization: a column with the number of grocery stores that changed the price, availability, or image, and opens its details, Products for review: beside the table, for each product the image, the submitting grocery store, the proposed store price, the request age, and approve and reject buttons in the row, Tabs: central products, products for review (with count), catalog subscriptions, import log, Import log: result of the last Excel check: valid, errors, bulk selection for central stop
+- Elements: Catalogs: for each catalog its type (primary: common grocery products, secondary: specialized categories, general: merchant suggestions after approval), its status and the number of groceries subscribed to it; the catalog is for Mart only, Central products: search by name or barcode and a catalog and status filter, Reference store prices: with a "Selling price + the branch's set markup rate" column next to them, Catalog subscriptions: for each grocery its catalogs, and the status of the "Auto-enable additions" option (off by default), Local customization: a column with the number of groceries that edited the price, availability, or image, and it opens their detail, Products for review: beside the table, for each product the image, the sending grocery, the proposed store price, the request age, and approve and reject buttons in the row, Tabs: central products, products for review (with count), catalog subscriptions, import log, Import log: result of the last Excel check: valid, errors, Bulk selection for central suspension
 - Actions and what happens:
   - **Add**: window: a new catalog (primary, secondary, public) or a central product (name, category, reference store price, image, catalog). The product enters the subscribed grocery stores disabled, except for those that turned on "Enable additions automatically" (MER-010).
   - **Excel and check**: upload the file, then a report: new rows, update rows, errors with row number. "Apply [count] rows" after confirmation. It does not touch a modified local price (MER-010).
@@ -2474,14 +2552,15 @@ Reconciliation, settlements, liabilities, and closing.
   - Closing: the button is disabled until the month's name is typed exactly
   - Flagging a difference: the note is mandatory
 - Permissions:
-  - The page, payout approval, and financial reports: admin and finance; whoever lacks approval sees the list without checkboxes or approve buttons
+  - The page, approving payouts, and financial reports: admin and finance, and the support supervisor has the reversing entry only; whoever lacks approval sees the list without checkboxes or approve buttons
   - The creator of a manual payout (driver deposit refund, early withdrawal) does not approve it even if admin (ADM-002)
   - Reversal entry: the "Reverse a financial decision with a reversal entry" permission (admin, support supervisor, finance)
   - Closing: the closing permission holder (finance by default) and admin
   - No direct edit of any party's balance (PAY-005)
-- Requirements: PAY-005 PAY-006 PAY-031 INT-014 ADM-036 PAY-022 PAY-027 PAY-029 INT-001 INT-010 PAY-024 ADM-002 PAY-018 PAY-026 PAY-007 PAY-003 FLT-002
+- Requirements: PAY-005 PAY-006 PAY-031 INT-014 TRN-001 ADM-036 PAY-022 PAY-027 PAY-029 INT-001 INT-010 PAY-024 ADM-002 PAY-018 PAY-026 PAY-007 PAY-003 FLT-002
 - Leads to: A03 A26 A22 A21 A10
 - Special states: Closed month: its entries are read-only (ADM-036); Open reconciliation difference: a red row in daily reconciliation and a number on the collection and reconciliation tab until resolved; Daily balance check failed (PAY-005): a red alert at the top of the page with the date and difference; Odoo down: a yellow bar "Entries are saved in the ledger and waiting to be sent (N)", and orders and payouts work; Failed payout: stays "Failed" and is not counted in payments sent (PAY-006); Bulk approval partially succeeded: a message "N sent and M failed", and the failed are visible with a "Retry failed" button; Account with a negative balance: it is not paid (PAY-026); and the driver in balance lockout has a "Stopped from tasks" badge; Payout prepared by the current user: its checkbox is disabled with the badge "Approved by someone else"; No dues on schedule: "No accounts due in this period" with the next payout date; Companies: hidden at launch, and a "Companies" filter appears when enabled later; automatic payout failed (splitting or STC Pay): "Failed" badge and a retry button for whoever has "Approve payouts" (PAY-006, INT-014)
+
 #### A19 — Support and Tickets
 
 Context, evidence, decision, satisfaction, and object to.
@@ -2600,7 +2679,7 @@ Configurable values, permissions, keys, and connection status.
   - Minimum allowed version is not lower than the minimum supported version (SYS-006)
 - Permissions:
   - The page is for admin only (settings, cities and fees, roles and permissions, and audit log); other roles do not see it, and finance sees the financial limits read-only in A18
-- Requirements: SYS-002 ADM-001 INT-008 INT-014 ADM-034 ADM-002 SYS-006 SYS-012 SYS-013 SYS-019 SYS-021 PAY-029 MKT-014 SUP-007 SUP-004 SUP-009 INT-001 INT-010 INT-013 ADM-043 DSP-001
+- Requirements: SYS-002 ADM-001 INT-008 INT-014 INT-001 REG-007 ADM-034 ADM-002 SYS-006 SYS-012 SYS-013 SYS-019 SYS-021 PAY-029 MKT-014 SUP-007 SUP-004 SUP-009 INT-010 INT-013 ADM-043 DSP-001
 - Navigates to: A26 A20 A17 A18 A09
 - Special states: scheduled version: "Scheduled" badge and its effective date, then "Effective" automatically at its time; inherited value: shown with its source; editing it creates an override for the selected level; integration down: red badge and last success, and text beside it that PostHog, Adjust, OpenLoyalty, or Odoo being down does not stop orders or payment; Maps cap reached: badge "Saved estimates in use" (SYS-021); call center not connected: masked-call buttons are hidden (INT-013); unsaved permission change: an alert bar, and leaving the tab asks "Save or discard"; language with missing translations: the count of missing texts beside it and it is not enabled
 
@@ -2784,6 +2863,17 @@ Acceptance criteria:
 
 Pages: D12
 
+#### REG-007 — Reporting to the Transport General Authority (TGA) [Launch-critical]
+
+Rules:
+- The system sends the Transport General Authority (TGA) driver, vehicle, and order data in the format and at the timing the Authority specifies.
+- The integration details and required data are in "Open questions" (Q-02), and the integration is not coded before they are resolved.
+
+Acceptance criteria:
+- The data of every active driver and every delivered order is sent in the approved format, and each submission is logged with its result.
+
+Pages: A22
+
 ### Customer App (CUS)
 
 #### CUS-001 — Account and Language [Launch-critical]
@@ -2794,12 +2884,11 @@ Rules:
 - Arabic and English in the apps and both dashboards.
 - The customer changes their phone number from the app with a code sent to the new number.
 - "Delete my account" is available inside the app with a warning that promotional credit and points are forfeited; refund credit is returned to the customer's card via support before deletion.
-- The verification code arrives by SMS through 4jawaly, and is not sent by WhatsApp.
+- The verification code arrives through the 4jawaly gateway by WhatsApp or by SMS according to what the gateway supports, and is sent by SMS when WhatsApp is unavailable.
 
 Acceptance criteria:
 - Browsing does not ask for a verification code.
 - Login does not create two accounts for the same number.
-- The customer is not offered the option to receive the code by WhatsApp.
 
 Pages: C14
 
@@ -2811,7 +2900,7 @@ Rules:
 - The address supports the Saudi short national address for locating, and instructions for no-answer and leave-at-door.
 - The app warns if the customer's current location is far from the selected address.
 - A driver's entrance correction is saved for subsequent deliveries.
-- The warning "Your location is far from the address" appears at 300 meters.
+- The warning "Your location is far from the address" appears at 300 meters or more, and shows the actual distance.
 
 Acceptance criteria:
 - The address is not saved without confirming the location.
@@ -2897,9 +2986,9 @@ Pages: C11
 Rules:
 - Chat and calling with masked numbers within the order.
 - Phone numbers typed in the chat are removed automatically.
-- Contact expires after a configurable period from order closure; the chat owner can ask the platform to remove part of it.
+- Contact expires a configurable period after the order is closed, with an assumed default of 24 hours; the conversation owner can ask the platform to remove part of it.
 - Phone numbers, links, and external accounts are removed from the chat.
-- Contact remains available for 24 hours after the order is closed.
+- Communication stays available after the order is closed for the configured period (24 hours by default).
 
 Acceptance criteria:
 - The other party does not receive a typed number.
@@ -2961,6 +3050,7 @@ Acceptance criteria:
 - The end time is the same for all customers.
 
 Pages: C22
+
 #### CUS-020 — Item Ratings [Later]
 
 Rules:
@@ -3077,7 +3167,7 @@ Rules:
 Acceptance criteria:
 - Pressing Ready does not change the customer status to Delivering.
 - Two acceptances do not link the order to two drivers.
-- An "Awaiting support decision" order is not captured, refunded, or closed before the decision is recorded under the executor's name.
+- An "Awaiting support decision" order is not captured, refunded or closed before the decision is recorded under the name of the person who made it, except for the automatic capture at 24 hours from the hold (PAY-001); after that, the decision is executed as a refund.
 
 Pages: C10 MD02 A03
 
@@ -3086,9 +3176,9 @@ Pages: C10 MD02 A03
 Rules:
 - The rule that the customer may cancel within 60 seconds of payment remains.
 - After the window, the order is sent to dispatch and the app does not offer the usual customer cancellation.
-- The two cancellation-window explanation phrases that the owner asked to remove are deleted from the UI; no blocking message containing their text is shown.
+- During the window, next to the countdown: "You can cancel your order free of charge within {s} seconds".
 - Support actions and the special cancellation option after no driver is found remain, per ORD-004.
-- Until the text of the two phrases arrives: the customer sees a countdown on the cancel button only, without any explanation.
+- After the window, the cancel button is replaced, with a support button: "Your order is now in progress. To cancel, contact support".
 
 Acceptance criteria:
 - Cancelling at second 59 cancels the hold once.
@@ -3102,7 +3192,7 @@ Rules:
 - In menu, Mart, and write-in, the driver accepts first, then the order reaches the merchant, deliberately: no order is prepared without a driver; and the announced arrival time includes the time to find the driver, then preparation (ORD-011).
 - The default order duration is the longest preparation time among the products; write-in takes the branch's default duration.
 - The merchant may adjust the duration once within 3 minutes of the order's arrival; after that the default applies, with a limit of 40 minutes.
-- Preparation starts when the merchant opens the order in the app or 3 minutes after its arrival, whichever is earlier, and the preparation time is counted from then (ORD-007).
+- The customer sees "Being prepared", and the delay is measured from the driver accepting the order; the merchant's preparation time is counted from when they open the order in the app or 3 minutes after it arrives, whichever comes first (ORD-007).
 - The Ready button is an explicit decision; the products invoice is optional in menu and Mart and mandatory in write-in.
 - "Open order" means the merchant opens the order details. The only duration adjustment allows increasing or decreasing within the 40-minute limit.
 - Mart is like the restaurant: its default duration is applied automatically, and it has one optional adjustment.
@@ -3123,8 +3213,9 @@ Rules:
 - Two cases put the order automatically into "Awaiting support decision": an out-of-stock item for which the customer previously chose "Cancel the order" (MER-032), and a write-in order not paid within 10 minutes (ORD-013). After them, support decides the loss charge, the penalty, or the amount, then the order is closed.
 - No cancellation by the merchant in menu and Mart; the merchant rejects write-in only before uploading the products invoice, and the order enters "Awaiting support decision".
 - At 5 minutes without a driver, an alert reaches support; at 15 minutes support intervenes and offers the non-Mart customer self-pickup within 5 minutes or a full refund.
+- Pharmacy and write-in orders after 15 minutes without a driver: the delivery hold is released and the order is canceled by support decision.
 - Mart has no self-pickup; after 15 minutes support handles assignment or cancellation and refund, without transferring to another grocery.
-- If the non-Mart customer does not choose within 5 minutes, the order is cancelled and the full amount is refunded automatically, and an alert reaches support.
+- If the customer does not choose within 5 minutes (non-Mart), the order is escalated to a support agent to decide; no automatic cancellation.
 - The liable party in the cancellation window: the merchant, the driver, the platform, or "No loss charge"; the penalty is a separate, optional decision.
 
 Acceptance criteria:
@@ -3226,7 +3317,7 @@ Pages: C11 C25 D05 D14
 #### ORD-011 — Displayed Arrival Time [Launch-critical]
 
 Rules:
-- Initial arrival time = longest preparation + travel time from store to customer + 5 minutes.
+- Initial arrival time = expected time to find a driver + longest preparation + travel time from the store to the customer + 5 minutes (ORD-003).
 - It is shown as a single duration; at pickup the elapsed preparation time is removed and the remaining arrival time is shown.
 - Adjusting preparation, reassignment, or order batching recalculates the estimate without counting elapsed time twice.
 
@@ -3253,6 +3344,7 @@ Pages: D03 D04 D08 A02 A03
 #### ORD-013 — Write-in Orders [Launch-critical]
 
 Rules:
+- In write-in and pharmacy orders, driver dispatch does not start until the customer pays the products invoice.
 - Text and photos or a prescription; no voice recording for the order.
 - The customer pays delivery first, then a 60-second window, then driver acceptance and dispatch to the merchant.
 - The merchant uploads the products invoice photo and its amount; the products invoice is mandatory and the merchant cannot reject after it.
@@ -3291,11 +3383,13 @@ Pages: D03 D08
 #### PAY-001 — Payment and Hold [Launch-critical]
 
 Rules:
+- An order awaiting support decision that is not resolved 18 hours after the hold is automatically escalated to the support supervisor with an alert, and appears at the top of their list with the time remaining until capture.
+- If pre-launch testing shows that a payment method does not support holds, its amount is captured directly at order time, and all cancellation and edit decisions on it are executed as refunds.
 - Online payment via Moyasar
 - The amount stays held on the customer's payment method until the order is closed, then the system captures what is due and releases the hold on the remainder.
 - The order is closed in one of these cases: delivery, ending the order due to unresponsiveness (ORD-008), returning the medicine to the pharmacy (PHR-010), or a support decision on a cancellation or in the "Awaiting support decision" state. In a support decision, only what support specified is captured.
 - The system releases the hold in full if the customer cancels within the window, or if no driver is found and the customer chooses a refund.
-- Payment methods are mada, Visa, Mastercard, and Apple Pay through Moyasar, all supporting hold then capture; no STC Pay for the customer, no installments at launch (PAY-015), and no cash on delivery.
+- Payment methods are mada, Visa, Mastercard, Apple Pay, and Google Pay through Moyasar, all supporting hold then capture; no STC Pay for the customer, no installments at launch (PAY-015), and no cash on delivery.
 - Platform staff disable any payment method from settings without an app update.
 - An amount stays on hold for at most 24 hours from the hold: if the order is not closed within that time, the system captures the full held amount and the order stays open, and whatever support decides afterwards is carried out as a refund (PAY-003).
 
@@ -3380,25 +3474,26 @@ Pages: A18 A26
 
 Rules:
 - The system shows a real-time statement for each branch, freelance driver and company; the merchant manager sees their branches' statements and their total.
-- Payment splitting (Split Payment) through Moyasar is the only way merchants are paid: when the order is captured, the branch's share is split into its Moyasar wallet, and branch wallet balances appear in the admin dashboard; the platform does not hold merchant dues or pay them out itself.
-- On the weekly payout date Moyasar pays each branch's wallet balance to its bank account automatically, without manual approval. The system prepares a manual approval list only for what the platform pays out itself: delivery company dues on their schedule, and driver deposit refunds; freelance driver payouts via STC Pay (INT-014) are automatic and do not enter the approval list.
+- Split payment through Moyasar is the only method for merchant payouts: when an order is captured, the branch share is split into its wallet at Moyasar, and branch wallet balances appear in the admin dashboard; the platform does not hold merchant dues or pay them out itself; the platform instructs Moyasar to transfer the wallet to the bank only after the accountant's approval.
+- There is no automatic payout. On the payout cycle date (a setting, weekly by default) the system shows whoever holds the "Payout approval" permission a list of all branch wallets, freelance driver dues, delivery companies, and deposit refunds, each at its net after deductions. For each line: approve the payout or reject it with a written reason. An approved line sends an order to Moyasar (branch wallet to its bank account) or a bank transfer to the driver's verified IBAN (STC Pay later, INT-014), and a rejected line remains a visible balance for the next cycle. The merchant and the driver see the status "Awaiting approval" before "In progress".
+- Approved driver payouts are exported by the system as a bulk transfer file for the platform's bank, and Finance records the bank reference for each transfer so it becomes "Sent", or "Failed" with its reason so it returns as due.
 - The holder of the "Approve payouts" permission approves after reviewing the account statement: one account, or selects several accounts and approves them together.
 - Delivery companies' dues are paid to the company only
 - Each transfer appears with its status, bank reference, and date. Statuses: in progress, sent, or failed
-- Freelance driver payouts are weekly on the same day as merchant payouts, automatically through STC Pay with no manual approval (INT-014).
 - The wallet balance of a branch whose new bank account is awaiting Finance approval is not paid out (MER-001).
 - The branch's share is split when the order is captured after closing (not at hold), and equals its net in the statement: products minus the commission or contract fee, the payment fee, the tax on platform fees, and its share of offers; the product VAT inside its share is borne by the merchant and is not deducted by the platform (PAY-029).
 - The share of a branch whose new bank account is awaiting Finance approval (MER-001) stays in its Moyasar wallet as "Due", is not paid out, and reaches it on the first payout date after approval.
-- Penalties, deductions, compensations, and refunds that occur after the order is split are recorded on its branch's dues account and deducted from its Moyasar wallet through the admin dashboard integration before the weekly payout; whatever the wallet balance does not cover is carried forward on the branch and deducted from its next shares, and it never touches the dues of another branch of the merchant.
-- Each split is recorded in the ledger (PAY-005) with its gateway reference, and shows in the merchant's dues account as "In progress", then "Sent" or "Failed"; a failed one returns to being due, visible to Finance in A18, and is not counted as paid.
+- Penalties, loss charges, compensations, and refunds that occur after the order is split are recorded on its branch's dues account and deducted from its Moyasar wallet through the admin dashboard integration before the payout is approved; whatever the wallet balance does not cover is carried forward on the branch and deducted from its next shares, and it never touches the dues of another branch of the merchant.
+- Each split is recorded in the ledger (PAY-005, PAY-005 appendix) with its gateway reference, and shows in the merchant's dues account as "In progress", then "Sent" or "Failed"; a failed one returns to being due, visible to Finance in A18, and is not counted as paid.
 - Each branch has its own dues account and Moyasar wallet: each order's share is split into its branch's wallet, and the branch's deductions, penalties, and order refunds are deducted from its wallet alone.
 
 Acceptance criteria:
 - A failed transfer does not appear as paid
-- No payout prepared by the platform (a delivery company or a deposit refund) is sent without an approval recorded under the approver's name and time.
+- No payout (branch, driver, company, or deposit refund) is sent without a recorded approval with the approver's name and time.
+- A rejected line in the approval list is not sent, and appears in the next cycle with the rejection reason.
 - Selecting 10 accounts and approving them sends 10 payouts and records an approval for each account.
 - The statement shows all deductions, compensations, and offers
-- A delivered order's branch share enters its Moyasar wallet at capture and reaches its bank account on the weekly payout date without appearing in the approval list.
+- A delivered order's branch share enters its wallet at Moyasar at capture, appears in the approval list in the next cycle, and does not reach its bank account before it is approved.
 - Unregistered merchant, products at selling price 115, 10% contract percentage: 101.77 is split to them before the payment fee, and no product VAT is deducted from them (PAY-029).
 - A merchant with two branches: a penalty on the Olaya branch is deducted from Olaya's dues and does not touch Al Malqa's dues.
 - A 200 penalty on a branch whose wallet balance is 50 before the payout: 50 is deducted, and 150 is carried forward on the branch and deducted from its next shares.
@@ -3473,6 +3568,7 @@ Acceptance criteria:
 - A menu order with products of 105 paid entirely from the wallet: merchant fee 3.63.
 
 Pages: MD02 MD07 MD13
+
 #### PAY-012 — Mart and pharmacy percentages [Launch-critical]
 
 Rules:
@@ -3628,6 +3724,7 @@ Pages: C14 C17 C20
 
 Rules:
 - Each driver pays a 100 SAR deposit before their account is activated (a setting).
+- Drivers who worked on the previous platform are activated without an upfront payment, and a 50 SAR deposit is deducted from the net of each of the first two weeks; whatever earnings do not cover is deducted from the following weeks until 100 SAR is complete, without suspending the driver.
 - The deposit is a held amount separate from the dues account: it does not enter its balance, cannot be withdrawn, and penalties are not deducted from it during work.
 - The driver gets the deposit back when the account is closed, after deducting any amounts owed by them.
 - The driver pays the deposit electronically from the app through Moyasar.
@@ -3643,7 +3740,7 @@ Pages: D07 D10 D13 A10 A18
 Rules:
 - There is no automatic loss charge or penalty; lateness, cancellation, or a warning does not create a deduction entry.
 - A support agent decides manually, after reviewing the evidence, two separate things: the loss charge, which is a deduction equal to an actual loss from the party liable for it (merchant or driver), or recording it as an expense on the platform; and the penalty, which is a punishment in addition to any loss, on a merchant or driver.
-- Every loss charge or penalty requires a linked order or report, a written reason, an amount, an executor, a date, and evidence. If the admin sets a limit for the agent's role, anything above it needs a second approval (ADM-043).
+- Every loss charge or penalty requires a linked order or report, a written reason, an amount, an actor, a date and evidence. Anything above the staff role's mandatory limit needs a second approval (ADM-043).
 - The affected party receives a notification of the decision and the reason appears in their statement, and they can object within 7 days of the notification (SUP-006); reversing the decision is done with a reversal entry.
 - The destination of the loss charge: refunding what the customer actually paid, or covering the loss; the destination of the penalty: the platform or compensation to the customer. Compensation is not a refund of an amount the customer paid.
 - "Platform" is a possible liable party in a loss charge with a written reason, and is recorded as an expense on the platform.
@@ -3716,7 +3813,9 @@ Rules:
 - Platform fees on the merchant (contract fee or percentage, and payment fee) have 15% tax added on the fees invoice; advertising fees have 15% added on the ad invoice when deducted (MKT-003).
 - The accountant approves the table before coding, and then the examples are declared final.
 - Each merchant has an option platform staff set when adding it: registered for VAT or not registered; a registered merchant must have its VAT number (15 digits) entered. The option covers all merchants: restaurants, Shops, Mart and pharmacies.
-- A registered merchant is responsible for issuing the tax products invoice under its own VAT number, and the platform issues the platform invoice for the delivery fee and service fee.
+- The merchant always issues its products invoice (the tax invoice under its VAT number if registered) at the full selling price, and the platform issues the platform invoice for the delivery fee and service fee.
+- The markup percentage that goes to the platform (Mart, or a restaurant if the contract provides for it) is a fee on the merchant, with 15% added to it in the monthly fees invoice.
+- The basis of each fee, its tax treatment and its entries are in the "PAY-005 appendix: chart of accounts, entries, and fee basis", which is approved.
 - Changing the registration status or VAT number applies to new orders only; it is saved on each order and recorded in the audit log.
 - All invoices the platform issues are issued automatically through Odoo on command from the system (INT-010), except the products invoice of a registered merchant, which the merchant issues itself.
 - VAT on delivery fees, service fees, and the tip is on the platform in every case: it issues its invoice for them and remits it, and it is not deducted from the merchant, registered or not. Product VAT is always on the merchant, and the platform does not remit it on their behalf.
@@ -3749,6 +3848,267 @@ Acceptance criteria:
 
 Pages: A15 A18
 
+### Appendix PAY-005: Chart of accounts, entries and fee basis
+
+| Item | Value |
+|---|---|
+| Status | **Approved for development** by owner decision after the last review (29 October 2026). Meets the PAY-005 condition "chart of accounts before development" |
+| Note | It is advisable for the business's accountant to review section 5 before the first VAT return, because the regulatory responsibility before ZATCA lies with the business |
+| Date | 29 October 2026 |
+| Reference | PRD 4.11. Section 5 records the approved accounting treatment decisions, and they take precedence over any earlier assumption in this file |
+
+**General rules governing everything below:**
+- The double-entry ledger is the single source of truth for money; every movement is a balanced entry, and no entry is edited but corrected with a reversing entry; and the sum of each day's entries is zero (PAY-005).
+- Amounts are in halalas as integers, half is rounded up, and each fee is rounded once; points are rounded down (PAY-029).
+- Everything the customer pays includes 15% VAT; and 15% is added to the platform fees on the merchant (PAY-029).
+- All platform invoices and credit notes are issued automatically through Odoo connected to the Fatoora system (INT-010). The merchant always issues the invoice for its products, and the platform issues invoices for its fees only (owner decision, PAY-029).
+- No payout to any party (branch or driver) except with the accountant's approval (owner decision).
+
+---
+
+#### 1. Chart of accounts
+
+##### 1-A Assets
+
+| Account number | Name | Type | Description |
+|---|---|---|---|
+| 1100 | Bank — the platform's current account | Asset | Receives Moyasar settlements for the platform's share, and funds the STC Pay business account. |
+| 1110 | Moyasar — platform balance (clearing account) | Asset | The platform's share of each capture after the split, until settled to 1100. Reconciled daily with the Moyasar statement (PAY-027). |
+| 1120 | Moyasar — branch wallet funds (restricted) | Asset | The contra account for account 2100: what Moyasar split into branch wallets and has not yet been transferred to their banks. It is not used for any platform purpose. **See the treatment in 1-F.** |
+| 1130 | STC Pay — business account balance | Asset | Activated with the STC Pay integration (INT-014, later). At launch drivers are paid from 1100. |
+| 1140 | Accounts receivable — branches (carried-forward balance) | Asset | Any penalty, loss charge, or refund not covered by the branch wallet balance, deducted from its next shares (PAY-006). A sub-account per branch. |
+| 1150 | Accounts receivable — drivers (negative balance) | Asset | Reclassification of the debit balance in 2110 when preparing the statements (PAY-026). |
+| 1160 | Input VAT | Asset | VAT on supplier invoices (including Moyasar fees if invoiced with VAT). |
+
+##### 1-B Liabilities
+
+| Account number | Name | Type | Description |
+|---|---|---|---|
+| 2100 | Branch dues (Moyasar wallets) | Liability | Each branch's share of its orders after deductions (PAY-006). A sub-account per branch; no branch affects another branch. |
+| 2105 | Merchant dues — opening balances from the previous platform | Liability | The migrated merchant balance (TRN-001). Paid from the platform's bank (1100) in the first approval cycle, and does not pass through the Moyasar wallet. |
+| 2110 | Driver dues | Liability | Delivery fee and tips minus penalties and loss charges (PAY-014, CUS-010, PAY-025). May become a debtor (negative balance, PAY-026). |
+| 2115 | Delivery company dues | Liability | Later (FLT-002). |
+| 2120 | Driver deposits held | Liability | 100 SAR per driver, separate from 2110; it is not withdrawn and no penalties are deducted from it while working (PAY-024). |
+| 2130 | Customer wallet — refund balance | Liability | Does not expire (PAY-002, PAY-003). |
+| 2131 | Customer wallet — compensation balance | Liability | Expires after 14 days (PAY-002). |
+| 2132 | Customer wallet — platform-funded promotional credit | Liability | The referral prize, gifts, cashback and redeemed points; 14 days (PAY-002, PAY-031). |
+| 2133 | Granted rewards not yet claimed | Liability | Compensation awaiting a press on "Claim reward" within 24 hours (PAY-002, PAY-031). |
+| 2134 | Pending referral prizes | Liability | On hold until the report window ends (MKT-013, PAY-031). |
+| 2140 | Loyalty points liability | Liability | The SAR value of points at the conversion rate in effect for the city or period (MKT-010, PAY-031). |
+| 2150 | VAT — output tax payable | Liability | VAT on what the platform has actually invoiced. |
+| 2151 | Output VAT — merchant fees not yet invoiced | Liability | A tracking-only sub-account of 2150: VAT on merchant fees deducted at split. It is remitted in the return for the period in which it was deducted (the deduction is a payment, and payment is a tax point), and is moved to 2150 when the monthly fees invoice is issued (PAY-022; Section 5, item 6). |
+| 2160 | Customer refunds in progress | Liability | A post-capture refund that was ordered and not yet confirmed by Moyasar (PAY-003). |
+| 2170 | Payouts in progress | Liability (intermediary) | Approved payouts sent to Moyasar or STC Pay whose confirmation has not arrived; closed on "Sent" or reversed on "Failed" (PAY-006). |
+| 2180 | Ad and campaign revenue received in advance | Liability | The unperformed portion of an ad period that extends past the end of the month; recognized as revenue by days (MKT-003; section 5 item 19). |
+| 2190 | Amounts captured on open orders | Liability | The platform's net share of an order auto-captured at 24 hours while still open; it becomes revenue at closing or is refunded by support decision (Section 5, item 10). |
+
+##### 1-C Equity
+
+| Account number | Name | Type | Description |
+|---|---|---|---|
+| 3100 | Capital | Equity | — |
+| 3200 | Retained earnings | Equity | — |
+| 3900 | Migrating opening balances from the old platform | Equity (intermediate) | The contra account for wallet balances transferred manually; the accountant settles it against cash or receivables transferred from the old platform's books, and it must reach zero (owner's decision). |
+
+##### 1-D Revenue (all net of tax)
+
+| Account number | Name | Type | Description |
+|---|---|---|---|
+| 4100 | Customer service fee | Revenue | 2.5% menu and Mart, 5% write-in and pharmacy (PAY-021). |
+| 4110 | Delivery fee | Revenue | The amount before tax (12 → 10.43). Recorded gross, and the driver fee is an expense in 5100 (section 5 item 8). |
+| 4115 | Tip | Revenue | Net tip before VAT (10 → 8.70). The platform invoices it, so it is its revenue, and its counter-entry is 5105 (Section 5, item 9). |
+| 4190 | Discounts on platform services | Contra revenue (negative) | Platform discount on its own fees (free delivery, service fee discount): reduces revenue and is not treated as an expense (Section 5, item 5). |
+| 4120 | Contract percentage commission — restaurants and Shops | Revenue | A percentage of the selling price minus the merchant's share of the discount (PAY-009, owner decision). |
+| 4121 | Contract fee per customer and branch | Revenue | 2 or 5 SAR, capped at 30 per 365-day cycle (PAY-010). |
+| 4122 | Mart and pharmacy commission | Revenue | 5% by default (PAY-012). |
+| 4130 | Payment fee borne by the merchant | Revenue | 2.5% of products after discount + 1 SAR (PAY-011, PAY-027). |
+| 4140 | Markup rate fee — Mart | Revenue | The markup is a fee on the merchant, with 15% added on top, in the monthly fee invoice (section 5 item 2). |
+| 4141 | Markup rate fee — restaurants with a contract stating it belongs to the platform | Revenue | The same treatment, only when the contract states it (section 5 item 3). |
+| 4150 | Ads and paid placements | Revenue | MKT-003. |
+| 4151 | Store customer campaigns | Revenue | MKT-005. |
+| 4152 | Double points bought by the merchant | Revenue | MKT-010; the price is a setting not specified in the file. |
+| 4153 | Cashier fee | Revenue | Listed in the fees invoice (PAY-022); the price is not specified in the file. |
+| 4160 | Penalties that go to the platform | Revenue | PAY-025. |
+| 4170 | Forfeited amounts | Revenue | An unclaimed reward, expired promotional credit, or expired points funded by the platform (PAY-005). |
+
+##### 1-E Expenses
+
+| Account number | Name | Type | Description |
+|---|---|---|---|
+| 5100 | Driver fees | Expense | Full delivery fee before offers, excluding VAT, minus the platform's 10% share (PAY-014). |
+| 5105 | Driver tips | Expense | The net tip due to the driver, against 4115. |
+| 5110 | Actual Moyasar fees | Expense | Per payment transaction; two transactions in write-in and pharmacy (PAY-027). |
+| 5120 | Platform-funded discounts and offers | Expense | The platform's share of product offers, delivery offers and coupons (MKT-007, PAY-004). |
+| 5130 | Customer compensations | Expense | Compensation rewards funded by the platform (PAY-002, PAY-025). |
+| 5140 | Platform-funded promotional credits | Expense | Referral prizes, gifts and cashback (PAY-002, MKT-013). |
+| 5150 | Loyalty points expense | Expense | MKT-010. |
+| 5160 | Loss charges and losses on the platform | Expense | When the responsible party is "Platform" for a written reason (PAY-025). |
+| 5170 | STC Pay transfer fees | Expense | If any; not specified in the file. |
+
+##### 1-F Memorandum accounts (memo — off balance sheet)
+
+| Account number | Name | Type | Description |
+|---|---|---|---|
+| 9100 / 9101 | Customer card holds / counter-entry | Memo | An amount held on the customer's card that has not been captured; not platform money (PAY-001). |
+| 9200 / 9201 | Branch-funded promotional credit / counter-entry | Memo | Deducted from the branch only when it is used, and nothing is charged to it if it expires (PAY-002, PAY-031). |
+
+**Treatment of branch wallets at Moyasar (1120 / 2100) — approved:**
+- **Approved:** recognize them on the balance sheet: a restricted asset (1120) offset by a liability (2100). Reason: the platform controls money leaving the wallet (no payout without its accountant's approval, owner decision), and deducts penalties and refunds from it (PAY-006); this brings it close to "control", and enables full daily reconciliation with Moyasar and the zero-balance entries check (PAY-005).
+- **Reconsidered only** if the Moyasar contract explicitly states that the wallet is the merchant's legal property and that the platform is only an agent (PAY-006: "The platform does not hold merchants' dues"). In that case 1120/2100 are replaced by two memo accounts, and 1140 remains for the migrated balances.
+- In both cases: the product value is not platform revenue; the platform is an agent for the products (PAY-029).
+
+---
+
+#### 2. Entry templates for each financial event
+
+##### 2-A Reference numeric example (used in the entries below)
+
+A restaurant on a 10% percentage contract, VAT-registered or not (the VAT on products is its responsibility in both cases, PAY-029). Selling price 105, delivery 12, service 2.5%, tip 10, paid entirely by card.
+
+| Item | Account | Amount |
+|---|---|---|
+| Customer pays | 105 + service 2.93 + delivery 12 + tip 10 | **129.93** |
+| 10% commission of 105 | + its 15% tax | 10.50 + 1.58 |
+| Payment fee 2.5%×105 + 1 | + its 15% tax | 3.63 + 0.54 |
+| **Branch share to its wallet** | 105 − 10.50 − 1.58 − 3.63 − 0.54 | **88.75** |
+| Delivery 12 | Net + VAT | 10.43 + 1.57 |
+| Service 2.93 | Net + VAT | 2.55 + 0.38 |
+| Tip 10 | For the driver + VAT | 8.70 + 1.30 (CUS-010) |
+| **Platform share at Moyasar** | 129.93 − 88.75 | **41.18** |
+| Driver fee | 10.43 − 10% (1.04) | 9.39 (file example L285) |
+| Driver tip | Net tip | 8.70 (received in full, CUS-010) |
+| **What remains for the platform** | 41.18 − tax 5.37 − driver 18.09 | **17.72** before the actual Moyasar fee |
+
+##### 2-B Entries table
+
+| # | Event | Debtor | Creditor | Note |
+|---|---|---|---|---|
+| 1 | Amount hold at order | 9100 Holds (129.93) | 9101 Holds contra (129.93) | Memo only; no financial entry (PAY-001). |
+| 2 | Full hold release (cancellation within the window / no driver) | 9101 | 9100 | No financial entry (PAY-001, PAY-003). |
+| 3 | Edit before capture (delete an item, cheaper substitute, partial refund before capture) | 9101 for the difference | 9100 for the difference | Reduces only the captured amount, with no reversing entries (PAY-028). |
+| 4 | Capture and splitting when the order closes | 1110 Moyasar—Platform 41.18; 1120 Branch wallets 88.75; 9101 (129.93) | 2100 Branch 88.75; 4120 Commission 10.50; 4130 Payment fee 3.63; 2151 Tax on merchant fees 2.12; 4110 Delivery 10.43; 4100 Service 2.55; 2150 Tax (1.57+0.38+1.30) 3.25; 4115 Tip 8.70; 9100 (129.93) | The platform's simplified invoice for the order (delivery, service, and tip) is issued at capture (INT-010). The merchant issues its products invoice. Fees contract: 4121 instead of 4120. Mart: 4122 + 4140 with their tax in 2151, and no 4130 (PAY-012). |
+| 5 | Automatic capture after 24 hours with the order still open | Same as entry 4, for the full held amount | Same as entry 4, except that platform revenues (4100, 4110, 4115, 4120…) are recorded in 2190 until closing; VAT goes to 2150 immediately | At closing: debit 2190, credit the revenue accounts. A support decision after that is executed as a refund (entry 8) from 2190 (Section 5, item 10). |
+| 6 | Escalating the status to the supervisor at hour 18 | — | — | No entry; audit log only (owner decision). |
+| 7 | Actual Moyasar fee | 5110 Moyasar fees; 1160 Input tax (if any) | 1110 Moyasar—Platform | Per transaction; reconciled daily against the Moyasar statement (PAY-027). |
+| 8 | Partial or full refund after capture | The revenue and tax affected by the difference (4100, 4110, 4120/4121/4122, 4130, 2150, 2151); 2110 for the refunded tip; 2100 for the refunded branch share, or 5160 if the platform is responsible | 2160 Refunds in progress | A single function recalculates on the original order snapshot; the locked contract fee counter (PAY-028, PAY-010). A linked credit note is issued (PAY-007, INT-010). If delivery is refunded, the tip is refunded in full (CUS-010). Role limit: support agent 50, supervisor 200 (owner decision). |
+| 8a | Moyasar refund confirmation | 2160 | 1110 Moyasar—Platform; 1120 Branch wallets (with the branch share) | The branch share is deducted from its wallet (PAY-006). |
+| 8b | Refund to the customer's wallet instead of the card | 2160 | 2130 Refund credit | At the customer's choice; does not expire and has no claim window (PAY-003). |
+| 9 | Platform-funded discount on products (file example: discount 20, platform 12, merchant 8) | 5120 Platform discounts 12 | (part of the capture entry: what the customer paid decreases by 12 and the branch share remains calculated on 97) | Does not reduce the commission base (PAY-004, PAY-009, example L282). The merchant invoices the customer for 97 (what the customer paid + what the platform paid on their behalf), and its VAT is on 97 (section 5, item 4). |
+| 9a | Platform discount on its own fees (free delivery, service discount) | 4190 Discounts on platform services | (what the customer paid decreases) | The platform invoice shows the full fee and the discount line, with VAT on the net (Section 5, item 5). The driver fee is not affected (PAY-014). |
+| 10 | Coupon or offer funded by the merchant | — (no expense on the platform) | 2100 is recorded at its share after the discount | Reduces the commission base by the merchant's share (PAY-009). |
+| 10a | Using branch-funded promotional credit | 2100 Branch (for the amount used); 9201 | 9200; (offset by the reduction in the amount collected from the customer) | Deducted from it only on use; expiry has no effect on it (PAY-002, PAY-031). |
+| 11 | Payment from the customer's wallet (platform-funded) | 2130 / 2131 / 2132 by type | Replaces part of 1110 in the capture entry | The wallet is a payment method that does not reduce the fee base; nearest to expiry first and refund last (PAY-002, PAY-004, PAY-011). |
+| 12 | Tip: driver accrual | 5105 Driver tips 8.70 | 2110 Driver 8.70 | The revenue and tax in the capture entry (4115, 2150). The platform issues the invoice and remits the tax (CUS-010, PAY-029). A post-delivery tip: a separate payment with a separate simplified invoice and the same two entries + the Moyasar fee. |
+| 13 | Driver fee accrual at closing | 5100 Driver wages 9.39 | 2110 Driver 9.39 | Of the full delivery fee before offers (PAY-014). |
+| 14 | Approve a driver payout and send it | 2110 Driver | 2170 Payouts in progress | **With the accountant's approval** (PAY-006). At launch, a bank transfer to the driver's approved IBAN, and STC Pay later (INT-014). No payout for a zero or negative net. |
+| 14a | Record the transfer's bank reference | 2170 | 1100 Bank (and 1130 after STC Pay is enabled) | The bank reference or the STC Pay transaction number is stored. |
+| 14b | Funding the STC Pay account (after it is activated) | 1130 | 1100 Bank | — |
+| 15 | Approve a branch wallet payout and send it to Moyasar | 2100 Branch | 2170 Payouts in progress | **With the accountant's approval**, then the instruction is sent to Moyasar (owner decision, differs from PAY-006). No payout to a new, unapproved bank account (MER-001). |
+| 15a | Moyasar payout confirmation | 2170 | 1120 Branch wallets | — |
+| 16 | Accountant rejects the payout | — | — | No entry; the balance remains due in 2100/2110 with the rejection reason in the audit log. |
+| 17 | Payout failure after sending | 2170 | 2100 or 2110 | A failed transfer is not counted as paid and returns as a visible due amount for Finance (PAY-006, INT-014). |
+| 18 | Settling the platform's share from Moyasar to the bank | 1100 Bank | 1110 Moyasar—Platform | — |
+| 19 | Loss charge on a merchant (actual loss) | 2100 Branch (or 1140 for what the wallet balance does not cover) | 2160 if the outcome is a refund to the customer; or 5160 if it covers a loss borne by the platform | Manual, with a reason and evidence, and linked to an order (PAY-025). Compensation, not consideration for a supply: outside the scope of VAT (section 5, item 7). |
+| 20 | Penalty on a merchant | 2100 Branch (or 1140) | 4160 Penalties (platform outcome); or 2133 compensation reward for the customer | Out of VAT scope; shown in the branch statement and as a non-taxable line in the monthly fees invoice (PAY-022). |
+| 21 | Penalty or loss charge on a driver | 2110 Driver (may become negative) | 4160; or 2133 compensation for the customer; or 5160/2160 for the loss charge | At −50 the driver is stopped (PAY-026). Not settled from the deposit while working. |
+| 22 | Accepting the objection | Reverse the original entry with the same accounts and amounts | — | A reversing entry linked to the original; the deduction remains in effect during the objection (PAY-025). |
+| 23 | Platform compensation to a customer (grant a reward) | 5130 Compensation | 2133 Unclaimed rewards | Subject to the role limit (PAY-025). |
+| 23a | Claiming the reward within 24 hours | 2133 | 2131 Compensation credit | PAY-002. |
+| 23b | Reward forfeiture / expiry of platform-funded promotional credit | 2133 or 2131 or 2132 | 4170 Forfeited amounts | The forfeiture rule is in PAY-005. |
+| 24 | New driver deposit through Moyasar | 1110 Moyasar—Platform | 2120 Held deposit | Before activation (PAY-024). |
+| 24a | Existing driver deposit in installments | 2110 Driver | 2120 Held deposit | 50 SAR from the net of each of the first two weeks; whatever earnings do not cover is deducted from the following weeks until 100 is reached, and the driver keeps working (Section 5, item 17). |
+| 24b | Driver pays off their negative balance through Moyasar | 1110 | 2110 | PAY-026. |
+| 24c | Account closure and deposit refund | 2120 Deposit | 2110 Driver | The negative balance is settled first, then the net is paid out via entry 14 with approval (PAY-024, PAY-026). |
+| 25 | Campaign or ad invoice at approval | 2100 Branch (or 1140) for the amount + tax | 4151 Campaigns or 4150 Ads; 2150 tax 15% | A separate tax invoice immediately through Odoo, outside the fees invoice (MKT-003, MKT-005). File example: 100 + 15 = 115. |
+| 25a | Refund of the unserved portion of an ad | 4150; 2150 | 2100 Branch | A credit note linked to the ad invoice (MKT-003). |
+| 26 | Earning loyalty points (when the report window ends) | 5150 Points expense | 2140 Points liability | From the platform net after the offer funder, the coupon, and the Moyasar fee; a base ≤ 0 gives no points (MKT-010). Valued at the payout rate in effect on the entry date (section 5, item 11). |
+| 26a | Points withdrawal on refund | 2140 | 5150 | MKT-010. |
+| 26b | Redeem points | 2140 | 2132 Promotional credit | Redemption converts to promotional credit used as a payment method (entry 11). From 500 points. |
+| 26c | Points expiry (12 months) | 2140 | 4170 Forfeited amounts | PAY-005, PAY-031. |
+| 27 | Referral prize | 5140 | 2134 Pending → when the report window ends: 2134 to 2132 | Withdrawn on order refund by reversing the entry (MKT-013). |
+| 28 | Branch monthly fees invoice | 2151 | 2150 | Transfer of the month's fees VAT when the invoice is issued; invoice VAT = the sum of its line VAT amounts (PAY-022, PAY-029). |
+| 29 | Opening balance entry from the old platform | 3900 Balance migration | 2130 (customer); 2110 (driver); 2105 (merchant) | Entered manually by the finance team from an approved statement with a second approver (TRN-001). |
+| 29a | Transfer of the corresponding cash from the previous platform's account | 1100 Bank | 3900 Balance migration | At the total of the transferred balances; 3900 reaches zero. Any difference is investigated and is closed only by an approved entry (section 5 item 12). |
+| 29b | Paying the merchant's opening balance | 2105 | 2170 → then 1100 on confirmation | In the first approval cycle, a bank transfer from the platform's account (not through the Moyasar wallet). |
+
+---
+
+#### 3. Entry test figures (from the file examples L279–L287)
+
+| Example | Expected result in the ledger |
+|---|---|
+| Mart: store price 100, markup 5%, delivery 12 | Customer 119.93; 4122 = 5; 4140 = 5; 2151 = 1.50; 2100 = 93.50 (95 before platform fee tax, as in L279). The merchant invoices the customer at 105 |
+| Restaurant 10%, selling price 105 | 4120 = 10.50; 4130 = 3.63 |
+| Restaurant discount 20 (merchant 8, platform 12) | Commission base 97; 4120 = 9.70; 5120 = 12; 4130 = 3.13 |
+| Unregistered restaurant, selling price 115, 10% | 4120 = 11.50; 2151 = 1.73; 2100 = 101.77 before the payment fee |
+| Driver, delivery 12 | 4110 = 10.43; 5100 = 9.39 |
+| Tip 10 | 4115 = 8.70; 2150 = 1.30; 5105 = 8.70; 2110 = 8.70 |
+
+---
+
+#### 4. Fee basis table (G-A2)
+
+| Fee | What it is calculated on | Tax inclusive or exclusive | Who issues the invoice | In any invoice | Reference |
+|---|---|---|---|---|---|
+| Product price | Selling price after discount | Included, and always borne by the merchant | Merchant | Products invoice from the merchant | PAY-029, owner decision |
+| Delivery fee | Distance: restaurants 9 SAR covers 3 km + 1.5/km (9–25); Mart and pharmacy 12 SAR covers 3 km + 1.5/km (12–30) | Included (12 → 10.43 + 1.57) | Platform | Platform invoice for the order at capture | PAY-013, PAY-029, INT-010 |
+| Customer service fee — menu and Mart | 2.5% of products after discounts + the delivery actually paid, excluding the tip and before service | Included | Platform | Platform invoice for the order | PAY-021, PAY-029 |
+| Customer service fee — write-in and pharmacy | 5% of products only | Included | Platform | Platform invoice for the order (second payment) | PAY-021, PAY-012 |
+| Tip | The amount the customer chooses | Included (÷ 1.15) | Platform | Platform invoice for the order; the tip after delivery with a separate simplified invoice | CUS-010, PAY-029 |
+| Contract percentage commission — restaurants and Shops | The agreed percentage × (selling price − the merchant's share of the discount); the platform's share does not reduce it | 15% VAT applies | Platform | Branch monthly fees invoice (deducted at split) | PAY-009, PAY-022, PAY-029, owner decision |
+| Contract fee per customer and branch | 2 SAR if the total of selling prices is < 25, and 5 SAR from 25; cap of 30 per 365-day cycle | 15% VAT applies | Platform | Monthly fee invoice | PAY-010, PAY-022 |
+| Mart commission | 5% by default of the store price (not the selling price) | 15% VAT applies | Platform | Monthly fee invoice | PAY-012, PAY-022 |
+| Pharmacy commission | 5% by default of the products invoice value | 15% VAT applies | Platform | Monthly fee invoice | PAY-012, PAY-022 |
+| Payment fee | 2.5% of products after discount + 1 SAR per menu order; no delivery, service or tip; no Mart or pharmacy; whatever the payment method | 15% VAT applies | Platform | Monthly fee invoice | PAY-011, PAY-022, PAY-029 |
+| Markup rate fee — Mart | 5% by default of the store price | 15% VAT applies (fee on the merchant). The full selling price to the customer is in the merchant's invoice with its VAT | Platform (the fee); merchant (the selling price) | Monthly fee invoice | PAY-004, PAY-012 |
+| Markup rate fee — restaurants | Per the contract | If it belongs to the platform: like Mart (a fee with 15% on top). If it belongs to the merchant: no fee | The platform, if it belongs to it | Monthly fee invoice | PAY-009 |
+| Ads and placements | Placement, city and duration price | 15% VAT applies | Platform | A separate ad invoice at approval and deduction | MKT-003 |
+| Store customer campaigns | Zone or city price (zero is free) | 15% VAT applies | Platform | A separate invoice, like an ad, after approval | MKT-005 |
+| Double points are bought by the merchant | The price is a setting (ADM) | 15% VAT applies | Platform | Monthly fee invoice | MKT-010 |
+| Cashier fee | Not specified in the file | 15% VAT applies (like platform fees) | Platform | Monthly fee invoice | PAY-022 |
+| Loss charge on a merchant | Amount of the actual loss | Out of VAT scope (compensation) | No tax invoice | Non-taxable line in the branch statement and the fees invoice | PAY-025, PAY-022 |
+| Penalty on a merchant | The amount support decides | Out of VAT scope (contractual penalty) | No tax invoice | Non-taxable line in the branch statement and the fees invoice | PAY-025, PAY-022 |
+| Loss charge and penalty on a driver | The loss or the decided amount | Out of VAT scope | No invoice | Driver statement | PAY-025 |
+| Platform percentage of the driver's fee | 10% of the full delivery before offers, excluding tax | No VAT: a method of calculating the fee, not a charge | No invoice | Driver statement | PAY-014 |
+| Driver deposit | 100 SAR fixed | Out of VAT scope (assumption: refundable deposit) | No invoice; a receipt | — | PAY-024 |
+| Actual Moyasar fee | Per the Moyasar contract | Input VAT if Moyasar invoices it | Moyasar | Moyasar's invoice to the platform | PAY-027 |
+| Transfer fees (Moyasar to bank, STC Pay) | Per the two contracts | Input VAT if invoiced | Provider | Provider's invoice to the platform | Borne by the platform (5110, 5170) unless the merchant's contract states otherwise |
+
+---
+
+#### 5. Approved accounting treatment decisions (29 October 2026)
+
+All open questions in the draft were resolved in the latest review. Reference: the VAT Law and its Implementing Regulations, and financial reporting standards (principal versus agent, and revenue recognition on satisfaction of the performance obligation).
+
+| # | Issue | Approved decision | Reason |
+|---|---|---|---|
+| 1 | Branch wallets at Moyasar | Within the budget: restricted asset 1120 against liability 2100, disclosed as restricted | The platform controls money leaving (no payout without its accountant's approval) and deducts from it, so it is under its control; full daily reconciliation with Moyasar achieves this |
+| 2 | Markup percentage in Mart | The merchant is the principal in selling the products and invoices the customer at the full selling price (105) with its tax. The markup is a fee on the merchant (4140) with 15% added on top in the monthly fee invoice together with the commission | The invoicing chain stays the same: the merchant sells, and the platform invoices its services to the merchant. Matches the L279 example: 95 before platform fee tax |
+| 3 | Markup in restaurants when the contract gives it to the platform | Same as item 2 (4141). When it belongs to the merchant there is no platform entry | Consistency |
+| 4 | Platform-funded discount on products | The merchant invoices the full consideration (what the customer paid + what the platform paid on their behalf = 97 in the example) with its tax on it. The platform's share is a marketing expense 5120 with no input tax | What a third party pays on the customer's behalf is part of the consideration for the supply |
+| 5 | Platform discount on its own fees (free delivery, service discount) | A revenue reduction (4190), not an expense. The invoice shows the full fee and the discount line, and tax is on the net | A discount on the platform's own supply reduces the consideration |
+| 6 | VAT point for merchant fees | At deduction (treated as payment), so it is remitted in the return for the deduction period. A consolidated monthly tax invoice per branch is issued during the following month, and 2151 is a tracking sub-account of 2150 | Accrual at the earliest of supply, invoice, or payment |
+| 7 | Loss charges and penalties | Out of VAT scope (compensation for damage or a contractual penalty, not consideration for a supply). Shown as non-taxable lines in the statement and the fees invoice, and no invoice for the driver | No supply corresponds to it |
+| 8 | Delivery | Gross: the platform is the principal in the delivery service (invoices it in its own name, 4110), and the driver fee is an expense (5100). The 10% rate is a way of calculating the fee, not a fee or an invoice | The platform sets the price and bears responsibility for the service toward the customer |
+| 9 | Tip | Gross, like delivery: revenue 4115 at its net, and expense 5105 at the same amount for the driver. A post-delivery tip gets a separate simplified invoice | As long as the platform invoices it with its VAT, it is the platform's supply; the net effect on profit is zero |
+| 10 | Automatic capture at 24 hours with the order still open | Tax is due immediately (payment). Platform revenue is deferred in 2190 until closing or a support decision. The branch share is split at capture as in PAY-006 | Revenue is not recognized before the service is fulfilled |
+| 11 | Loyalty points | Liability when the report window ends (when the points become due) at the conversion rate in effect that day. Redemption converts to promotional credit 2132, and expiry to 4170 | Before the window ends, points may be withdrawn by an order refund |
+| 12 | Opening balances | Recorded against 3900, and the corresponding cash is moved from the previous platform's account to 1100 against 3900 until it reaches zero. The merchant's opening balance in 2105 is paid from the platform's bank in the first approval cycle and does not pass through the Moyasar wallet | The Moyasar wallet is funded from captures only |
+| 13 | Payment fee (2.5% + 1) on full refund after capture | Refunded to the merchant with a credit note, and the actual Moyasar fee remains an expense on the platform (5110) | A fee against an order whose supply was cancelled |
+| 14 | Two-payment write-in and pharmacy orders | A simplified platform invoice for each captured payment | Accrual at each payment |
+| 15 | Moyasar-to-bank transfer fees and STC Pay fees | Borne by the platform (5110, 5170) unless the merchant's contract states otherwise | No provision charges it to the merchant or the driver |
+| 16 | Rejected payout | Remains due in 2100 or 2110 and appears in the next cycle with the rejection reason; no entry | Rejection does not change the liability |
+| 17 | Installment payment of former drivers' deposits | 50 SAR from the net of each of the first two weeks. Whatever earnings do not cover is deducted from the following weeks until 100 is reached, and the driver keeps working | Accommodation without suspension, with the deposit completed |
+| 18 | Cashier fee and double points price | Two settings in the admin dashboard, with 15% on top, in the monthly fee invoice | A platform fee like the others |
+| 19 | Prepaid ads | Invoice and deduction at approval; revenue is recognized by day, and whatever extends past month-end is deferred in 2180 | Recognizing revenue over the service period |
+
+**Accounting operating controls (binding for development):**
+- Daily balance check: total debits for each day = total credits, and any difference is a red alert in A18 (PAY-005).
+- Daily reconciliation: 1110 and 1120 against the Moyasar statement, and 1130 against the STC Pay statement; every difference stays open until it is resolved with an entry.
+- 3900 must reach zero before the first month after launch is closed.
+- A month is not closed while 2170 has payouts older than 7 days without a comment.
+- Every manual entry (opening, loss charge, penalty, reversing) with a reason, a reference, and a second approver above the role limit (ADM-002, ADM-043).
+
 ### Mart catalog (CAT)
 
 #### CAT-001 — Mart product inheritance [Launch-critical]
@@ -3773,7 +4133,7 @@ Rules:
 - The system saves the merchant, its branches, contracts, bank accounts and users; each branch is run as if it were an independent store in operations and money.
 - Each branch has its location, city, hours, preparation time, minimum and zone, a payout bank account (defaults to the merchant's account), and its own cashier integration and devices.
 - Changing the bank account requires validation and a log; activation is by platform decision based on completeness of the operational data.
-- No mandatory compliance or license requirements in this PRD except for the HRDF (Hadaf) program.
+- No mandatory compliance requirements or licenses in this PRD except HRDF (Hadaf) and reporting to the Transport General Authority (TGA) (REG-007).
 - A finance staff member approves the new bank account of the merchant or a branch after matching its holder's name with the business name; the affected branch's payouts stop until approval, and a notification of the change reaches the merchant manager's mobile.
 - Merchant activation requires: branches with their locations and hours, the contract, the bank account, and a menu or catalog with products that have prices.
 - Business data includes VAT registration: registered with its VAT number, or not registered (PAY-029).
@@ -3959,8 +4319,8 @@ Pages: MD15
 #### MER-014 — Account manager [Important]
 
 Rules:
-- Each merchant has an account manager registered in the admin dashboard.
-- Their name appears to the merchant in the communication channel (MER-012), and the merchant's chats are assigned to them.
+- Account manager is a separate role in the admin dashboard; the admin assigns each employee with this role a group of merchants, and each merchant has one account manager
+- Their name appears to the merchant in the communication channel (MER-012), the merchant's chats are assigned to them, and the support supervisor sees them
 
 Acceptance criteria:
 - A new chat from the merchant reaches their account manager.
@@ -3996,10 +4356,11 @@ Acceptance criteria:
 - A branch manager sees only their branch.
 
 Pages: MD01 MD09
+
 #### MER-018 — Busy mode [Important]
 
 Rules:
-- The merchant raises the preparation time for new orders only, by up to 15 minutes, for a maximum of one hour. These values are configurable from settings
+- The merchant increases the preparation time for new orders only, by up to 15 minutes, for a maximum of one hour, and the total preparation time does not exceed a cap of 40 minutes. These values are configurable, edited from settings
 - The customer sees the new time before ordering
 - The mode does not change the time of an existing order
 
@@ -4212,7 +4573,8 @@ Pages: D04 M02 M04 M08
 #### MER-037 — Employees and permissions [Launch-critical]
 
 Rules:
-- The merchant manager creates employees and sets branches and permissions: orders, handover, products, prices, offers, campaigns, reports, finance, tickets, employees.
+- The merchant manager creates employees and sets the branches and permissions: orders, handover, products, prices, offers, campaigns, reports, finance, tickets, ratings, employees.
+- The default permissions of each role are in the "MER-037 appendix: merchant staff permissions matrix"; where a screen differs from it, the matrix prevails.
 - A branch manager works within their branch only, and permissions do not exceed what the platform granted to the merchant.
 - Every important action records the employee and the time; finance is hidden from anyone not authorized.
 - Employee performance shows orders, preparation, delays, and the action log.
@@ -4389,6 +4751,54 @@ Acceptance criteria:
 
 Pages: C05 A06
 
+### Appendix MER-037: Merchant staff permissions matrix
+
+Approved by the owner (29 October 2026).
+
+#### Glossary
+
+- **Merchant owner** = "merchant manager" in MER-037 (L4223) and MER-043 (L4293). It is the registration account itself, and sees all branches.
+- **Branch manager**: works in their own branch only (MER-037 L4224, MER-017 L4003). Created from MD10 with a ready-made permissions template (L1545). ✓ in the branch manager column means the permission is **included in the default template and for their branch only**.
+- **Staff member (with granted permissions)**: has nothing by default. The owner (or the branch manager within their limits) grants them permissions from the MER-037 list: Orders, Handover, Products, Prices, Offers, Campaigns, Reports, Finance, Tickets, Staff, **Reviews** (L4223, L4227).
+- **Prep account**: a shared device or kitchen account. It works with the "Orders" permission within its limits (M01 L936, M08 L1144). It does not open dues or edit prices (MER-030 L4137). In M11 it sees only orders, devices and support (L1224).
+
+Cell symbols: ✓ allowed | ✗ not allowed and not grantable | "By grant" not allowed by default, and enabled by granting the permission named in parentheses.
+
+#### Matrix
+
+| # | Action | Merchant owner | Branch manager | Staff member | Prep account | Reference and note |
+|---|---|---|---|---|---|---|
+| 1 | Accepting the order (interacting with the ringing and opening it) | ✓ | ✓ | "By grant" (Orders) | ✓ | M01 L921–922, L936; MER-030 L4131. There is no accept or reject decision for a menu or Mart order (MER-030 L4132), and "accept" here means stopping the ringing and starting preparation |
+| 2 | Set the preparation time (the only edit within 3 minutes) | ✓ | ✓ | "By grant" (Orders) | ✓ | M01 L921, L926; ORD-003 L3110 |
+| 3 | Ready announcement ("Ready") | ✓ | ✓ | "By grant" (Orders) | ✓ | M01 L923; M02 L967; M08 L1144 |
+| 3a | Delivery by the driver or the customer (code entry) | ✓ | ✓ | "By grant" (Handover) | ✓ | M01 L937; M03 L1016. "Assumption": the prep account has "Handover" because it is usually the device at the counter |
+| 4 | Out-of-stock handling (remove / call / replace / cancel according to the customer's choice) | ✓ | ✓ | "By grant" (Orders) | ✓ | M02 L967; M08 L1144; M12 L1268 |
+| 5 | Rejecting a write-in order (only before the products invoice is uploaded) | ✓ | ✓ | "By grant" (Orders) | ✗ "assumption" | Owner decision: rejection applies to the write-in order only, and only before the invoice (ORD-004 L3130, MER-006 L3853). There is no reject button in menu and Mart for any role. Blocking it for the prep account is an "assumption": rejection cannot be undone, the order enters "Awaiting support decision", and the shared account does not identify who made the decision (MER-037 L4225) |
+| 6 | Uploading the invoice (products invoice) | ✓ | ✓ | "By grant" (Orders) | ✓ | M02 L955; M04 L1041; M08 L1138. In write-in, the upload sends the payment request to the customer (M04 L1031) |
+| 7 | Temporarily pause the branch | ✓ | ✓ | "By grant" (Orders) | ✗ "assumption" | M09 L1172; MER-004 L3822. Pausing hides the branch from customers, so it is not left to a shared account |
+| 8 | Busy mode | ✓ | ✓ | "By grant" (Orders) | ✓ "assumption" | M09 L1172; MER-018 L4010. The kitchen knows best how busy it is. Busy mode does not raise any time above 40 minutes (owner decision) |
+| 8a | Edit working hours and special days | ✓ | ✓ | ✗ | ✗ | M09 L1173; MD09 L1535 |
+| 9a | Edit the menu (add a product, name, image and description, options, preparation time) | ✓ | ✗ (the menu is shared across all branches) | "By grant" (Products) | ✗ | M05 L1064–1066; M06 L1094; MD03 L1357. The branch manager changes only the **availability** of their branch's products and their temporary pause (M05 L1066, MD03 L1359) |
+| 9b | Edit prices (store price) | ✓ | ✓ for their branch | "By grant" (Prices) | ✗ | M05 L1065–1066; M06 L1095; MER-030 L4137. Editing is within the merchant's pattern, and anything beyond it goes to platform review (MER-002) |
+| 10 | Devices and printers (link, remove, sign a device out, auto-print) | ✓ | ✓ for their branch | ✗ (status view only) | ✗ (status view only) | M15 L1241–1242; MD13 L1627 |
+| 11 | Test print and bell test | ✓ | ✓ | ✓ | ✓ | M15 L1242. It needs no grant because it changes nothing |
+| 12 | Staff management (add, permissions, suspend) | ✓ | ✓ for their branch's employees and within their permissions | "By grant" (Staff) | ✗ | MD10 L1558–1560; M11 L1213, L1218; MER-037 L4224 |
+| 13 | Ratings, replying to them, and requesting hiding | ✓ | ✓ for their branch | "By grant" (Reviews) | ✗ | MER-037 L4227 makes it a separate permission, and MD08 L1488 contradicts it by tying it to "Tickets" |
+| 13a | Objecting to a loss charge or penalty | ✓ | "By grant" (Finance) | "By grant" (Finance) | ✗ | MD08 L1489; MD07 L1454, L1464–1465; SUP-006 |
+| 14 | Tickets and platform chat | ✓ | ✓ for their branch | "By grant" (Tickets) | ✓ for order tickets only "assumption" | M12 L1267; MD12 L1600–1602; M11 L1224. The "Accounts" subject also requires "Finance" (M12 L1267). **Destination (owner decision):** the account manager assigned to the merchant, which is a role in the admin dashboard, together with the supervisor |
+| 15 | Viewing the contract card | ✓ | "By grant" (Finance) | "By grant" (Finance) | ✗ | MD13 L1626. Line L1628 says "view only for everyone", which contradicts L1626 |
+| 16 | Statements and wallet (statement, payouts, fees invoice, archive) | ✓ | "By grant" (Finance) for their branch | "By grant" (Finance) | ✗ | MD07 L1464–1465; M10 L1196; MER-043 L4297; MER-030 L4137 |
+| 17a | Payout request | ✗ | ✗ | ✗ | ✗ | The merchant does not request a payout: the branch wallet balance appears to the accountant in every cycle, who approves or rejects its payout (owner decision, 29 October; PAY-006 in 4.11). The owner and the branch manager see the status "Awaiting approval" in the statement |
+| 17b | Change bank details (request to change the bank account) | ✓ | ✗ | ✗ (not granted even with "Finance") | ✗ | "Assumption". MER-001 L3782–3784 requires verification and finance approval, and the notification goes to the merchant manager's mobile. MD09 L1521 shows the account as view-only and does not specify where the request is made; we propose it be submitted from MD12 under the "Accounts" subject |
+| 18 | Paid campaigns and ads (create, send, stop) | ✓ | "By grant" (Campaigns) for their branch | "By grant" (Campaigns) | ✗ | MD05 L1414–1416. Spend and return are visible to whoever has "Finance" or "Campaigns" (L1415). The amount is deducted from the branch's dues after approval (MKT-003, MKT-005) |
+
+#### General matrix rules
+
+1. No employee's permissions exceed what the platform granted the merchant. What the platform has withdrawn appears locked for all roles (MER-037 L4224, MD10 L1563).
+2. A branch manager does not grant an employee a permission they do not hold themselves (MD10 L1560).
+3. Every action from the prep account is logged under the device name together with the last employee who signed in on it, if any ("assumption"). The reason is that MER-037 L4225 requires logging the employee.
+4. Ringing continues until a device with the "Orders" permission interacts (MER-030 L4131).
+
 ### Driver (DRV)
 
 #### DRV-001 — Driver account and activation [Launch-critical]
@@ -4396,7 +4806,7 @@ Pages: C05 A06
 Rules:
 - The driver registers by themselves as a Saudi freelancer or a resident freelancer. The "Company-affiliated" type is activated later with the first delivery company (FLT-001).
 - The account includes contact, bank, vehicle and its photos, city, and equipment; activation is approved by platform staff.
-- No Taxi operation at launch; no mandatory compliance list other than HRDF (Hadaf).
+- No Taxi operation at launch; no mandatory compliance list other than HRDF (Hadaf) and reporting to the Transport General Authority (TGA) (REG-007).
 - Account closure goes through support to settle dues and insurance.
 
 Acceptance criteria:
@@ -4488,6 +4898,7 @@ Acceptance criteria:
 - The absence of optional verification does not block regular services.
 
 Pages: D01 D10 D13
+
 #### DRV-011 — Vehicle Type [Important]
 
 Rules:
@@ -4560,7 +4971,7 @@ Pages: D08 D09 A11
 Rules:
 - The list shows available tasks that no one has accepted.
 - Nearby drivers choose from it.
-- A task enters the list 3 minutes after dispatch starts, and drivers within 10 km see it.
+- The existing task enters 3 minutes after dispatch starts, and it is seen by the same drivers that dispatch offers to in that minute (DSP-001), and not by anyone who explicitly rejected it.
 
 Acceptance criteria:
 - When a driver accepts a task, the task disappears from the list immediately.
@@ -4619,7 +5030,7 @@ Rules:
 - Five consecutive steps are applied to the driver: warning, then priority reduction for a week, then a 24-hour ban, then operations review, then a permanent ban.
 - In fraud, location spoofing, account sharing, and abuse of a customer, platform staff jump directly to a permanent ban without progression, after a review; the system does not ban anyone automatically.
 - The driver receives a notification of the reason for each step.
-- The driver may object to within 7 days of the decision notification, and receives a response within 48 hours
+- The driver objects within 7 days of the decision notification, and gets the response within 48 hours; anything not answered within that time is escalated to the support supervisor
 - Ladder steps are carried out manually by an operations employee or support supervisor after review, not automatically by the system.
 - Violations that move the driver one step: a confirmed report, or leaving without permission, or an emergency report that platform staff deemed a violation (ORD-014).
 - The driver returns to the start of the ladder after 90 days with no violation.
@@ -4646,10 +5057,10 @@ Pages: D03
 Rules:
 - The system detects mock locations and impossible jumps in the driver's location.
 - The system detects modified phones (rooted or jailbroken).
-- The driver is disabled until review
+- An immediate alert reaches the operations team with the evidence, and it appears in the driver's file; the driver is not disabled automatically (DRV-023)
 
 Acceptance criteria:
-- If a mock location is detected for a driver, they do not receive tasks until they are reviewed.
+- If a driver is detected with a fake location, an alert reaches Operations within a minute, and the driver stays active until a staff member decides.
 
 Pages: D01 A02 A10
 
@@ -4657,6 +5068,7 @@ Pages: D01 A02 A10
 
 Rules:
 - The system saves the first successful delivery photo together with the address's corrected pin.
+- The entrance photo is shared with subsequent drivers to the same address without asking for the customer's consent; this is stated in the privacy policy, and the customer can delete it from the addresses page; the retention period follows the data retention policy (Q-06).
 - It is shown to every driver delivering to the same address.
 
 Acceptance criteria:
@@ -4725,6 +5137,7 @@ Rules:
 - Optionally: a zone within the city can be set for a specific driver, and orders from outside it do not reach them
 - Platform staff assign an order manually by driver number with a reason stated.
 - A manual assignment reaches the driver as directly assigned with the reason, and it is binding like acceptance: no rejection and no declining; if the driver cannot carry it out, it is through an emergency report (ORD-014), and it is recorded in their performance.
+- If the assigned driver does not open the task within two minutes (setting), an alert reaches the assigning staff member to reassign it; it does not return to automatic dispatch.
 
 Acceptance criteria:
 - A customer outside the branch's city cannot order from it.
@@ -4832,7 +5245,7 @@ Rules:
 - Least privilege
 - The system enforces two-step verification on all admin dashboard and finance users.
 - Penetration test before launch
-- The prescription image is visible only to the Admin, support agent, and support supervisor, and the customer's address is visible only to support and operations.
+- The prescription photo is not visible to any role in the admin dashboard; only the pharmacist sees it (PHR-012), and the customer's address is seen only by support and operations.
 - Session expires after 30 minutes of inactivity.
 
 Acceptance criteria:
@@ -4848,6 +5261,7 @@ Pages: A22 A26
 Rules:
 - The system records every financial, permission, or settings change with the values before and after the change.
 - The creator of a payout does not approve it
+- Every payout, to a merchant, a driver, or a company, and every deposit refund, needs a recorded approval with the approver's name and time; there is no payout without approval.
 
 Acceptance criteria:
 - A financial record cannot be deleted from the interface.
@@ -4918,11 +5332,10 @@ Rules:
 - Create and schedule an operational or marketing notification within a city, audience, and time.
 - Segments, cities, and stores are targeted; a store offer is not sent outside its branch zone.
 - The audience preview, its size, and the language template appear before sending.
-- Maximum marketing notifications per customer: 3 per week and one per day.
 
 Acceptance criteria:
 - A store offer does not reach an address it does not serve.
-- Sending respects the configured frequency limit.
+- A customer who turned off marketing notifications in their settings does not receive marketing notifications.
 
 Pages: C26 A17
 
@@ -4982,6 +5395,7 @@ Acceptance criteria:
 - The alert identifies the type of spike and its source.
 
 Pages: A01
+
 #### ADM-013 — Ban and Exclusion [Important]
 
 Rules:
@@ -5132,10 +5546,10 @@ Pages: C02 C26
 #### ADM-040 — Automated Marketing Messages [Important]
 
 Rules:
-- Rules: a cart left for an hour without payment, a registered user who has not ordered, a customer who has lapsed; the event, timeout, template, and daily limit are settings.
+- Rules: a cart left for an hour without payment, a registered user who has not ordered, a customer who dropped off; the event, timeout and template are settings.
 - A low rating alerts support; a high rating suggests referral.
 - Choosing timing and wording with AI is a later improvement; the rules work without it.
-- Idle customer at a branch: has not ordered from it for the idle period (the single setting in MKT-001, default 30 days). "Registered but has not ordered" after 24 hours, and "Customer lapsed" after 30 days, with one message per day per rule.
+- An idle customer at a branch: has not ordered from it for the idle period (the single setting in MKT-001, 30 days by default). "Registered, never ordered" after 24 hours, and "Customer lapsed" after 30 days.
 
 Acceptance criteria:
 - Changing the timeout applies to new cases.
@@ -5180,7 +5594,7 @@ Rules:
 - Within the role's financial limit, a cancellation, refund, loss charge, or penalty does not need a second approval, and anything above it is approved by a higher role.
 - Every financial action is recorded with the executor, time, reason, and values before and after. No operations code and no automatic penalty decision.
 - The default distribution of permissions across roles, including disabling, ban, exclusion, catalogs, preferred captain, instant incentive, wallet freeze, points, and sensitive data, is in the "Roles and Permissions" table, which is its reference, and the admin edits it.
-- Default financial limit per single decision: support agent 200 SAR, support supervisor 1,000 SAR, and anything above it goes to the admin.
+- A financial limit per decision is mandatory: support agent 50 SAR, support supervisor 200 SAR, and anything above goes to admin.
 - "Driver supervisor" is the operations role; the steps of the driver penalty ladder belong to operations and the support supervisor (DRV-023).
 
 Acceptance criteria:
@@ -5228,7 +5642,7 @@ Rules:
 - An item report specifies the products, the reason, and a photo from the in-app camera; "I did not receive it" needs no photo.
 - The evidence file gathers the route, staying within 100 m, communication, and photos, with no customer code.
 - The actual loss is charged to the party whose responsibility is established after support review; it is not an automatic penalty.
-- The support agent carries out the refund or compensation; if the admin sets a limit for their role, anything above it is escalated.
+- A support agent performs the refund or compensation; anything above their role's mandatory limit (ADM-043) is escalated.
 
 Acceptance criteria:
 - An "I did not receive it" report does not ask for a photo.
@@ -5276,7 +5690,7 @@ Pages: C19 C21
 
 Rules:
 - The merchant or driver can object to any loss charge or penalty within 7 days of the decision notification (configurable value).
-- The objection is decided within a target period
+- The objection is decided within 48 hours of its submission; anything not decided is escalated to the support supervisor
 
 Acceptance criteria:
 - The system does not accept an objection that arrives more than 7 days after the decision notification.
@@ -5315,7 +5729,7 @@ Pages: C19 C21 A19 A22
 
 Rules:
 - These properties are set for each coupon: cities, stores, categories, customers, period, usage limit, budget, funding, and stacking.
-- "First order" offers are granted once per phone number, per device, and per payment method. They are not granted to a device previously used with another account.
+- "First order" offers are granted once: they are not granted if the mobile number, device or payment method was previously used in an earlier first order. They are not granted to a device previously used with another account.
 - The coupon targets the customer's segment relative to the branch: new (has never ordered from it), repeat (ordered from it within the idle period), or idle (ordered from it before, then stopped for the idle period). The idle period is a single setting, default 30 days, applying to coupons and campaigns (MKT-005).
 - A coupon can be restricted to cards of a specific issuing bank, and it is then funded by the bank or the platform according to the agreement.
 - A configurable setting determines whether the coupon may be combined with wallet balance, and platform staff turn it on or off
@@ -5364,7 +5778,7 @@ Rules:
 - The merchant targets their store's previous customers through the platform by segment, city, and zone.
 - The merchant does not get customers' numbers; audience counts and results are shown.
 - Frequency limits, budget, and templates are set by the platform.
-- Store customer campaigns have a price that the platform sets per region and per city and can change at any time, and a price of zero makes them free; the merchant sees the price before sending, the campaign goes through platform approval, and its price is deducted from the branch's dues after approval with a separate tax invoice like an ad (MKT-003). Segments: new, repeat, and lapsed with the same inactivity period as in MKT-001. The limit is one message per week per customer from the same store.
+- Store customer campaigns have a price that the platform sets per region and per city and can change at any time, and a price of zero makes them free; the merchant sees the price before sending, the campaign goes through platform approval, and its price is deducted from the branch's dues after approval with a separate tax invoice like an ad (MKT-003). Segments: new, repeat, and lapsed with the same inactivity period as in MKT-001.
 
 Acceptance criteria:
 - Results are aggregated and do not reveal customers' numbers.
@@ -5425,7 +5839,7 @@ Acceptance criteria:
 
 Pages: C19 C23 A15
 
-#### MKT-013 — Referral via OpenLoyalty and Adjust [Launch-critical]
+#### MKT-013 — Referral via OpenLoyalty and Adjust [Important]
 
 Rules:
 - An invitation link whose source is measured via Adjust, with referral prizes carried out by OpenLoyalty rules.
@@ -5473,6 +5887,7 @@ Rules:
 Acceptance criteria:
 - The system does not count what the customer spends at another store.
 - The system does not deduct from the merchant before the discount is used.
+
 #### MKT-017 — Recurring Hour Deal [Launch-critical]
 
 Rules:
@@ -5481,6 +5896,7 @@ Rules:
 - The countdown runs to the end of the scheduled period for everyone; there is no separate hour per customer.
 - Running out of deal stock or the end of the period stops it; the usual price returns, and a recurring deal runs again in its next cycle.
 - Hour Deal limit: one item per customer in the period.
+- The branch bears the full Hour Deal discount.
 
 Acceptance criteria:
 - 30% is eligible to publish.
@@ -5558,28 +5974,29 @@ Rules:
 - Sandbox environment, then production
 - Daily reconciliation with the Moyasar report
 - All displayed payment methods support authorization then capture through Moyasar (PAY-001).
-- Payment splitting (Split Payment) is always on, with no setting to turn it off: each order's share is split into its branch's Moyasar wallet, and Moyasar pays the wallets out weekly (PAY-006).
+- Split payment is always enabled and there is no setting to disable it: each order's share is split into its branch wallet at Moyasar, and Moyasar transfers the wallet balance to the bank only when an approved payout order arrives from the platform (PAY-006).
 
 Acceptance criteria:
 - Successful, failed, and refunded payments appear in their correct state.
 - Before launch, the results of the authorization, capture, cancellation, and refund trial are documented for each approved payment method, and what concerns Moyasar is confirmed in writing. This is an item in the manual acceptance checklist (SYS-014).
-- Before launch, splitting into branch wallets, weekly payouts from them, and deductions from them are tested, and whatever concerns Moyasar is confirmed in writing. This is an item on the manual acceptance checklist (SYS-014).
+- Before launch, splitting into branch wallets, executing the payout order from them only upon approval, and deducting from them are tested, and whatever concerns Moyasar is confirmed in writing. This is an item in the manual acceptance checklist (SYS-014).
 
 Pages: A18 A22
 
-#### INT-014 — STC Pay: driver payouts [Launch-critical]
+#### INT-014 — STC Pay: driver payouts [Later]
 
 Rules:
-- A direct integration with STC Pay to pay out freelance driver dues automatically; each payout carries the STC Pay transaction number as its reference.
+- At launch, driver dues are paid out by bank transfer after approval (PAY-006); the STC Pay integration replaces it later under the following rules.
+- A direct integration with STC Pay to pay out freelance driver dues after the accountant's approval; each payout carries the STC Pay transaction number as its reference.
 - The driver adds an STC Pay wallet number in their name in their details (D10), and Finance approves it after matching the holder's name; payouts are not made to a new number before it is approved, and the previously approved one stays active until then.
-- On the weekly payout date (PAY-006) the system sends each freelance driver a payout of their net due after deducting the negative balance in their dues account (PAY-026), with no manual approval; no payout is created for a net of zero or less.
+- In the payout cycle, each freelance driver's net enters the approval list (PAY-006) after their negative balance is deducted (PAY-026), and is sent only after it is approved; no line is created for a zero or negative net.
 - The system prevents duplicate payouts: one key per driver and period, and resending never pays twice.
 - The payout appears to the driver in D07 and to Finance in A18 with its status: in progress, sent, or failed; a failed payout is not counted as paid and appears to Finance to be retried.
-- Manual approval remains for the driver deposit refund and account-closure settlement (PAY-024) and for delivery company payouts (FLT-002).
+- Every payout through STC Pay needs a recorded approval (PAY-006, ADM-002), including the driver deposit refund and the account-closure settlement (PAY-024).
 - An STC Pay outage does not stop orders; payouts wait and are sent when it returns, without duplication.
 
 Acceptance criteria:
-- A freelance driver with a net of SAR 250 on payout day receives the payout through STC Pay without their account appearing in the approval list.
+- A freelance driver with a net of 250 SAR in the payout cycle appears in the approval list, and does not receive the payout through STC Pay before it is approved.
 - A new STC Pay number awaiting Finance approval is not paid to before approval.
 - Re-running the payout job on the same day does not create a second payout for the same driver and period.
 - A failed payout does not appear as paid, and appears to Finance to be retried.
@@ -5683,7 +6100,7 @@ Pages: A19 A20 A22
 
 ### Pharmacies (PHR)
 
-#### PHR-003 — Wasfaty Prescriptions [Important]
+#### PHR-003 — Wasfaty Prescriptions [Later]
 
 Rules:
 - The system places a tag on a pharmacy that participates in "Wasfaty".
@@ -5711,7 +6128,7 @@ Rules:
 - The status of a medicine order that was not delivered is "Returning to the pharmacy", and the driver returns the medicine to the pharmacy at the return stop within the same task
 - The return is done by a code like the pickup code, and the pharmacy enters this code.
 - The return window is configurable. After it ends, an alert reaches operations to decide, even if the pharmacy has closed
-- The customer does not get the delivery fee back, and is refunded the medicine price and the 5% service fee after the pharmacy confirms the medicine was returned intact. Refusing the refund is an operations decision based on the pharmacy's confirmation.
+- The customer does not get the delivery fee back, and gets back the medicine price and the 5% service fee after the pharmacy confirms the return is intact. Rejecting the refund is a support or operations decision based on the pharmacy's confirmation.
 - The default return window is 60 minutes.
 - Re-delivering the medicine to the customer is a new order with a new delivery fee.
 - No extra pay for the driver for the return stop; the driver has earned the full pay and tip.
@@ -5951,7 +6368,7 @@ Acceptance criteria:
 #### SYS-019 — Gradual Rollout [Launch-critical]
 
 Rules:
-- The platform is piloted with a group of merchants and drivers in one city.
+- The platform launches in all cities at once, while keeping the per-city feature toggles to stop a city when needed.
 - Cities and sections are opened with the flags and the city checklist ( ADM-037 ).
 - App updates are published in the stores to a percentage of users first
 
@@ -5975,6 +6392,55 @@ Acceptance criteria:
 - Reaching the cap does not stop the order.
 
 Pages: A22
+
+### Migration from the current platform (TRN)
+
+#### TRN-001 — Opening balances [Launch-critical]
+
+Rules:
+- Finance enters each customer's, driver's and merchant's balance from the approved statement of the current platform as an opening balance in their new wallet.
+- Each entry with the reason "Opening balance" and the statement reference, and it needs a second approver (ADM-002), and it is recorded in the ledger (PAY-005).
+- The merchant's opening balance is paid from the platform's bank in the first approval cycle (PAY-006), and does not pass through the branch wallet at Moyasar (Appendix PAY-005, entry 29b).
+
+Acceptance criteria:
+- The total of opening balances matches the current platform's statement to the halala.
+- An opening balance not approved by a second approver does not appear in the wallet.
+
+Pages: A18
+
+#### TRN-002 — Onboarding from current platform data [Launch-critical]
+
+Rules:
+- A one-time export, with the data owner's consent, of merchant and branch names, images, and driver documents to prefill registration.
+- The menu and its prices (store price and selling price) are entered manually by platform staff.
+- No balances or contracts are exported.
+
+Acceptance criteria:
+- A merchant who did not consent does not have its data prefilled.
+
+#### TRN-003 — Freezing the current platform [Launch-critical]
+
+Rules:
+- New orders stop on the current platform 3 days before the migration, to complete refunds, payouts, reconciliation, and the approval of balance statements.
+
+#### TRN-004 — Current platform archive [Launch-critical]
+
+Rules:
+- The current platform's orders, invoices, payments and tickets are exported to a searchable archive that finance and support can read, then the old system is shut down.
+- Retention period per the data retention policy (Q-06).
+
+#### TRN-005 — Mandatory update of the current apps [Launch-critical]
+
+Rules:
+- Before the migration, an update to the current apps is published that reads the "minimum version" from the server, so old versions show "Update required" on migration day instead of crashing. This is the first delivery in the program (SYS-008).
+
+Acceptance criteria:
+- An old version opened after the migration shows "Update required" and the store link, and does not crash.
+
+#### TRN-006 — Stopping express shipping [Launch-critical]
+
+Rules:
+- The "express shipping" service stops when the current platform is shut down, and is not built in the new platform.
 
 ### Taxi (TAX)
 

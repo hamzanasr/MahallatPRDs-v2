@@ -51,6 +51,8 @@ def apply(D, REQ_IDS, here):
              'fields': list(d.get('fields', [])), 'actions': [a['name'] for a in d.get('actions', [])],
              'refs': clean_ids(d.get('refs', []), d['id']), 'states': list(std) + list(d.get('states', [])),
              'links': list(d.get('links', [])), 'priority': d.get('priority', 'launch'), 'new': True, 'after': d.get('after')}
+        if d.get('sub'):
+            p['sub'] = True
         idx = next((i for i, x in enumerate(D['pages']) if x['id'] == d.get('after')), None)
         if idx is None:
             idx = max(i for i, x in enumerate(D['pages']) if x['surface'] == d['surface'])
