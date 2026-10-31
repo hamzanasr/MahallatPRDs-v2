@@ -239,6 +239,38 @@ for _pid, _rid in DEC9.PAGE_REFS_ADD:
         _p['refs'].append(_rid)
 DEC.DECISIONS.extend((n, t, d, _ids3.get(n, [])) for n, t, d in DEC9.DECISIONS)
 
+# الجولة العاشرة: تصحيحات 4.12 (القطع بلا تجميد، وتفعيل المدن، وحالات طلب الكتابة، والكاشير لاحقاً)
+import b4_decisions10 as DEC10
+D['revision'] = DEC10.REVISION
+for _after, _n, _new in DEC10.NEW_REQ:
+    assert _new['id'] not in _by, _new['id']
+    _i = next(i for i, x in enumerate(D['requirements']) if x['id'] == _after)
+    D['requirements'].insert(_i + 1, copy.deepcopy(_new))
+    _by[_new['id']] = D['requirements'][_i + 1]
+    _ids3.setdefault(_n, []).append(_new['id'])
+for _n, _rid, _old, _new in DEC10.REPLACE:
+    _r = _touch(_rid, _n)
+    _k = next((k for k in ('rules', 'acceptance') if any(x.startswith(_old) for x in _r[k])), None)
+    assert _k, (_rid, _old)
+    _r[_k] = [(_new if x.startswith(_old) else x) for x in _r[_k] if _new is not None or not x.startswith(_old)]
+for _n, _rid, _start, _old, _new in DEC10.SUB:
+    _r = _touch(_rid, _n)
+    _k = next(k for k in ('rules', 'acceptance') if any(x.startswith(_start) for x in _r[k]))
+    assert any(_old in x for x in _r[_k]), (_rid, _old)
+    _r[_k] = [x.replace(_old, _new) if x.startswith(_start) else x for x in _r[_k]]
+for _n, _rid, _kind, _txt in DEC10.ADD:
+    _r = _touch(_rid, _n)
+    _r['rules' if _kind == 'R' else 'acceptance'].append(_txt)
+for _n, _rid, _p in DEC10.PRIORITY:
+    _touch(_rid, _n)['priority'] = _p
+for _n, _rid, _t in DEC10.TITLES:
+    _touch(_rid, _n)['title'] = _t
+for _pid, _rid in DEC10.PAGE_REFS_ADD:
+    _p = next(p for p in D['pages'] if p['id'] == _pid)
+    if _rid not in _p['refs']:
+        _p['refs'].append(_rid)
+DEC.DECISIONS.extend((n, t, d, _ids3.get(n, [])) for n, t, d in DEC10.DECISIONS)
+
 DEC.DECISIONS.sort(key=lambda x: x[0])
 DEC.SETTING_EDITS.update(DEC3.SETTING_EDITS)
 DEC.SETTING_EDITS.update(DEC4.SETTING_EDITS)
@@ -322,6 +354,16 @@ for _start, _new in DEC9.QUALITY_EDITS9:
     _i = next(i for i, x in enumerate(D['quality']) if x.startswith(_start))
     D['quality'][_i] = _new
 for _id, _old, _new in DEC9.PRELAUNCH_EDITS9:
+    _x = next(x for x in D['open'] if x[0] == _id)
+    _j = next(j for j, y in enumerate(_x) if isinstance(y, str) and _old in y)
+    _x[_j] = _x[_j].replace(_old, _new)
+
+# الجولة العاشرة: التكاملات وبنود «قبل التشغيل»
+for _row in D['integrations']:
+    if _row[0] in DEC10.INTEGRATIONS10:
+        _desc, _state = DEC10.INTEGRATIONS10[_row[0]]
+        _row[1], _row[2] = _desc or _row[1], _state or _row[2]
+for _id, _old, _new in DEC10.PRELAUNCH_EDITS10:
     _x = next(x for x in D['open'] if x[0] == _id)
     _j = next(j for j, y in enumerate(_x) if isinstance(y, str) and _old in y)
     _x[_j] = _x[_j].replace(_old, _new)
