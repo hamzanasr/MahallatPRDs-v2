@@ -271,6 +271,25 @@ for _pid, _rid in DEC10.PAGE_REFS_ADD:
         _p['refs'].append(_rid)
 DEC.DECISIONS.extend((n, t, d, _ids3.get(n, [])) for n, t, d in DEC10.DECISIONS)
 
+# الجولة الحادية عشرة: تصحيحات 4.13 (حالة العميل في الكتابة، والرصيد الافتتاحي السالب، وتنظيف الملاحق)
+import b4_decisions11 as DEC11
+D['revision'] = DEC11.REVISION
+for _n, _rid, _old, _new in DEC11.REPLACE:
+    _r = _touch(_rid, _n)
+    _k = next((k for k in ('rules', 'acceptance') if any(x.startswith(_old) for x in _r[k])), None)
+    assert _k, (_rid, _old)
+    _r[_k] = [(_new if x.startswith(_old) else x) for x in _r[_k] if _new is not None or not x.startswith(_old)]
+for _n, _rid, _start, _old, _new in DEC11.SUB:
+    _r = _touch(_rid, _n)
+    _k = next(k for k in ('rules', 'acceptance') if any(x.startswith(_start) for x in _r[k]))
+    assert any(_old in x for x in _r[_k]), (_rid, _old)
+    _r[_k] = [x.replace(_old, _new) if x.startswith(_start) else x for x in _r[_k]]
+for _n, _rid, _kind, _txt in DEC11.ADD:
+    _r = _touch(_rid, _n)
+    _r['rules' if _kind == 'R' else 'acceptance'].append(_txt)
+DEC.DECISIONS.extend((n, t, d, _ids3.get(n, [])) for n, t, d in DEC11.DECISIONS)
+DEC9.EXAMPLES_NOTE9 = DEC11.EXAMPLES_NOTE11
+
 DEC.DECISIONS.sort(key=lambda x: x[0])
 DEC.SETTING_EDITS.update(DEC3.SETTING_EDITS)
 DEC.SETTING_EDITS.update(DEC4.SETTING_EDITS)
@@ -363,6 +382,13 @@ for _row in D['integrations']:
     if _row[0] in DEC10.INTEGRATIONS10:
         _desc, _state = DEC10.INTEGRATIONS10[_row[0]]
         _row[1], _row[2] = _desc or _row[1], _state or _row[2]
+# الجولة الحادية عشرة: الإعدادات
+_found11 = set()
+for _row in D['settings']:
+    if _row[0] in DEC11.SETTING_EDITS11:
+        _found11.add(_row[0])
+        _row[:] = list(DEC11.SETTING_EDITS11[_row[0]])
+assert _found11 == set(DEC11.SETTING_EDITS11), set(DEC11.SETTING_EDITS11) - _found11
 for _id, _old, _new in DEC10.PRELAUNCH_EDITS10:
     _x = next(x for x in D['open'] if x[0] == _id)
     _j = next(j for j, y in enumerate(_x) if isinstance(y, str) and _old in y)
