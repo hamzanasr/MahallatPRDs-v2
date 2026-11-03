@@ -1,6 +1,6 @@
-# Mahallat Platform Specification — Version 4.14
+# Mahallat Platform Specification — Version 4.15
 
-3 November 2026 · Revision 2026-11-03 · 241 requirements · 93 pages. The requirements are the reference.
+3 November 2026 · Revision 2026-11-03b · 241 requirements · 93 pages. The requirements are the reference.
 
 ## Order states by type
 
@@ -75,14 +75,14 @@ The timeline for a single order per DSP-001. The rules, weights, and the priorit
 
 | Time | What happens |
 |---|---|
-| 0:00 | Cancellation window ends. The 15-minute window starts. |
+| 0:00 | Cancellation window ends for menu and Mart orders, and the products invoice is paid in write-in and pharmacy. The 15-minute window starts. |
 | 0:00 to 0:30 | The preferred captain alone, if set. If none, the first attempt starts immediately. |
 | 0:30 to 1:00 | Attempt 1: task-offer radius 5 km, top 3 by priority index. |
 | 1:10 to 1:40 | Attempt 2: task-offer radius 6 km, top 6. |
 | 1:50 to 2:20 | Attempt 3: task-offer radius 7 km, all eligible drivers. |
 | From 2:30 | Cycles: +1 km each attempt up to 10 km, all eligible drivers. |
 | 5:00 | Alert to support. |
-| 15:00 | Automatic task offers stop. Outside mart: self-pickup or full refund within 5 minutes, otherwise support decides. Write-in and pharmacy: "Awaiting support decision". Mart: manual assignment or cancellation. |
+| 15:00 | Automatic task offers stop. For a menu order outside Mart: self-pickup or full refund within 5 minutes, otherwise support decides. Write-in and pharmacy: "Awaiting support decision". Mart: manual assignment or cancellation. |
 
 ## Closing an order without delivery
 
@@ -108,7 +108,7 @@ When the held amount is captured, when it is refunded, and who gets what, when t
 | Medicine not delivered because of no response | Support | Delivery is not refunded; the medicine price and the service fee are refunded after the pharmacy confirms it is intact; if the refund is rejected, the pharmacy keeps it for 7 days for a new delivery order, then it is destroyed | Fee and tip | You restore the medicine | PHR-010 |
 | Self-pickup not collected by its owner | Support agent | What support decides | — | What support decides | EXT-006 |
 
-Every support decision in these cases is logged with the actor, the written reason, and the liable party, and the order stays "Awaiting support decision" and is not closed before it. "What support decides" means the cancellation screen asks the agent for the amount for each party or "nothing".
+Every support decision in these cases is logged with the actor, the written reason, and the liable party, and the order is not closed before it; the "Awaiting support decision" status covers the reasons listed in ORD-001. "What support decides" means the cancellation screen asks the agent for the amount for each party or "nothing".
 
 ## Roles and permissions
 
@@ -168,7 +168,7 @@ Reference ADM-036, page A18.
 | Tab | What it shows | Actions | Reference |
 |---|---|---|---|
 | Overview | Captured and held amounts for the period, unpaid dues, open discrepancies, and negative driver dues accounts | Open any number into its list | PAY-001 PAY-006 PAY-026 |
-| Collection and reconciliation | Every payment with its status, and the daily reconciliation against the Moyasar report: captured minus the actual Moyasar fee equals the bank deposit, with the difference visible | Suspend a discrepancy, retry a failed transaction | INT-001 PAY-027 ADM-036 |
+| Collection and reconciliation | Every payment with its status, and the daily reconciliation against the Moyasar report: captured minus the actual Moyasar fee equals the Moyasar balance of the platform and the branch wallets (1110 and 1120), with the difference visible | Suspend a discrepancy, retry a failed transaction | INT-001 PAY-027 ADM-036 |
 | Dues and payouts | The statement of each merchant and freelance driver (and companies later), the list of due payouts, and the status and bank reference of each transfer | Approve one account, or select several accounts and approve them together | PAY-006 FLT-002 PAY-018 |
 | Liabilities | The platform's liability items and their total, matched against wallet and points balances | Export | PAY-031 |
 | Invoices | Platform invoices for customers, and monthly fees invoices and ad invoices for merchants | Issue, export | PAY-007 PAY-022 |
@@ -218,7 +218,7 @@ One definition for each number used across all pages and reports, so the same nu
 
 | Indicator | From | To | Reference |
 |---|---|---|---|
-| Acceptance time | Start of dispatch (after the 60-second window) | Driver accepts | DSP-001 ADM-014 |
+| Acceptance time | Start of dispatch (after the 60-second window, and in write-in and pharmacy after payment) | Driver accepts | DSP-001 ADM-014 |
 | Preparation time | Start of preparation (ORD-003) | Press of "Ready" | ORD-003 ORD-007 |
 | Driver wait at the branch | Driver enters the arrival distance of the branch | Pickup code entered | ORD-005 ADM-014 |
 | Delivery time | Pickup from the branch | Delivery | ADM-014 |
@@ -248,8 +248,8 @@ One definition for each number used across all pages and reports, so the same nu
 | First response time | From ticket or chat creation to the first employee response | SUP-001 |
 | Resolution time | From ticket creation to its closing | SUP-003 |
 | Customer satisfaction with the resolution | Average customer rating of the resolution after closing, from rated tickets only | SUP-003 |
-| Resolved by self-service | Reports closed through in-app help without employee intervention ÷ all reports | SUP-001 |
-| Order profitability | Platform revenue on the order minus the actual Moyasar fee, the driver's fee, and the platform's funding of offers and compensation | PAY-027 ADM-006 |
+| Resolved by self-service | In-app help chats (such as "Where is my order") closed without employee intervention ÷ all help chats; reports are not included, because a support agent reviews all of them | SUP-001 |
+| Order profitability | Platform revenue on the order minus the actual Moyasar fee; platform revenue is already net of the driver's fee and the funding of offers and compensation | PAY-027 ADM-006 |
 | Expected balance | Current bank balance + collected not yet deposited − approved payouts not yet sent − liabilities due in the period | PAY-006 PAY-031 |
 | Cost per extra order | Cost of the campaign or offer ÷ orders above the comparison period | MKT-005 ADM-006 |
 
@@ -257,7 +257,7 @@ One definition for each number used across all pages and reports, so the same nu
 
 | Setting | Value | Limits and effect |
 |---|---|---|
-| Payment fee | 2.5% of the product value after discount + 1 SAR | Fixed on restaurant and Shops merchants whatever the payment method; not Mart or pharmacy |
+| Payment fee | 2.5% of the product value after discount + 1 SAR | Fixed on restaurant and Shops merchants in menu orders whatever the payment method; not Mart, pharmacy, or write-in orders |
 | Mart and pharmacy merchant percentage | 5% | Global, then per-merchant; base is the original price |
 | Markup rate | Mart 5% | Inside the sale price; independent of the merchant percentage. No markup in restaurants and Shops: platform staff enter the sale price (MER-002) |
 | Menu and Mart service | 2.5% | Total after discounts, excluding the tip and before the service fee |
@@ -336,10 +336,10 @@ Values that had no default, approved by the owner (29 October 2026), and remain 
 
 ## Integrations
 
-- **Moyasar** — hold, capture, and refund, plus merchant payouts by payment splitting into each branch's wallet with weekly payouts (Launch-critical)
+- **Moyasar** — hold, capture, and refund, and splitting each branch's share into its wallet and paying it out after the accountant's approval (Launch-critical)
 - **STC Pay** — payout of driver dues after approval (Later; bank transfer at launch)
 - **4jawaly** — verification code by text message or WhatsApp (Launch-critical)
-- **OpenLoyalty** — points, referral, and reward rules (Launch-critical)
+- **OpenLoyalty** — points, referral, and reward rules (Important)
 - **Adjust** — source, links, and referral (Launch-critical)
 - **OneSignal** — order and marketing notifications (Launch-critical)
 - **PostHog** — visits, conversion, and product events (Launch-critical)
@@ -411,7 +411,7 @@ What remains unresolved. For each question: what it is waiting on, who resolves 
 
 Access to the sections and stores available for the customer's address.
 
-- Elements: Delivery address: the address name, its district, and its city in the header, not just "My address", Notifications bell: in the header, Unified search: a search field for all sections (CUS-004), Current order: a card at the top of the page with the store name, status badge, arrival time in minutes and arrival clock time (ORD-011), and the customer status steps (looking for a driver, being prepared, out for delivery, delivered; preceded by "The store is reviewing your order" in write-in and pharmacy orders) (ORD-001); with more than one current order, a single card "You have N current orders", Restaurants, Mart, Shops, and Pharmacies: the four sections with their visibility and order by the customer's city (CUS-009), City banners: carrying a visible "Ad" tag, as does any paid row (CUS-003), Featured stores: a row of stores, Discounted products: a row of products with a discount, Suggestions: a "Suggestions for you" row with a reason line beneath: an item the customer ordered before or their dietary preference (CUS-003); for a new user, a fallback row "Most ordered in your city", Store card in the rows: rating, arrival time as a single number, delivery fee, and the Quality badge (MKT-014); each merchant has a single store, the nearest open branch whose zone covers the address (CUS-003)
+- Elements: Delivery address: the address name, its district, and its city in the header, not just "My address", Notifications bell: in the header, Unified search: a search field for all sections (CUS-004), Current order: a card at the top of the page with the store name, status badge, arrival time in minutes and arrival clock time (ORD-011), and the customer status steps (looking for a driver, being prepared, out for delivery, delivered; and in write-in and pharmacy: the store is reviewing your order, being prepared, out for delivery, delivered) (ORD-001); with more than one current order, a single card "You have N current orders", Restaurants, Mart, Shops, and Pharmacies: the four sections with their visibility and order by the customer's city (CUS-009), City banners: carrying a visible "Ad" tag, as does any paid row (CUS-003), Featured stores: a row of stores, Discounted products: a row of products with a discount, Suggestions: a "Suggestions for you" row with a reason line beneath: an item the customer ordered before or their dietary preference (CUS-003); for a new user, a fallback row "Most ordered in your city", Store card in the rows: rating, arrival time as a single number, delivery fee, and the Quality badge (MKT-014); each merchant has a single store, the nearest open branch whose zone covers the address (CUS-003)
 - Actions and what happens:
   - **Change address**: opens Addresses (C13). After another address is chosen, the sections, stores, and fees refresh immediately (CUS-003) with a transient notice "We updated the stores for your address". An address outside coverage goes to C24. If the new address is outside the zone of the cart's branch, the cart stays with its branch and payment in it is disabled, and "Open branch ..." appears with a new cart if another branch of the merchant covers the address (CRT-001).
   - **Search**: opens Search (C02) with the cursor in the field and the keyboard visible, with recent searches.
@@ -428,7 +428,7 @@ Access to the sections and stores available for the customer's address.
   - The store card numbers allow comparison without opening the store.
   - The suggestion reason line builds trust and explains the ordering.
 - Requirements: CUS-003 CUS-004 CUS-009 MKT-014 ORD-011
-- Navigates to: C02 C03 C04 C05 C07 C10 C13 C11 C16 C12 C24 C08 C17 C26
+- Navigates to: C02 C03 C04 C05 C07 C10 C13 C11 C16 C12 C24 C08 C17 C26 C06
 - Special states: New user with no orders: "Suggestions for you" is replaced by "Most ordered in your city" and the in-progress order card does not appear; the page is never empty.; Address outside coverage: the page moves to C24 (no driver or coverage) with a change-address button.; Section disabled in the city: it disappears from the sections grid and the remaining sections move up in the city's order.; A store closed now: appears with a "Closed · opens 4:00 PM" tag at the end of the row and is not shown as available.; A store outside the customer's city: does not appear in any row, nor in "Suggestions for you".; Pharmacy order in progress: the in-progress order card says "Your order from the pharmacy" without any medicine name.; No offers or discounted products in the city: the whole row is hidden instead of being shown empty.
 
 #### C02 — Search and results
@@ -457,7 +457,7 @@ Search across sections with alternatives when nothing matches.
   - The "Suggest a store" card is always present because the results may not include the store the customer wants.
   - In the no-result state, the alternatives come before the suggestion form so the customer still has something to order now.
 - Requirements: CUS-004 ADM-039 MKT-014
-- Navigates to: C07 C21 C08 C17
+- Navigates to: C07 C08 C17
 - Special states: No result: the message "No ... delivers to your address", then close alternatives from the same category, then the suggestion form; the term is logged as a search with no result (ADM-039).; A result not available for the address does not appear (CUS-004) and is not counted in the chip counts.; A store closed now: at the end of the list with the tag "Closed · opens ...".; Filters emptied the results: "No results with these filters" with a "Clear filters" button, and the alternatives and suggestion form are visible.; A duplicate suggestion from the same customer for the same store: "You suggested this store before, we received your suggestion" without a new record.; A merchant with several branches: a single store appears for it, the nearest open branch whose zone covers the address; if all its branches are closed, the nearest one appears with the tag "Closed · opens ..." (CUS-004).
 
 #### C03 — Restaurants
@@ -466,7 +466,7 @@ Browse restaurants with an active menu.
 
 - Elements: Restaurant count: in the header, the number of restaurants that deliver to the address, Categories: category chips, including "All", Current sort chip: visible and highlighted, Filters: categories, self-pickup, offers, rating, distance, arrival time, Restaurant card: the Quality badge on the image (MKT-014), the delivery fee as a number, and the arrival time as a single number, not a range (ORD-011), Card tags: "Closes in N min" in red near closing (CUS-005); an offer tag (discount or free delivery) if the offer applies to it (CUS-005); "Self-pickup" for restaurants that offer it
 - Actions and what happens:
-  - **Open a restaurant**: opens C07 on the active period's menu (CUS-005). With the self-pickup filter it opens in the pickup path (C15).
+  - **Open a restaurant**: opens C07 on the active period's menu (CUS-005). With the self-pickup filter C07 opens in pickup mode (EXT-006).
   - **Sort**: a single-choice list: nearest, fastest, highest rated, lowest delivery; the order refreshes immediately.
   - **Filter**: a bottom sheet with the filters; the button "Show N restaurants" applies and closes, and the active filters are removable chips.
   - **Select a category**: the chip limits the list to the category, and "All" removes the restriction.
@@ -554,7 +554,7 @@ Show the store's details and its products, or its write-in path.
   - The bottom navigation bar is hidden here so the cart button stays the main action within thumb reach.
 - Requirements: CUS-005 MER-005 MER-010 MKT-014 CRT-002 CRT-004 MER-024 CRT-001 ORD-011
 - Navigates to: C08 C09 C17
-- Special states: Near closing: the sticker is orange; at closing it becomes "Store closed · opens ...", adding is disabled, and the cart expires (CRT-004).; Store closed: the page is browse-only, the buttons are disabled, and the opening time is visible.; A product outside its availability time or the active menu period, or an offer outside the branch zone: does not appear (CUS-005, MER-005).; A product unavailable now (a meal whose component is out of stock with no substitute, MER-024): dimmed with no add button and the tag "Not available now".; A store not participating in a free-delivery offer: no free-delivery bar (CRT-002), and only the remainder to the minimum appears if it is not met.; Minimum not met: the bar reads "Add N SAR to reach the minimum".; Customer returns after the cart expired (CRT-004): the message "Your previous cart expired" and the app re-validates the items or starts a new cart.; A write-in Shops store or a pharmacy: opens C17 instead of this page.
+- Special states: Near closing: the sticker is orange; at closing it becomes "Store closed · opens ...", adding is disabled, and the cart expires (CRT-004).; Store closed: the page is browse-only, the buttons are disabled, and the opening time is visible.; A product outside its availability time or the active menu period, or an offer outside the branch zone: does not appear (CUS-005, MER-005).; A product unavailable now (a meal whose component is out of stock with no substitute, MER-024): dimmed with no add button and the tag "Not available now".; A store not participating in a free-delivery offer: no free-delivery bar (CRT-002), and only the remainder to the minimum appears if it is not met.; Minimum not met: the bar reads "Add N SAR to reach the minimum".; Customer returns after the cart expired (CRT-004): the message "Your previous cart expired" and the app re-validates the items.; A write-in Shops store or a pharmacy: opens C17 instead of this page.
 
 #### C08 — Product details
 
@@ -585,7 +585,7 @@ Review the amount, address, and out-of-stock policy before confirming payment.
 - Actions and what happens:
   - **Edit quantity**: + increases by one per tap; − at 1 asks "Remove [item] from the cart?". Every change recalculates the bar, the service, and the total immediately (CRT-002).
   - **Choose out-of-stock handling**: one choice from three cards. "Call me" shows the registered number partially masked and an "Another number" link opens a mobile field. The choice is saved on the order (MER-032).
-  - **Choose payment**: opens the payment methods sheet: enabled methods only (PAY-001), and Tabby and Tamara when the installment limit is reached (PAY-015). The choice is saved for future orders.
+  - **Choose payment**: opens the payment methods sheet: enabled methods only (PAY-001). The choice becomes the default card for future orders (PAY-023).
   - **Confirm payment**: the server re-validates price, availability, minimum, whether the address is within the branch zone, and store status (CRT-001); if anything changed, a differences review appears and nothing is held. Then the amount is held (PAY-001). Success creates the order and goes to C11 with the cancel button with a counter (ORD-002). Failure does not create an order and keeps the cart.
   - **Add a suggestion**: adds it once per tap (CRT-003), the button temporarily becomes a checkmark, and the summary and bar update.
   - **Edit options**: opens C08 in edit mode with the saved options selected.
@@ -607,13 +607,13 @@ Review the amount, address, and out-of-stock policy before confirming payment.
   - The arrival time before payment is the same one that appears in tracking.
 - Requirements: CRT-001 CRT-005 PAY-004 PAY-021 ORD-002 CRT-002 CRT-003 CRT-004 ORD-011 PAY-001 PAY-015 MER-032
 - Navigates to: C10 C12 C13 C08 C11
-- Special states: Empty cart (last item removed): return to the store page.; Disconnection after payment: the app queries the order without repeating it.; Cart expired (CRT-004): when opened "Your cart expired" and the app re-validates the items or starts a new cart.; Minimum not met: the pay button is disabled with the text "Add N SAR to reach the minimum".; Eligible for free delivery: the bar turns green "Delivery is free for this order" and the delivery line is 0.00.; The saved payment method was disabled by the platform (PAY-001): it disappears from the sheet, and another method must be chosen before payment.; Address outside the branch zone: the cart stays with its branch and does not move; a red message above the summary and the pay button is disabled, and "Open branch ..." appears with a new cart if another branch of the merchant covers the address (CRT-001).; Self-pickup order: no address, no delivery, no tip, and no free-delivery bar (PAY-021).; Hold in progress: the button is disabled with an indicator and the text "Holding…" so the request is not repeated, and the page is not closed by going back.; A delivery offer and a discount offer on products combine in the order; two discount offers on products do not combine, so only the one with the higher saving applies (MKT-007).
+- Special states: Empty cart (last item removed): return to the store page.; Disconnection after payment: the app queries the order without repeating it.; Cart expired (CRT-004): when opened "Your cart expired" and the app re-validates the items.; Minimum not met: the pay button is disabled with the text "Add N SAR to reach the minimum".; Eligible for free delivery: the bar turns green "Delivery is free for this order" and the delivery line is 0.00.; The saved payment method was disabled by the platform (PAY-001): it disappears from the sheet, and another method must be chosen before payment.; Address outside the branch zone: the cart stays with its branch and does not move; a red message above the summary and the pay button is disabled, and "Open branch ..." appears with a new cart if another branch of the merchant covers the address (CRT-001).; Self-pickup order: no address, no delivery, no tip, and no free-delivery bar (PAY-021).; Hold in progress: the button is disabled with an indicator and the text "Holding…" so the request is not repeated, and the page is not closed by going back.; A delivery offer and a discount offer on products combine in the order; two discount offers on products do not combine, so only the one with the higher saving applies (MKT-007).
 
 #### C10 — My Orders
 
 Current and past orders with status, source, and fulfillment method.
 
-- Elements: current orders: "Current" tab with the order count, past orders: "Past" tab, and a "Cancelled" tab showing the final statuses verbatim, status and arrival time: a color-coded badge per status (The store is reviewing your order, Looking for a driver, Preparing, On the way, Delivered, Ready for pickup), and the arrival time as a single number for the active order (ORD-011), money status per order: "Amount held" for active, "Paid" for delivered, "Hold released" or "Refunded" for cancelled, and "Awaiting support decision" until support decides the amounts, message while waiting for the customer's reply inside the card: out-of-stock item with a countdown (MER-032), or a products invoice to pay with a 10-minute countdown, fulfillment method: delivery, or "Pick it up yourself" with closing time, search and filters: in "Past", purchase order and products invoice if available: "Purchase order" and "Tax invoice" links (the platform's simplified invoice with QR and credit notes, INT-010) and "Products invoice" if the merchant uploaded it (PAY-007), reorder dialog: price differences and unavailable items (CUS-006)
+- Elements: current orders: "Current" tab with the order count, past orders: "Past" tab, and a "Cancelled" tab showing the final statuses verbatim, status and arrival time: a color-coded badge per status (The store is reviewing your order, Looking for a driver, Preparing, On the way, Delivered, Ready for pickup), and the arrival time as a single number for the active order (ORD-011), money status per order: "Amount held" for active, "Paid" for delivered, "Hold released" or "Refunded" for cancelled, and "Awaiting support decision" until support decides the amounts; and an out-of-stock cancellation of the order is "Refunded" immediately, message while waiting for the customer's reply inside the card: out-of-stock item with a countdown (MER-032), or a products invoice to pay with a 10-minute countdown, fulfillment method: delivery, or "Pick it up yourself" with the latest time to show up (end of working hours or 3 hours after it is ready, whichever comes first), search and filters: in "Past", purchase order and products invoice if available: "Purchase order" and "Tax invoice" links (the platform's simplified invoice with QR and credit notes, INT-010) and "Products invoice" if the merchant uploaded it (PAY-007), reorder dialog: price differences and unavailable items (CUS-006)
 - Actions and what happens:
   - **Track**: opens C11 for delivery; for a self-pickup order the button becomes "Directions" and opens C16.
   - **Reorder**: creates a cart from the same store (CUS-006) and shows the differences dialog: "Price changed" with both prices, "Same as before", "Unavailable today · will not be added". "Review cart" opens C09. If a cart for another store exists: the customer is asked before replacing it. Store closed: "Store is closed now · opens ..." and no cart is created.
@@ -637,14 +637,14 @@ Current and past orders with status, source, and fulfillment method.
 
 A map, status, and an overall arrival time with no code.
 
-- Elements: map: top of the page (CUS-007), remaining time: a single arrival time in minutes and the arrival clock time, without breaking down the components (CUS-007, ORD-011), status line: the customer status steps: four, and five in write-in and pharmacy orders, starting with "The store is reviewing your order" (ORD-001), driver: first name, transport type, and a "Hidden number" tag, call and chat: two buttons directly next to the driver, address instructions: the address card and its instructions, fix location: a button in the address card, leave at the door: an "Leave it at the door" switch with an explanation of the photo (ORD-010), and after dropping off, a photo of the order in place, cancel order card: with a countdown, within the grace period only (ORD-002), showing its effect "The full N SAR hold is released"
+- Elements: map: top of the page (CUS-007), remaining time: a single arrival time in minutes and the arrival clock time, without breaking down the components (CUS-007, ORD-011), status line: the four customer status steps; in write-in and pharmacy they start with "The store is reviewing your order" instead of "Looking for a driver" (ORD-001), driver: first name, transport type, and a "Hidden number" tag, call and chat: two buttons directly next to the driver, address instructions: the address card and its instructions, fix location: a button in the address card, leave at the door: an "Leave it at the door" switch with an explanation of the photo (ORD-010), and after dropping off, a photo of the order in place, cancel order card: with a countdown, within the grace period only (ORD-002), showing its effect "The full N SAR hold is released"
 - Actions and what happens:
   - **Call**: a call through a proxy number (CUS-008). Disabled after the contact period ends.
   - **Chat**: opens C25. Disabled before a driver accepts, with the text "Chat is available when a driver accepts".
   - **Fix location**: opens the map to move the pin (C13), then "Confirm location". Same fees: the location updates immediately and the driver is notified. Farther location: a "Delivery fee difference X SAR" dialog with two buttons "Pay the difference" and "Continue to the first location", and the location does not change before payment. Rejection and out-of-zone follow (ORD-009); for out-of-zone the message "Your request reached support and they will contact you" is shown.
   - **Ticket**: opens C21 with a ticket linked to the order.
   - **Leave it at the door**: the switch saves the choice immediately (ORD-010) with a transient notice "The driver will leave your order at the door and photograph it". It can be turned off before the driver arrives.
-  - **Cancel the order**: within the grace period only (ORD-002). Confirmation "Cancel the order? The full N SAR hold is released" with two buttons "Yes, cancel the order" and "Go back". Confirming turns the page into "Order cancelled". When the countdown ends the button disappears with no explanation, and "Ticket" remains.
+  - **Cancel the order**: within the grace period only (ORD-002). Confirmation "Cancel the order? The full N SAR hold is released" with two buttons "Yes, cancel the order" and "Go back". Confirming turns the page into "Order cancelled". When the countdown ends the button disappears and the text "Your order is now in progress. To cancel, contact support" appears, and "Ticket" remains.
   - **View drop-off photo**: opens the photo taken by the driver at full size.
 - Validation and error messages:
   - Fix location without moving the pin: the confirm button is disabled with the text "Move the pin to the correct location".
@@ -682,15 +682,15 @@ Chat and call with the driver within the order using hidden numbers, closed a se
 
 #### C12 — Out-of-Stock Item and Substitute
 
-Customer approval, or applying their pre-selected choice after 3 minutes.
+Customer approval, or removing the item after 3 minutes with no reply (MER-032).
 
 - Elements: reply countdown: a large circular countdown at the top of the screen that starts the moment the merchant taps "Out of stock" (MER-032), the out-of-stock item: by name, pre-selected choice: the customer's pre-selected choice, and the number the store will call, partially masked, substitute and its price: the substitute proposed by the store with its name and price, price and service difference: the item price difference and the service fee difference, then the amount added to the hold, deadline line: with no reply before it ends, the item is removed and its price is not charged (MER-032), auto-cancellation result screen: the reason "Out-of-stock item" and the amount whose hold was released
 - Actions and what happens:
   - **Accept the substitute**: for a pricier substitute: the button "Accept the substitute and pay N SAR" holds the difference on the same payment method (PAY-028); success locks in the substitute and moves to tracking with an "Item replaced" notification, and failure removes the item and the customer is informed with a message (MER-032). For a cheaper or equal-priced substitute: "Accept the substitute" with no payment (PAY-028).
-  - **Remove**: the "Remove the item" button asks "Remove [item] from your order? The amount drops by N SAR". Confirming removes the item (PAY-028). If it is the last item: auto-cancellation and the result screen.
+  - **Remove**: the "Remove the item" button asks "Remove [item] from your order? The amount drops by N SAR". Confirming removes the item (PAY-028). If it is the last item: the order is canceled and the full amount refunded, support determines the loss charge or penalty on the merchant (MER-032), and the result screen is shown.
   - **Call me**: confirms to the store to wait for a call with the customer before acting, and shows the chosen number with "Another number" to change it for this item. It does not extend the deadline.
-  - **Cancel per choice**: the "Cancel the order" button asks "Cancel the whole order? The N SAR hold is released". Confirming cancels the order automatically (MER-032); nothing is charged to the customer. The result screen is shown.
-  - **Order from another grocery**: on the cancellation screen: opens C04.
+  - **Cancel per choice**: the "Cancel the order" button asks "Cancel the whole order? The N SAR hold is released". Confirming cancels the order and refunds the full amount; nothing is charged to the customer, and support determines the loss charge or penalty on the merchant (MER-032). The result screen is shown.
+  - **Order from another grocery**: on the cancellation screen for a Mart order only: opens C04.
   - **Contact support**: opens C21 linked to the order.
 - Validation and error messages:
   - Another number for "Call me": a Saudi mobile number of 10 digits starting with 05.
@@ -701,7 +701,7 @@ Customer approval, or applying their pre-selected choice after 3 minutes.
   - The result screen after auto-cancellation has a next step (another grocery) instead of a dead end.
 - Requirements: MER-032 PAY-028 PAY-001 ORD-004
 - Navigates to: C09 C11 C04 C21 C10
-- Special states: the store has not proposed a substitute yet: "Awaiting the store's suggestion", and the accept-substitute button is hidden while remove and cancel remain.; the deadline passed without a reply: the screen shows "We removed the item · new amount N SAR" with a "Continue your order" button.; the merchant recorded the customer's reply after a call (replace, remove, cancel): the screen updates immediately with the result and the buttons are locked.; all items removed, or the pre-selected choice is "Cancel the order": auto-cancellation (MER-032) and the result screen is shown.; the pre-selected choice is "Remove it": this screen does not appear; a notification "We removed the item and will not charge for it" arrives.; cheaper substitute: a line "The amount drops by X SAR" instead of payment.; several out-of-stock items: a card per item with its own countdown.; pharmacy order: the out-of-stock notification uses the phrase "Your order from the pharmacy" without the medicine name.
+- Special states: the store has not proposed a substitute yet: "Awaiting the store's suggestion", and the accept-substitute button is hidden while remove and cancel remain.; the deadline passed without a reply: the screen shows "We removed the item · new amount N SAR" with a "Continue your order" button.; the merchant recorded the customer's reply after a call (replace, remove, cancel): the screen updates immediately with the result and the buttons are locked.; all items removed, or the pre-selected choice is "Cancel the order": cancellation and a full refund, and the support decision concerns the merchant only (MER-032), and the result screen is shown.; the pre-selected choice is "Remove it": this screen does not appear; a notification "We removed the item and will not charge for it" arrives.; cheaper substitute: a line "The amount drops by X SAR" instead of payment.; several out-of-stock items: a card per item with its own countdown.; pharmacy order: the out-of-stock notification uses the phrase "Your order from the pharmacy" without the medicine name.
 
 #### C13 — Addresses
 
@@ -774,8 +774,8 @@ All of the customer's notifications about their orders and offers for the last 3
   - Unread is a colored dot next to the time, cleared by viewing.
   - Every notification opens its destination directly; no notification is without a destination.
 - Requirements: INT-004 ADM-039 ADM-007
-- Navigates to: C11 C19 C20 C22
-- Special states: no notifications: "No notifications in the last 30 days" with a "Browse stores" button.; notifications turned off on the phone: a bar at the top of the page "Turn on notifications to get your order status" with a button to settings.
+- Navigates to: C11 C19 C20 C22 C18 C12 C16 C21 C23
+- Special states: no notifications: "No notifications in the last 30 days" with a "Browse stores" button.; notifications turned off on the phone: a bar at the top of the list "Turn on notifications to get your order status" with a button to settings.
 
 #### C15 — Pick It Up Yourself
 
@@ -801,7 +801,7 @@ Stores eligible for self-pickup; Mart is excluded.
 
 A persistent page with no code, with directions and pickup notifications.
 
-- Elements: store and branch: the store name, and the branch address and distance, order number: in large type with "No code needed · the employee confirms pickup by order number" (EXT-006), ready status: a "Ready for X minutes" badge, and steps: Paid -> Being prepared -> Ready -> Picked up, held amount: captured on pickup, reminder, delay, and end of working hours: the line "We will remind you if you don't pick up within 60 minutes, and if you don't come by end of working hours the order becomes 'Awaiting support decision'" (EXT-006), directions: the primary button in the sticky bar, with support as secondary next to it, line for an order converted from delivery: "You converted your order to pickup · delivery fee, tip, and service fee difference refunded"
+- Elements: store and branch: the store name, and the branch address and distance, order number: in large type with "No code needed · the employee confirms pickup by order number" (EXT-006), ready status: a "Ready for X minutes" badge, and steps: Being prepared -> Ready -> Delivered, held amount: captured on pickup, reminder, delay, and end of working hours: the line "We will remind you if you don't pick up within 60 minutes, and if you don't come by end of working hours or 3 hours after it is ready, whichever comes first, the order becomes 'Awaiting support decision'" (EXT-006), directions: the primary button in the sticky bar, with support as secondary next to it, line for an order converted from delivery: "You converted your order to pickup · delivery fee, tip, and service fee difference refunded"
 - Actions and what happens:
   - **Open directions**: opens the maps app at the branch location. The page is kept in "My Orders" and opens from the notification until pickup (EXT-006).
   - **Contact support**: opens C21 with the order context and number automatically.
@@ -809,16 +809,16 @@ A persistent page with no code, with directions and pickup notifications.
 - UX decisions:
   - The order number is the largest element because the customer reads it to the employee at the counter.
   - The held amount is visible with the time it will be captured so the customer does not worry about an early capture.
-  - The end-of-working-hours rule is written in advance so the customer is not surprised by the closure.
+  - The latest-time-to-show-up rule is written in advance so the customer is not surprised by the closure.
 - Requirements: EXT-006 ORD-004
 - Navigates to: C21 C19 C10
-- Special states: being prepared: before "Ready" the "Being prepared" step and the expected time appear, with no large number.; during the cancellation grace period (EXT-006): a "Cancel the order" button with a countdown, then it disappears.; more than 60 minutes since ready (EXT-006): a reminder notification and a yellow bar at the top of the page.; the customer did not come by end of working hours (EXT-006): the order is "Awaiting support decision", and the amount is held and not captured before the decision (the second preview).; picked up: a green badge and the pickup time, then the rating.
+- Special states: being prepared: before "Ready" the "Being prepared" step and the expected time appear, with no large number.; during the cancellation grace period (EXT-006): a "Cancel the order" button with a countdown, then it disappears.; more than 60 minutes since ready (EXT-006): a reminder notification and a yellow bar at the top of the page.; the customer did not come by the latest time to show up (EXT-006): the order is "Awaiting support decision", and the amount is held and not captured before the decision (the second preview).; picked up: a green badge and the pickup time, then the rating.
 
 #### C17 — Write the Order and Pay Delivery
 
 A text order with photos or a prescription, then the delivery payment.
 
-- Elements: store: its name, order steps: write and pay delivery -> the store reviews (the pharmacist in a pharmacy) -> pay the products invoice -> delivery, order text: a field with a character counter, photos or prescription: horizontal thumbnails of attachments with a "Prescription" tag and a delete on each attachment; and the text "Voice recording is not accepted" with no voice button (ORD-013), pharmacy message before payment: "A medicine that needs a prescription is cancelled if you don't attach one. The prescription is seen only by the pharmacist, not by the driver" (PHR-012), delivery fee, and an explanation that the products invoice will arrive for payment: delivery now, then the products and service invoice is paid within the deadline (ORD-013), payment method: the default card first with "Change" (PAY-023), and a toggle to use the wallet balance (PAY-002), pay button: "Pay delivery · N SAR"; and after payment a countdown on the cancel button only, with no explanation (ORD-002)
+- Elements: store: its name, order steps: write and pay delivery -> the store reviews (the pharmacist in a pharmacy) -> pay the products invoice -> delivery, order text: a field with a character counter, photos or prescription: horizontal thumbnails of attachments with a "Prescription" tag and a delete on each attachment; and the text "Voice recording is not accepted" with no voice button (ORD-013), pharmacy message before payment: "A medicine that needs a prescription is cancelled if you don't attach one. The prescription is seen only by the pharmacist, not by the driver" (PHR-012), delivery fee, and an explanation that the products invoice will arrive for payment: delivery now, then the products and service invoice is paid within the deadline (ORD-013), payment method: the default card first with "Change" (PAY-023), and a toggle to use the wallet balance (PAY-002), pay button: "Pay delivery · N SAR"; and after payment the cancellation countdown with the text "You can cancel your order for free within {s} seconds" (ORD-002), tip: a preset percentage or an amount the customer writes when paying for delivery, with what reaches the driver (CUS-010)
 - Actions and what happens:
   - **Attach**: opens the camera or gallery (images only). Each image appears as a thumbnail and can be tagged "Prescription". An upload failure keeps the text and shows "Retry" on the thumbnail.
   - **Pay delivery**: at a pharmacy with no prescription attached, a "You didn't attach a prescription" dialog appears first (the second preview). After payment only the delivery is held and the order page appears with a "Cancel" button with a countdown, then it is sent to the store for review (ORD-013). When the products invoice arrives a notification opens C18.
@@ -933,7 +933,7 @@ Help with an order or with the app, with context and evidence.
   - The general ticket is a secondary link, and satisfaction is two large buttons.
 - Requirements: SUP-001 SUP-002 SUP-003 SUP-007 SUP-009 SUP-005 ORD-004
 - Navigates to: C10 C20 C11
-- Special states: every report is reviewed by an agent and there is no automatic reply (SUP-004): "The support team is reviewing your report and we will reply".; repeated overuse: a message at the top of the page (SUP-007).; restricted customer (SUP-007): the self-report buttons disappear and "Talk to support" remains.; after the one-hour window (SUP-005): the report buttons disappear in all sections including Mart, and no report is accepted after it; "Talk to support" remains for a general ticket.; damaged or expired Mart report: "The item price is refunded after support review" (SUP-009).; decision escalated to a higher level (SUP-002): "Your order is with the support supervisor".; smart reply enabled later: messages carry an "Automated assistant" tag with a "Talk to an agent" button.
+- Special states: every report is reviewed by an agent and there is no automatic reply (SUP-004): "The support team is reviewing your report and we will reply".; repeated overuse: a message at the top of the page (SUP-007).; restricted customer (SUP-007): the report buttons remain, and "Your reports will be reviewed by a support supervisor" appears.; after the one-hour window (SUP-005): the report buttons disappear in all sections including Mart, and no report is accepted after it; "Talk to support" remains for a general ticket.; damaged or expired Mart report: "The item price is refunded after support review" (SUP-009).; decision escalated to a higher level (SUP-002): "Your order is with the support supervisor".; smart reply enabled later: messages carry an "Automated assistant" tag with a "Talk to an agent" button.
 
 #### C22 — Offers and Hour Deal
 
@@ -978,20 +978,20 @@ Loyalty and referral through OpenLoyalty and Adjust links.
 
 A clear action for the problem without showing an unavailable store.
 
-- Elements: reason for the state: a timeline of what happened: search started, support notified, waiting for the choice (ORD-004), after 15 minutes: eligible pickup within 5 minutes or a refund: two visible options "I'll pick it up myself from the branch" (distance, ready time, and "Your delivery fee is refunded") and "Cancel the order and get a full refund" (the amount and where it goes), with a red choice-deadline countdown above the fold (ORD-004), Mart, write-in, and pharmacy: "The support team is handling your order", with no self-pickup and no self-service refund (ORD-004), location: a map with the customer's location when out of coverage, coverage interest: a one-step "Notify me when covered" button (ADM-033)
+- Elements: reason for the state: a timeline of what happened: search started, support notified, waiting for the choice (ORD-004), after 15 minutes: eligible pickup within 5 minutes or a refund: two visible options "I'll pick it up myself from the branch" (distance, ready time, and "Your delivery fee, tip, and service fee difference are refunded") and "Cancel the order and get a full refund" (the amount and where it goes), with a red choice-deadline countdown above the fold (ORD-004), Mart, write-in, and pharmacy: "The support team is handling your order", with no self-pickup and no self-service refund (ORD-004), location: a map with the customer's location when out of coverage, coverage interest: a one-step "Notify me when covered" button (ADM-033)
 - Actions and what happens:
   - **Notify me**: sends the pin's location as a coverage request (ADM-033) and shows "We received your request, we'll notify you when the service arrives". The button becomes "Your interest is recorded" and is not repeated for the same location.
   - **Self-pickup for non-Mart**: converts the order once (EXT-006, CUS-010), and C16 opens in the "Being prepared" state. Does not appear in Mart, write-in, or pharmacy.
   - **Refund**: confirmation "Cancel the order and refund N SAR in full? What you paid by card returns to your card, and what you paid from the wallet returns to your wallet". Afterwards the hold is released (PAY-001) and the order appears as "Cancelled · full refund" in C10.
   - **Support**: opens C21 with the order context. In Mart, write-in, and pharmacy it is the primary action.
 - Validation and error messages:
-  - Converting to pickup after the deadline has passed or after a driver accepted: "This option is no longer available".
+  - Converting to pickup after the deadline has passed or after a driver is assigned: "This option is no longer available".
 - UX decisions:
   - One choice of two with their financial consequences, and a primary button that follows the choice.
   - The timeline prevents the customer from feeling the order was neglected.
 - Requirements: ADM-033 ORD-004 EXT-006 CUS-010 PAY-001
 - Navigates to: C15 C21 C16 C13 C10
-- Special states: before 15 minutes: "Looking for a driver" with the elapsed time, no options.; Mart after 15 minutes: "Support is following up on your order" with the support button only.; a driver accepts while the options are shown: the screen disappears and the order returns to tracking with "We found a driver".; out of coverage: the second preview, with no unavailable store shown.; interest recorded earlier: "We recorded your interest in this location" with edit location.
+- Special states: before 15 minutes: "Looking for a driver" with the elapsed time, no options.; Mart after 15 minutes: "Support is following up on your order" with the support button only.; support manually assigns a driver while the options are shown: the screen disappears and the order returns to tracking with "We found a driver".; out of coverage: the second preview, with no unavailable store shown.; interest recorded earlier: "We recorded your interest in this location" with edit location.
 
 ### Merchant App
 
@@ -1047,7 +1047,7 @@ Preparation, driver, events, and products invoice by type.
   - Products invoice upload: image or PDF only; anything else is rejected with "Upload an image or a PDF file"
   - Substitute: is not sent without a product and quantity; the message "Choose the substitute product"
 - Permissions:
-  - Viewing the order, printing, out-of-stock, and ready: the "Orders" permission
+  - Viewing the order, printing, out-of-stock, and ready: the "Orders" permission; and the prep account does not carry out "Cancel" for out-of-stock (MER-037)
   - Merchant net and amounts per the contract: the "Finance" permission only; others see only the value of the products
   - Order log: branch manager and merchant manager
 - UX decisions:
@@ -1056,7 +1056,7 @@ Preparation, driver, events, and products invoice by type.
   - The out-of-stock dialog is a bottom sheet within thumb reach: the number is large, then the call button, then three buttons in different colors, and cancel is red with a confirmation.
 - Requirements: MER-036 MER-019 MER-032 MER-022 MER-024 ORD-007 MER-021 MER-030 MER-037 ORD-003 MER-006
 - Navigates to: M03 M04 M12 M13 M15
-- Special states: overdue: a red bar "You exceeded the preparation time by … min. Support was notified of the times, and there is no automatic deduction from your dues" and the times section is open (ORD-007); item awaiting a customer reply: an orange bar with the timer that reopens the out-of-stock dialog; item removed: the amounts update; substitute rejected: the item is removed; order cancelled or awaiting support decision: all buttons disappear and a bar with the reason appears (cancellation by support, out-of-stock item, non-payment) and "Do not complete preparation"; closed order: the page is read-only and the chat is closed; self-pickup: the driver card is replaced by "The customer picks it up themselves · match the order number"; driver changed after reassignment: the new identifier and a line "Driver changed …"
+- Special states: overdue: a red bar "You exceeded the preparation time by … min. Support was notified of the times, and there is no automatic deduction from your dues" and the times section is open (ORD-007); item awaiting a customer reply: an orange bar with the timer that reopens the out-of-stock dialog; item removed: the amounts update; substitute rejected: the item is removed; order cancelled or awaiting support decision: all buttons disappear and a bar with the reason appears (cancellation by support, or one of the "Awaiting support decision" reasons in ORD-001) and "Do not complete preparation"; closed order: the page is read-only and the chat is closed; self-pickup: the driver card is replaced by "The customer picks it up themselves · match the order number"; driver changed after reassignment: the new identifier and a line "Driver changed …"
 
 #### M13 — Customer Chat (new)
 
@@ -1085,7 +1085,7 @@ Text chat between the merchant and the customer of an active order using hidden 
 
 Driver pickup by code; customer self-pickup by order number.
 
-- Elements: Driver and driver ID: arrival alert at the top of the page "Driver arrived … · within the arrival distance · waiting since …" (MER-020, MER-019), arrival distance badge: within it or outside it (ORD-005), driver code: a single large digit field with spaced digits and a direct numeric keypad (ORD-005), write-in payment status: for write-in orders (ORD-013), photo: "Order photo at handover" button, saved with the order (ORD-005), pickup type: part of a pre-handover checklist with the order number, item count, and bag count (and the cooler in Mart), self-pickup match: the order number shown large and a "Number shown by the customer" field with a "Match" or "No match" badge (EXT-006), self-pickup payment: "Paid online · collected on confirmation", ready time, and end of shift, link "Driver doesn't have the code? Open a ticket"
+- Elements: Driver and driver ID: arrival alert at the top of the page "Driver arrived … · within the arrival distance · waiting since …" (MER-020, MER-019), arrival distance badge: within it or outside it (ORD-005), driver code: a single large digit field with spaced digits and a direct numeric keypad (ORD-005), write-in payment status: for write-in orders (ORD-013), photo: "Order photo at handover" button, saved with the order (ORD-005), pickup type: part of a pre-handover checklist with the order number, item count, and bag count (and the cooler in Mart), self-pickup match: the order number shown large and a "Number shown by the customer" field with a "Match" or "No match" badge (EXT-006), self-pickup payment: "Paid online · collected on confirmation", ready time, and the latest time to show up, link "Driver doesn't have the code? Open a ticket"
 - Actions and what happens:
   - **Enter driver code**: the field is enabled when the driver is within the arrival distance of the branch, and the server validates the code and the distance (ORD-005)
   - **Confirm handover**: with a driver: sends the code; on success the order becomes "Picked up by driver", the photo is saved, and the customer sees "Delivery in progress", then a short success page and a return to M01 with a notification "Order #… handed over". For self-pickup: after the match, a confirmation "Hand over order #… to the customer? The amount is collected and this cannot be undone", then the order is closed as "Received" (EXT-006)
@@ -1102,7 +1102,7 @@ Driver pickup by code; customer self-pickup by order number.
   - Self-pickup is a separate blue screen so it is not confused with handover to a driver.
 - Requirements: ORD-005 EXT-006 MER-020 MER-019 ORD-013 MER-030
 - Navigates to: M01 M12
-- Special states: driver on the way: the field is disabled with the text "Available when the driver arrives · arrives in …"; driver outside the arrival distance: red badge and the button is disabled "Ask the driver to come closer to the branch"; unpaid write-in order: the button is disabled "No handover before the customer pays" (ORD-013); self-pickup waiting for the customer: alert "If the customer does not show up by the end of the shift, the order enters "Awaiting support decision" due to "No-show""; after that, read-only with the status "Awaiting support decision · No-show" (EXT-006)
+- Special states: driver on the way: the field is disabled with the text "Available when the driver arrives · arrives in …"; driver outside the arrival distance: red badge and the button is disabled "Ask the driver to come closer to the branch"; unpaid write-in order: the button is disabled "No handover before the customer pays" (ORD-013); self-pickup waiting for the customer: alert "If the customer does not show up by the end of the shift or 3 hours after "Ready", whichever comes first, the order enters "Awaiting support decision" due to "No-show""; after that, read-only with the status "Awaiting support decision · No-show" (EXT-006)
 
 #### M04 — Write-in Orders and Products Invoice
 
@@ -1121,7 +1121,7 @@ Accept for processing or reject before the products invoice, then submit it for 
   - Amount with at most two decimal places: "Write the amount like 100.00"
   - Rejection with reason "Other" and no text: "Write the rejection reason"
 - Permissions:
-  - Rejecting and uploading the products invoice: "Orders" permission (MER-030)
+  - Rejecting and uploading the products invoice: "Orders" permission (MER-030); and rejecting is not for the prep account (MER-037)
 - UX decisions:
   - The primary button carries the amount "Upload and send · … SAR", and rejecting is a secondary red button.
   - A warning "No rejection after sending" sits directly above the button.
@@ -1135,7 +1135,7 @@ Manage the restaurant or Shops menu according to permissions.
 
 - Elements: menu period: the menu active now and the time of the next one ("Morning · active now", "Evening · from …") (MER-005), search and filters: search by name, and filters All, Not visible, Awaiting review, Paused, with counts, products: for each product the preparation time in minutes, and a "Combo meal" badge with the number of its components (MER-040, MER-024), store price and sale price: store price ← sale price on one line; and Shops the sale price only, product availability time: the time or "Follows menu period" (MER-005), availability: visibility badge with the reason written under the product: visible, outside availability time, paused until a time, awaiting review, unavailable due to an out-of-stock component (MER-028, MER-024), review: the product is awaiting price review (MER-002), sizes and add-ons: shared option groups; and changing the price of any option or size is a request sent for review (MER-002), cashier sync (later, MER-011): the status and last sync time
 - Actions and what happens:
-  - **Add**: opens M06 with a new product (or a combo meal) in the selected menu
+  - **Add**: opens M06 with a new product (or a combo meal) in the selected menu; saving creates it as "New product for review", and it does not appear to the customer before platform approval (MER-002)
   - **Edit**: tapping the product opens M06
   - **Enable**: toggle switch: turning it on makes the product visible if the other conditions are met (MER-005), otherwise the badge shows the reason. Turning it off hides it immediately until it is turned on manually, with no confirmation, with a notification "… paused" and an "Undo" button
   - **Pause**: bottom sheet: one or more products, and the duration (one hour, two hours, until end of day, until a specific time). After "Pause until …" a badge "Paused until … · returns automatically" appears (MER-004)
@@ -1250,7 +1250,7 @@ Open, busy, or temporarily paused, and special hours.
   - Closure end before its start or in the past: "Choose a return time after now"
   - Overlapping hours on the same day: "The two periods overlap"
 - Permissions:
-  - Changing status, busy, and temporary pause: merchant manager, branch manager, and anyone with the "Orders" permission as granted by the merchant manager, except the prep account (MER-004, MER-037)
+  - Changing status, busy, and temporary pause: merchant manager, branch manager, and anyone with the "Orders" permission as granted by the merchant manager; and the prep account changes busy but not the temporary pause (MER-004, MER-037)
   - Editing hours: merchant manager, and branch manager for their branch only, within what the platform allows
 - UX decisions:
   - Visibility is in the first card because the merchant's first question is: do customers see me?
@@ -1264,7 +1264,7 @@ Open, busy, or temporarily paused, and special hours.
 
 Sales and operations summary with custom range and links to reports.
 
-- Elements: period: the one selected in the filter, with each number compared to the previous period (vs yesterday / vs last week), branch: the one selected in the filter, orders and sales: the period's numbers, preparation: the period's numbers, delays: the number of late orders and their share of delivered orders, rating: the rating and number of ratings, next payout: its amount and status (awaiting the accountant's approval, sent, rejected with the reason), with a share-statement-PDF button beside it (MER-021), store quality: a compact card with the number of indicators better and worse than the section average in the city and the names of the worst ones, with details in "Store Quality" (MD14) in the merchant dashboard (MER-026)
+- Elements: period: the one selected in the filter, with each number compared to the previous period (vs yesterday / vs last week), branch: the one selected in the filter, orders and sales: the period's numbers, preparation: the period's numbers, delays: the number of late orders and their share of delivered orders, rating: the rating and number of ratings, next payout: its amount and status (awaiting the accountant's approval, in progress, sent, failed, rejected with the reason), with a share-statement-PDF button beside it (MER-021), store quality: a compact card with the number of indicators better and worse than the section average in the city and the names of the worst ones, with details in "Store Quality" (MD14) in the merchant dashboard (MER-026)
 - Actions and what happens:
   - **Filter**: bottom sheet: period (today, last 7 days, last 30 days, custom), branch, and comparison; "Show" updates the numbers immediately
   - **Full report**: opens the full reports (MD06) with the same period and branch (MER-035)
@@ -1315,7 +1315,7 @@ Manage the branch's devices (phones, tablets, and order-receiving devices) and p
   - **Test bell**: the bell rings once on this device
   - **Auto-print**: later (MER-042): turning it on prints every new order when it arrives; turning it off asks for confirmation "Orders will not be printed automatically on this printer"
   - **Log out a device**: from the device menu: confirmation "This device will not ring or receive orders until it is signed in again"
-  - **Remove a printer**: confirmation, then it is deleted from the list; orders awaiting printing are moved to another printer if one exists
+  - **Remove a printer**: confirmation, then it is deleted from the list; the merchant sends the print to another printer from the phone
 - Validation and error messages:
   - No printer during linking: "We could not find a printer. Check that it is on and nearby"
 - Permissions:
@@ -1327,13 +1327,13 @@ Manage the branch's devices (phones, tablets, and order-receiving devices) and p
   - Test print and test bell next to the setup itself.
   - One primary link button at the bottom.
 - Requirements: MER-030 MER-042
-- Special states: disconnected device: red badge "Disconnected …", and orders appear on it when it returns; disconnected printer: orders are saved and printed automatically in order when it returns (MER-042); no connected device that rings in the branch: red alert "No connected device to receive orders"; no devices yet: "Link your first device or printer to receive and print orders automatically"
+- Special states: disconnected device: red badge "Disconnected …", and orders appear on it when it returns; disconnected printer: nothing prints automatically; the merchant reprints from the phone when it returns (MER-021); no connected device that rings in the branch: red alert "No connected device to receive orders"; no devices yet: "Link your first device or printer to receive and print orders"
 
 #### M12 — Support and Call Me
 
 Support tickets and the number the customer chose when an item is out of stock.
 
-- Elements: call-me number for this order: a card at the top of the page with the order number, the out-of-stock item, the number the customer chose, and the buttons "Substitute / Remove / Cancel order" (MER-032), 3-minute timeout: a timer on the card (MER-032), two tabs: tickets, and the ongoing platform chat (MER-012), ticket list: number, topic, title, linked order, and status (open, awaiting your reply, closed), topic accounts, menu, contract, or support: in the new ticket form with the order number (optional), problem description, and attachments, messages and attachments: inside the ticket and the chat (MER-012)
+- Elements: call-me number for this order: a card at the top of the page with the order number, the out-of-stock item, the number the customer chose, and the buttons "Substitute / Remove / Cancel order" (MER-032), 3-minute timeout: a timer on the card (MER-032), two tabs: tickets, and the ongoing platform chat (MER-012), ticket list: number, topic, title, linked order, and status (open, awaiting support, awaiting your reply, closed), topic accounts, menu, contract, or support: in the new ticket form with the order number (optional), problem description, and attachments, messages and attachments: inside the ticket and the chat (MER-012)
 - Actions and what happens:
   - **Ticket**: "New ticket" opens the form; "Send" creates a ticket with a number and the status "Open" that reaches platform support (A19), with a notification "Your ticket was sent"
   - **Reply**: sends the message and attachments in the open ticket; they appear immediately with their time, and the status changes to "Awaiting support"
@@ -1346,7 +1346,7 @@ Support tickets and the number the customer chose when an item is out of stock.
   - Order number not in your branch: "No order with this number in your branch"
 - Permissions:
   - Tickets and platform chat: "Tickets" permission; accounts tickets also appear for anyone with "Finance"
-  - "Call me" card: "Orders" permission and for the relevant order only
+  - "Call me" card: "Orders" permission and for the relevant order only; and "Cancel the order" in it is not for the prep account (MER-037)
 - UX decisions:
   - The "Call me" card is above everything in orange, because its timeout is short.
   - The reply is in the fixed bottom bar within thumb reach, with the new-ticket button below it.
@@ -1391,7 +1391,7 @@ Branch comparison, totals, and operations.
 
 Order search, its details, and its net.
 
-- Elements: order number: search by it, with filters for status, method, source, and payment status, and the branch and period from the top of the dashboard, status: using the order lifecycle names: with merchant, ready, ready for pickup, picked up by driver, delivered, received, and "Awaiting support decision" with its reason (out-of-stock item, Unpaid, No-show), and closing without delivery: cancelled or terminated with the closing reason, payment status: a separate column: held, collected, hold released, partially refunded, refunded (ORD-001), method: a column and a filter, source: app, menu link (exempt or non-exempt), cashier (later), with the offer tag if applied, timeline: a timeline for each transition with the time and who performed it from the merchant's team (ORD-001), amounts: the order net line by line with the name of each fee and how it is calculated: products, actual contract fee or the exemption value, payment fee, platform fee tax 15% shown separately, the net (PAY-010, PAY-011), Mart and pharmacy: a "Store percentage" line instead of the contract fee, with no payment fee line (PAY-011), products invoice if any: an icon in the table, and its absence is not colored as an error, branch: a column when "All branches" is selected, details panel: beside the table: branch, method, source, items, and timeline, closing without delivery: the written closing reason, the recorded liable party, and the loss charge and penalty if support set them
+- Elements: order number: search by it, with filters for status, method, source, and payment status, and the branch and period from the top of the dashboard, status: using the order lifecycle names: with merchant, ready, ready for pickup, picked up by driver, delivered, received, and "Awaiting support decision" with its reason (reasons in ORD-001), and closing without delivery: cancelled or terminated with the closing reason, payment status: a separate column: held, collected, hold released, partially refunded, refunded (ORD-001), method: a column and a filter, source: app, menu link (exempt or non-exempt), cashier (later), with the offer tag if applied, timeline: a timeline for each transition with the time and who performed it from the merchant's team (ORD-001), amounts: the order net line by line with the name of each fee and how it is calculated: products, actual contract fee or the exemption value, payment fee, platform fee tax 15% shown separately, the net (PAY-010, PAY-011), Mart and pharmacy: a "Store percentage" line instead of the contract fee, with no payment fee line (PAY-011), products invoice if any: an icon in the table, and its absence is not colored as an error, branch: a column when "All branches" is selected, details panel: beside the table: branch, method, source, items, and timeline, closing without delivery: the written closing reason, the recorded liable party, and the loss charge and penalty if support set them
 - Actions and what happens:
   - **Open**: opens details in the side panel (and clicking the row does the same) and the row stays highlighted. The link is shareable within the merchant's team.
   - **Print**: the print dialog with the order receipt: items, options, notes, and order number, without customer data.
@@ -1666,7 +1666,7 @@ Optional operational attachments.
 
 Topic, owner, attachments, and tickets.
 
-- Elements: Topics: a filter: Accounts, Menu, Contract, Support. Account manager: their name and avatar in the page header and in every conversation they handle (MER-014). Messages: for each conversation the topic, owner, status (open, new reply, closed), and the last message and its time; attachments are inside the messages. Linking: to an order, loss charge, penalty, or invoice, with a button that opens it, so the order number is not copied into every message. Save note: conversations are saved and linked to the merchant (MER-012)
+- Elements: Topics: a filter: Accounts, Menu, Contract, Support. Account manager: their name and avatar in the page header and in every conversation they handle (MER-014). Messages: for each conversation the topic, owner, status (open, awaiting support, awaiting your reply, closed) and a "New reply" tag, the last message and its time; attachments are inside the messages. Linking: to an order, loss charge, penalty, or invoice, with a button that opens it, so the order number is not copied into every message. Save note: conversations are saved and linked to the merchant (MER-012)
 - Actions and what happens:
   - **Start**: a dialog: topic (required), branch, optional order, loss charge, or penalty number, message, optional attachment. After sending, the conversation appears at the top of the list as "Open", assigned to the account manager (MER-014).
   - **Reply**: sends the message, which appears immediately in the thread with its time, and a notification goes to the owner.
@@ -1710,13 +1710,13 @@ What the merchant edits and what is display-only.
   - The cashier card reassures that orders work without linking, and "My system is not listed" turns a dead end into a request.
 - Requirements: MER-011 MER-007 MER-002 MER-009 PAY-010 PAY-011 INT-009 INT-012 MER-041
 - Navigates to: MD03 MD07 MD09 MD12
-- Special states: percentage contract: the agreed "contract percentage" and its base (sale price minus the merchant's share of the discount) instead of the order fee and cap; Mart or pharmacy: "Store percentage" 5% and its base, with no payment fee and no contract-fee exemption (PAY-011, MER-007); exemption disabled: "Menu-link orders are treated like any order under your contract"; cashier linking failed (later): a red badge with the reason and a "Retry" button, and orders continue; no systems available: "No systems are enabled for you right now" with a request-a-system button
+- Special states: percentage contract: the agreed "contract percentage" and its base (sale price minus the merchant's share of the discount) instead of the order fee and cap; Mart or pharmacy: the agreed "Store percentage" (default 5%) and its base, with no payment fee and no contract-fee exemption (PAY-011, MER-007); exemption disabled: "Menu-link orders are treated like any order under your contract"; cashier linking failed (later): a red badge with the reason and a "Retry" button, and orders continue; no systems available: "No systems are enabled for you right now" with a request-a-system button
 
 #### MD15 — Merchant Registration and Application Tracking (new)
 
 The merchant starts registering their store themselves, uploads their documents, and tracks the status of their application and the reason for any completion request until platform approval.
 
-- Elements: Progress steps: business data, branches, documents and bank account, platform review, approval and login details. Application status: a badge at the top: draft, under review, completion required, approved. Completion reason: the text written by platform staff, with their name and date (MER-013). Business data: trade name, store name, business type (MER-009), city, the responsible person and their mobile. Branches: location on the map and branch data (MER-001), and the status of each branch (complete, needs editing). Documents: logo, commercial register, menu, and others, each with an "Optional" tag and its status (MER-044). Bank account: partially masked IBAN. Application log: submission, completion requests, approval, with dates. Visibility note: the store is not visible to customers before approval (MER-013)
+- Elements: Progress steps: business data, branches, documents and bank account, platform review, approval and login details. Application status: a badge at the top: draft, under review, completion required, approved, finally rejected with the reason. Completion reason: the text written by platform staff, with their name and date (MER-013). Business data: trade name, store name, business type (MER-009), city, the responsible person and their mobile. Branches: location on the map and branch data (MER-001), and the status of each branch (complete, needs editing). Documents: logo, commercial register, menu, and others, each with an "Optional" tag and its status (MER-044). Bank account: partially masked IBAN. Application log: submission, completion requests, approval, with dates. Visibility note: the store is not visible to customers before approval (MER-013)
 - Actions and what happens:
   - **Next (in every step)**: saves the step and moves to the next; the merchant can go back to any completed step.
   - **Submit for review / Resubmit for review**: one primary button at the bottom of the page; it submits the application, the status becomes "Under review", and the fields are locked. After resubmission the completion alert disappears and a line is added to the application log.
@@ -1744,7 +1744,7 @@ The merchant starts registering their store themselves, uploads their documents,
 
 Start work and view current status and earnings.
 
-- Elements: Available or unavailable: a status card at the top of the screen ("You are available now" or "Unavailable") with an availability switch and the line "Your location is sent only while you work". Today's earnings. Tasks: the number of tasks available now on the primary "Orders" button. City. Level. Account status. "Verified" badge: next to the name if the platform granted it (DRV-007). Dues account: shown when negative, with the balance lockout threshold (−50) and the reason for each deduction (PAY-026); and the opening balance from the previous platform is a separate line with its weekly deduction (TRN-001). Demand map: neighborhoods that have orders now, with a color gradient (high/medium) (DRV-030). Best earning hours: hourly bars in the driver's city with the highest highlighted. Restriction reason bar: appears in any state that prevents tasks (see states)
+- Elements: Available or unavailable: a status card at the top of the screen ("You are available now" or "Unavailable") with an availability switch and the line "Your location is sent only while available or during an ongoing task". Today's earnings. Tasks: the number of tasks available now on the primary "Orders" button. City. Level. Account status. "Verified" badge: next to the name if the platform granted it (DRV-007). Dues account: shown when negative, with the balance lockout threshold (−50) and the reason for each deduction (PAY-026); and the opening balance from the previous platform is a separate line with its weekly deduction (TRN-001). Demand map: neighborhoods that have orders now, with a color gradient (high/medium) (DRV-030). Best earning hours: hourly bars in the driver's city with the highest highlighted. Restriction reason bar: appears in any state that prevents tasks (see states)
 - Actions and what happens:
   - **Start work**: changes the status to "Available", starts sending the location (DRV-003) and enters dispatch (DSP-001); the card changes to "You are available now" and the "Orders" button appears. If there is a blocker, the reason bar and the next step appear instead of activation.
   - **Stop availability**: changes the status to "Unavailable" immediately and new task offers stop, while location sending continues until the ongoing task ends, if any. With a task in progress, a confirmation appears: "You will not receive new task offers; complete your current task", and the task is not canceled.
@@ -1769,7 +1769,7 @@ Start work and view current status and earnings.
 
 A task offer sent directly to nearby drivers; the first to accept wins.
 
-- Elements: Service tag. Net earnings: with the line "After tax and platform percentage · + tip if any" (DRV-002). Store and customer, distances, duration, accept countdown, current capacity. "Task offer" / "Task list" toggle: the task offer directed to you with its countdown, and tasks that no one has accepted (DSP-001, DRV-018). Batching line: in an extra task offer while on a task, the current order number and the expected extra delay to deliver it (DSP-003). Eligibility line under the list: "Only tasks suited to your vehicle, equipment, services, and city appear"
+- Elements: Service tag. Net earnings: with the line "After tax and platform percentage · + tip if any" (DRV-002). Store and customer, distances, duration, accept countdown, current capacity. "Task offer" / "Task list" toggle: the task offer directed to you with its countdown, and tasks that no one has accepted (DSP-001, DRV-018). Batching line: in an extra task offer while on a task, the current order number and the expected extra delay to deliver it (DSP-003). Eligibility line under the list: "Only tasks suited to your services and city appear"
 - Actions and what happens:
   - **Accept**: sends the acceptance to the server (DSP-001). If first: the card is withdrawn from the others, a pickup code is created, and D03 opens. If someone else was first: "Another driver accepted this task" and the card disappears. If eligibility no longer holds at acceptance (DRV-011): "This task no longer suits you". The level benefit is fixed on the task (DRV-015). Acceptance is a final commitment: no declining after it, and an emergency goes through an emergency report from "Help" (ORD-014).
   - **Reject**: hides the task offer immediately without confirmation and counts toward the acceptance indicator; the effect of rejection and ignoring on later task offers follows (DSP-001).
@@ -1911,7 +1911,7 @@ Return stop within the same task: returning an undelivered medicine to the pharm
 
 Net, incentives, loss charges and penalties, and their reasons.
 
-- Elements: Delivery and tip after tax: two separate lines, delivery after tax and platform percentage, and the tip after excluding its VAT: a tip of 10 yields 8.70 (PAY-014). Platform percentage. Incentives. Loss charge and penalty: two separate lines with the type of each, and each amount with its reason and order number beside it (PAY-025). Net. Payout date. Payout account: the IBAN with its last 4 digits and status (approved, or awaiting Finance approval), with a line "Your earnings are paid out after the accountant's approval in the payout cycle" (PAY-006). Payments log: each payout with its status and reference (STC Pay transaction number) (PAY-006, INT-014), including "In progress". Dues account balance: excludes the deposit, with the held deposit line shown separately (PAY-024). Task list: with the badges "Late tip" and "Ended for non-response · full fee". Negative-balance deduction from the next payout: a visible line (PAY-026)
+- Elements: Delivery and tip after tax: two separate lines, delivery after tax and platform percentage, and the tip after excluding its VAT: a tip of 10 yields 8.70 (PAY-014). Platform percentage. Incentives. Loss charge and penalty: two separate lines with the type of each, and each amount with its reason and order number beside it (PAY-025). Net. Payout date. Payout account: the IBAN with its last 4 digits and status (approved, or awaiting Finance approval), with a line "Your earnings are paid out after the accountant's approval in the payout cycle" (PAY-006). Payments log: each payout with its status and reference (the bank reference; and the STC Pay transaction number once it is enabled later) (PAY-006), including "In progress". Dues account balance: excludes the deposit, with the held deposit line shown separately (PAY-024). Task list: with the badges "Late tip" and "Ended for non-response · full fee". Negative-balance deduction from the next payout: a visible line (PAY-026)
 - Actions and what happens:
   - **Open task**: opens the task statement (second preview): delivery fee, tax, platform percentage, fee, tip and the time it was added if it was late, wait time at the store, and any delivery offer (PAY-014).
   - **Statement**: opens the live statement for the selected period with all movements (fees, tips, incentives, loss charges, penalties, reversal entries, payouts) with a PDF export button.
@@ -1923,7 +1923,7 @@ Net, incentives, loss charges and penalties, and their reasons.
   - Payout status is a clear word and color, and a failed one is red and not confused with paid
 - Requirements: PAY-014 PAY-025 PAY-006 INT-014 DRV-005 PAY-026 PAY-024
 - Navigates to: D11 D10
-- Special states: late tip: a notification "The customer added a tip of [amount] to order [number]" and it appears in the same task's statement (DRV-005); negative balance: the number is red with "Deducted from your next payout", and at the balance lockout threshold (−50) a "Task reception stopped" bar and a payment link (PAY-026); payout failed: "Failed · not paid" with a link to update the IBAN in D10 (PAY-006); deduction not yet approved: does not appear in the balance (PAY-026); reversal entry after an objection is accepted: a green line "Refunded: your objection on [number] was accepted"; task whose driver was replaced: per (PAY-014), and any compensation to the first driver is a manual line with its reason; STC Pay wallet not yet approved: "Your payout arrives after Finance approves your number", and nothing is sent before then (INT-014)
+- Special states: late tip: a notification "The customer added a tip of [amount] to order [number]" and it appears in the same task's statement (DRV-005); negative balance: the number is red with "Deducted from your next payout", and at the balance lockout threshold (−50) a "Task reception stopped" bar and a payment link (PAY-026); payout failed: "Failed · not paid" with a link to update the IBAN in D10 (PAY-006); deduction not yet approved: does not appear in the balance (PAY-026); reversal entry after an objection is accepted: a green line "Refunded: your objection on [number] was accepted"; task whose driver was replaced: per (PAY-014), and any compensation to the first driver is a manual line with its reason; later (INT-014), STC Pay wallet not yet approved: "Your payout arrives after Finance approves your number", and nothing is sent before then (INT-014)
 
 #### D08 — My Performance
 
@@ -1964,7 +1964,7 @@ Targets, benefits, progress, budget, and duration.
 
 Operating data, bank, deposit, equipment, and services.
 
-- Elements: Driver type, Vehicle and its photos: type, allowed services and maximum distance, display only (DRV-011), Equipment: with the effect of lacking a cooling bag (DRV-013), Bank and STC Pay: the IBAN for the earnings payout after the accountant's approval, for the deposit refund, and for account-closure settlement, and the STC Pay wallet (last 4 digits) when INT-014 is enabled later, and the status of each: approved or under review (INT-014), Deposit: the amount and status (paid and held, or refund pending), separate from the dues account (PAY-024), Regular services, Optional files: to request a "Verified" badge, "Verified" badge and its explanation (DRV-007), Document expiry reminder: a single yellow card that states explicitly that it does not stop tasks (DRV-006), Preferred navigation app, Conversation language (Arabic, English, Urdu)
+- Elements: Driver type, Vehicle and its photos: type, display only (DRV-011), Equipment (DRV-013), Bank and STC Pay: the IBAN for the earnings payout after the accountant's approval, for the deposit refund, and for account-closure settlement, and the STC Pay wallet (last 4 digits) when INT-014 is enabled later, and the status of each: approved or under review (INT-014), Deposit: the amount and status (paid and held, or refund pending), separate from the dues account (PAY-024), Regular services, Optional files: to request a "Verified" badge, "Verified" badge and its explanation (DRV-007), Document expiry reminder: a single yellow card that states explicitly that it does not stop tasks (DRV-006), Preferred navigation app, Conversation language (Arabic, English, Urdu)
 - Actions and what happens:
   - **Edit**: opens the item for editing. Changing the vehicle, equipment, bank, or STC Pay number is sent for review and the old one stays active until approval; changing navigation and language is immediate.
   - **Upload file**: opens the camera or files; the optional file is sent for verification review, and its status shows (under review, accepted, rejected with the reason).
@@ -2076,7 +2076,7 @@ Growth, problems, and what needs intervention.
 - Permissions:
   - The page is for all roles within their cities: admin, support supervisor, support agent, operations, finance, sales.
   - Total sales and platform revenue: admin and finance only.
-  - Intervention bar: the store onboarding requests card for admin and sales, and the rest for admin, support supervisor, support agent, and operations.
+  - Intervention bar: the store onboarding requests card for admin and sales, the anomalous-patterns card for admin, support supervisor, and finance, and the rest for admin, support supervisor, support agent, and operations.
   - "Mark anomaly as reviewed": admin, finance, and support supervisor.
 - UX decisions:
   - The intervention bar is the first thing seen, before the growth numbers, and its cards are colored by severity.
@@ -2099,7 +2099,7 @@ Order, alert, its owner, and the parties map.
   - **Take over shift**: opens the previous handover notes for everything that will become theirs; "Read and taken over" starts the shift, records the time, and the items move to them (ADM-042).
   - **Hand over shift**: window listing every open order and alert under their name, each with a mandatory note (ADM-042). "Hand over and end my shift" is disabled until all notes are complete. Confirming moves the items to the next shift's staff member (or to automatic distribution) and records the handover (ADM-042).
   - **Redistribute**: for the supervisor: window to distribute cities and services among those present, and to move one staff member's alerts to another in one batch. Every transfer is logged.
-  - **Offer self-pickup or refund**: appears for a non-Mart order that reached the intervention deadline (ORD-004). A confirmation states the impact, then the customer receives the two options (ORD-004, EXT-006). The alert follows the customer's choice and is closed by it.
+  - **Offer self-pickup or refund**: appears for a menu order outside Mart that reached the intervention deadline (ORD-004). A confirmation states the impact, then the customer receives the two options (ORD-004, EXT-006). The alert follows the customer's choice and is closed by it.
   - **Cancel and refund (Mart after 15 minutes)**: opens the cancellation window in the order file (A03), with the cause "no driver" and the reason pre-suggested (ORD-004).
   - **Instant disable**: shows the impact before confirming, such as "[Branch] will not receive any new orders; ongoing orders complete". The confirm button is red "Disable now". Takes effect immediately without an app update (ADM-004), and the item shows a "Disabled" badge with the reason and actor, and is resumed with a "Resume" button and a written reason.
   - **Message**: opens a chat with the customer, merchant, or driver linked to the order (ADM-010).
@@ -2134,7 +2134,7 @@ A full reference for the order, events, money, and evidence.
   - **Refund**: available after collection; before it, disabled with the hint "The amount is still held". Window: items or an amount, the reason, the liable party (merchant, driver, or platform), evidence. The confirm button is "Refund [amount] SAR to the customer" and states the impact on the liable party. It is refunded to the same payment method, and the entry is recorded (ADM-043) and appears as a loss charge in the liable party's statement with the right to object within 7 days, or as an expense on the platform (PAY-025). Above the role limit it goes to "Awaiting approval" in A04.
   - **Compensation**: window: the compensation amount, the reason, the source (platform or a penalty on a party) (PAY-025). The confirm button is "Give the customer a reward of [amount] SAR". The customer receives a notification of the reward to collect within 24 hours, otherwise it lapses with a reversal entry (PAY-002); and the entry is recorded. Subject to the role limit.
   - **Cancel because of**: appears only after the customer's grace period and only for those with permission, and opens the cancellation window; save conditions (ORD-004). The confirm button is red "Cancel the order and refund [amount] SAR". After it: status "Canceled by support", the full amount hold is released, the task is withdrawn from the driver, the customer, merchant, and driver are notified, the loss charge and penalty, if any, are recorded in A04 as effective (or awaiting approval above the role limit) with the right to object, and the causing party is counted in the cancellation rate.
-  - **Reassign**: Dialog: a table of eligible drivers with priority index or a driver number, and a mandatory reason; this is how an emergency report after acceptance is handled (ORD-014). Confirmation pulls the task from the current driver and notifies them of the reason, sends it to the new one as an assignment binding like acceptance, and logs the event. After the driver has picked up the order, a warning "The order is with the current driver" appears, and reassignment at that point is for the support agent and support supervisor only, with a mandatory reason.
+  - **Reassign**: Dialog: a table of eligible drivers with priority index or a driver number, and a mandatory reason; this is how an emergency report after acceptance is handled (ORD-014). Confirmation pulls the task from the current driver and notifies them of the reason, sends it to the new one as an assignment binding like acceptance, and logs the event. After the driver has picked up the order, a warning "The order is with the current driver" appears, and reassignment at that point is for whoever holds it in the roles table, with a mandatory reason.
   - **Message / Send**: sends to the party selected in the chat tab; it appears for them in the app linked to the order, and is saved in the file with the staff member's name and time.
   - **No-response decision**: appears after the support deadline from "arrived" (ORD-008). A window shows the evidence (staying near the customer and for how long, calls, messages) and the three decision options with a written reason; the impact of each option per ORD-008.
   - **Amounts decision (out-of-stock item or unpaid)**: for an order "Awaiting support decision" because of an out-of-stock item (MER-032) or unpaid (ORD-004): a window with fields for how much of the delivery the customer bears, what is refunded to them, what is paid to the driver, the loss charge or penalty on the merchant for the out-of-stock item if any, and a written reason (ORD-013). The order is closed only after saving.
@@ -2347,7 +2347,7 @@ Accounts, activation, restrictions, and equipment.
   - **Edit city**: the new city and a reason; confirmation "[Driver] will receive only [city] orders, and their private zone is canceled". Applies to new task offers and is recorded.
   - **Lift disabling**: a written reason; they resume receiving tasks immediately unless stopped due to balance (PAY-026) or suspended for review.
   - **Review spoofing detection**: an evidence window (route, jumps, device type) and two options with a mandatory note: "Lift suspension" (false detection) or "Permanent ban" for proven spoofing (DRV-027, DRV-023).
-  - **Edit equipment**: the three equipment switches; the change is recorded and applies to dispatch immediately (DRV-013).
+  - **Edit equipment**: the three equipment switches; the change is recorded and has no effect on dispatch (DRV-013).
   - **Set private zone**: draw a zone inside the city (DSP-002).
   - **Message**: opens a chat with the driver linked to their account or to an order the staff member chooses (ADM-010).
   - **Performance**: opens the "Driver file" tab in A11.
@@ -2548,8 +2548,8 @@ Reconciliation, settlements, liabilities, and closing.
 
 - Elements: The nine tabs (ADM-036): each tab has a number for what awaits action (open differences, accounts awaiting approval), Months status bar: the current is open, the previous awaiting closing, and the oldest closed; and the daily entry balance check result (PAY-005), "Needs your attention" first in the overview: accounts awaiting approval, failed transfers, reconciliation differences, entries not sent to Odoo, a month ready for closing; each item has a button that opens its place, Overview: collected and held (with the count of open orders), undisbursed dues (with the count of accounts), payments sent, open differences with count and amount, drivers' negative balances and those stopped from tasks (PAY-026), liabilities and those expiring this month, and held driver deposits separated from their dues accounts; each number opens its list, Collection and reconciliation: each payment operation with its status (held, collected, hold released, refunded, failed), its method, Moyasar reference, and actual fee (PAY-027), Daily reconciliation (INT-001): a line equation: collected − actual Moyasar fee = expected in bank, against what was actually deposited; the difference in red with a flag button; and the payment fee taken from merchants is a separate revenue line (PAY-027), Dues and payouts: the live statement and the dues list (PAY-006) with columns: select, account and its type, due, deductions (commission, fees, ad, loss charge, penalty), net, statement, status, bank reference, transfer date, transfer statuses: "Awaiting approval" then PAY-006 statuses, and "Failed" with the Moyasar reason, payout method in the dues list: a column showing for each account "Moyasar instruction after approval" (merchants: from the branch's Moyasar wallet) or "Bank file after approval" (drivers and deposit refunds); no payout without approval (PAY-006), Bulk selection: a checkbox for each row and "Select all" in the header; and when selected, a fixed dark bar above the table: the number of accounts, their net total, and an "Approve N payouts" button (not "Confirm"), Rows that cannot be approved: shown with a disabled checkbox and a written reason: negative balance (PAY-026), or a payout prepared by the current user (ADM-002), Driver deposit refund: a row in the payouts list that goes through the same approval (PAY-024), Liabilities: the single table with its items and columns (PAY-031), and a total-reconciliation line with wallet and points balances in the ledger, Invoices: the platform invoice and customer purchase orders, and each branch's statement and monthly fees invoice with its lines (PAY-022, PAY-007), and ad invoices (MKT-003), Tax: platform fee tax separately (PAY-022), the tax included in tips (15%), and the percentage's effective date, Refunds: each refund with its type (full, partial) and source (card, wallet), and each compensation with its reward status (claimed, lapsed), its actor, reason, and liable party, and the order link and the reversal entry, Financial reports: the "Finance" reports from the reports center (net revenue by components, order profitability, collection and reconciliation, dues and payouts, liabilities, refunds, expected balance) with the same filters, Closing and controls: each month's status and who closed it and when, a link to the financial audit log (A26), and the roles' financial limits for reading (edited in A22), Entries: a table of the latest entries: entry number, time, description, debit, credit, reference; and the reversal entry with a "Reversal" badge and a link to its original instead of editing the row, Odoo: last successful send, the count of entries waiting, and a resend button, Opening balances (TRN-001): importing the current platform's statement, entered by a finance employee and approved by a different employee (ADM-002); its total matches the statement to the halala, and each row carries the statement reference
 - Actions and what happens:
-  - **Approve payouts individually or in bulk**: "Approve" on the row for one account, or the "Approve N payouts" bar for the selection. Both open a confirmation: each account with its masked IBAN and amount, the total, that sending via Moyasar cannot be stopped after approval, and the excluded rows and their reason. After approval (PAY-006) rows become "In progress" then "Sent" with the bank reference or "Failed" with the reason, and a message "N payouts sent for execution" appears
-  - **Retry failed**: on a "Failed" payout: a confirmation shows the Moyasar or STC Pay reason and the current account details (the new IBAN if edited). It resends the payout with the same amount without a new approval, unless the IBAN changed, in which case it needs a new approval
+  - **Approve payouts individually or in bulk**: "Approve" on the row for one account, or the "Approve N payouts" bar for the selection. Both open a confirmation: each account with its masked IBAN and amount, the total, the route of each row (a Moyasar instruction, a bank file, or an opening balance from the platform bank), that sending cannot be stopped after approval, and the excluded rows and their reason. After approval (PAY-006) rows become "In progress" then "Sent" with the bank reference or "Failed" with the reason, and a message "N payouts sent for execution" appears
+  - **Retry failed**: on a "Failed" payout: a confirmation shows the Moyasar or bank reason and the current account details (the new IBAN if edited). It resends the payout with the same amount without a new approval, unless the IBAN changed, in which case it needs a new approval
   - **Reversal entry**: window: the original entry read-only, the amount, the reason. After confirmation the entry is created in the open month linked to its original (PAY-005), and appears in the audit log (ADM-002). If the original is in a closed month the window states that the correction will be recorded in the open month
   - **Close**: for a month "awaiting closing": a confirmation shows the month summary (total entries, open differences, incomplete transfers) and asks to type the month's name because it cannot be reversed. After it the month becomes "Closed" with the actor's name and time (ADM-036)
   - **Export**: exports the current tab with the same period and filters to Excel or PDF with numbers matching the screen, and is recorded in the audit log
@@ -2610,7 +2610,7 @@ Context, evidence, decision, satisfaction, and object to.
   - One primary button "Refund within authority"; the penalty has a different color and is placed away from it; close is at the other end
 - Requirements: SUP-002 SUP-004 ADM-043 SUP-003 SUP-007 SUP-009 MKT-002 INT-013 PAY-025 PAY-003 ADM-042 SUP-001
 - Navigates to: A03 A04 A13 A26
-- Special states: ticket being worked on by another agent: their name is visible, it opens read-only, and a "Request transfer" button replaces the decision buttons (ADM-042); customer exceeded the trust limit (SUP-007): red badge "Exceeded trust limit · Support supervisor decision"; repeated exceedance: badge "Customer notified" then "Restricted" (SUP-007); order delivered more than an hour ago: no new report on it in all sections including the Mart (SUP-005, SUP-009); and the customer's general ticket does not reopen the support decision (SUP-003); amount above the role limit: "Awaiting support supervisor approval" and not executed before approval; open objection on a support decision: badge "Objection" in the list and the ticket header; "Not delivered" report: shows delivery evidence instead of the photo (SUP-002)
+- Special states: ticket being worked on by another agent: their name is visible, it opens read-only, and a "Request transfer" button replaces the decision buttons (ADM-042); customer exceeded the trust limit (SUP-007): red badge "Exceeded trust limit · Support supervisor decision"; repeated exceedance: badge "Customer notified" then "Restricted" (SUP-007); order delivered more than an hour ago: no new report on it in all sections including the Mart (SUP-005, SUP-009); and the customer's general ticket does not reopen the support decision (SUP-003); amount above the role limit: "Awaiting approval by [higher role]" and not executed before approval; open objection on a support decision: badge "Objection" in the list and the ticket header; "Not delivered" report: shows delivery evidence instead of the photo (SUP-002)
 
 #### A20 — Team and Shifts
 
@@ -2674,7 +2674,7 @@ Configurable values, permissions, keys, and connection status.
   - **Edit**: opens the edit panel at the selected level. "Immediately" creates a version effective now, and "On date" a scheduled version with a "Scheduled" badge (ADM-034). A message "Version [number] scheduled to take effect [date]" appears
   - **Test connection**: sends a probe request and shows the result within seconds: "Working · response time" or "Failed" with the provider's message, and updates the status badge; it creates no financial operation and no notification to a customer
   - **Permission**: ticking or unticking a permission for a role shows an "Unsaved change" bar with the impact in numbers "Takes effect immediately for [N] agents". "Save and apply now" applies it immediately in the interface and the server (ADM-001), and the buttons disappear in open sessions
-  - **Financial limit**: sets for a role a maximum amount per financial action (refund, compensation, loss charge, penalty) (ADM-043); the limit is shown read-only in A18 and in the decision window for the role's agent
+  - **Financial limit**: sets for a custom role a higher amount per financial action (refund, compensation, loss charge, penalty) up to 200 SAR; the support agent (50) and support supervisor (200) limits are fixed by owner decision and shown read-only (ADM-043); the limit is shown read-only in A18 and in the decision window for the role's agent
   - **View log**: opens the audit log (A26) filtered by the current tab, setting, or role
   - **Cancel scheduled version**: after confirmation, deletes the scheduled version before it takes effect, and the current one remains; the cancellation is logged
   - **Revert to a previous version**: creates a new version with the previous value without erasing history, immediately or on a date
@@ -2737,7 +2737,7 @@ Shared states for all pages: clear loading without fake numbers; an empty state 
 - By district and city: where orders come from
 
 **Products**
-- Product performance: for each item the dashboard shows quantity, sales, its share, and its rating, with the best and worst sellers
+- Product performance: for each item the dashboard shows quantity, sales, and its share, with the best and worst sellers; and item ratings later (CUS-020)
 - Add-ons and sizes: the most chosen and their revenue
 - Out-of-stock products: when each item went out of stock and for how many hours, and the affected orders
 - Ordered together: the dashboard shows items that recur in a single order, to build meals
@@ -2747,7 +2747,11 @@ Shared states for all pages: clear loading without fake numbers; an empty state 
 - Delays and compensations: late orders, delay duration, and compensation amount
 - Cancellations: cancelled orders by reason and who cancelled them
 - Driver waiting at your store: how long the driver waits for your order after arriving
+
+**Finance**
 - Penalties and loss charges: penalties and loss charges, their reasons, objections, and decisions; no automatic financial calculation
+
+**Operations**
 - Availability and working hours: actual opening hours, temporary closure, and busy mode
 
 **Customers**
@@ -2756,7 +2760,7 @@ Shared states for all pages: clear loading without fake numbers; an empty state 
 - Customers by district: shows the distribution across districts without showing names or numbers
 
 **Ratings and Reports**
-- Ratings: overall rating and its trend, each item's rating, and comments
+- Ratings: overall rating and its trend, and comments; and each item's rating later (CUS-020)
 - Reports: by reason: missing, wrong, quality, delay
 - Objections: your objections and their outcome
 
@@ -2862,7 +2866,7 @@ Shared states for all pages: clear loading without fake numbers; an empty state 
 **Operations and System**
 - Operations alerts: count, response time, resolved, and escalated
 - Operations interventions: instant incentives, manual assignment, and disabling and ban
-- Audit log: the report shows every edit with who executed it and the value before and after.
+- Audit log: the report shows every edit with who executed it and the value before and after, with A26 permissions: the admin sees all, and finance sees financial events only.
 - Pharmacies: orders, rejected prescriptions, and those returned to the pharmacy
 
 ## Requirements
@@ -3198,7 +3202,7 @@ Rules:
 Acceptance criteria:
 - Pressing Ready does not change the customer status to Delivering.
 - Two acceptances do not link the order to two drivers.
-- An "Awaiting support decision" order is not captured, refunded or closed before the decision is recorded under the name of the person who made it, except for the automatic capture at 24 hours from the hold (PAY-001); after that, the decision is executed as a refund.
+- An "Awaiting support decision" order is not captured, refunded or closed before the decision is recorded under the name of the person who made it, except for the automatic capture at 24 hours from the hold (PAY-001), and the full refund for an out-of-stock item (MER-032); after capture, the decision is executed as a refund.
 - A write-in or pharmacy order shows the customer four steps starting with "The store is reviewing your order", and "Looking for a driver" does not appear in them.
 
 Pages: C10 MD02 A03
@@ -3207,14 +3211,14 @@ Pages: C10 MD02 A03
 
 Rules:
 - The rule that the customer may cancel within 60 seconds of payment remains.
-- After the window, the order is sent to dispatch and the app does not offer the usual customer cancellation.
+- After the window, a menu or Mart order is sent to dispatch, a write-in or pharmacy order reaches the merchant for review (ORD-013), and the app does not offer the usual customer cancellation.
 - During the window, next to the countdown: "You can cancel your order free of charge within {s} seconds".
 - Support actions and the special cancellation option after no driver is found remain, per ORD-004.
 - After the window, the cancel button is replaced, with a support button: "Your order is now in progress. To cancel, contact support".
 
 Acceptance criteria:
 - Cancelling at second 59 cancels the hold once.
-- After the window, the usual cancel action is not allowed; the support path appears without the two phrases.
+- After the window, the usual cancel action is not allowed, and the text "Your order is now in progress. To cancel, contact support" appears with a support button.
 
 Pages: C09 C11 C15 C17
 
@@ -3242,7 +3246,7 @@ Rules:
 - The customer may cancel normally within 60 seconds (ORD-002).
 - After the window, the order is cancelled only through support: the support agent refunds the customer, determines the party liable for the loss for the loss charge (merchant, driver, or platform) and any penalty, and writes the reason (PAY-025).
 - If the driver has already picked up the order from the store, the support agent also decides what is paid to the driver and what each party bears.
-- Two cases put the order automatically into "Awaiting support decision": an out-of-stock item for which the customer previously chose "Cancel the order" (MER-032), and a write-in order not paid within 10 minutes (ORD-013). After them, support decides the loss charge, the penalty, or the amount, then the order is closed.
+- The reasons listed in ORD-001 put the order automatically into "Awaiting support decision", including an out-of-stock item for which the customer previously chose "Cancel the order" (MER-032), and a write-in order not paid within 10 minutes (ORD-013). After that, support decides the loss charge, the penalty, or the amount, then the order is closed.
 - No cancellation by the merchant in menu and Mart; the merchant rejects write-in only before uploading the products invoice, and the order enters "Awaiting support decision".
 - At 5 minutes without a driver, an alert reaches support; at 15 minutes support intervenes and offers, for a non-Mart menu order, self-pickup within 5 minutes or a full refund.
 - Pharmacy and write-in orders 15 minutes after dispatch starts with no driver: the order enters "Awaiting support decision", and support decides what is captured and what is refunded for each party, including the price of what the merchant prepared, then it is closed (ORD-001).
@@ -3383,7 +3387,7 @@ Rules:
 - A separate service fee of 5% of the products; no hidden markup rate on the products invoice in pharmacy or write-in and no second 2.5% service fee.
 - The customer pays within 10 minutes; their refusal or expiry of the window puts the order into "Awaiting support decision" with the reason "Unpaid" (ORD-001).
 - The support agent sets exactly what the customer bears of the delivery fee and what is refunded, then the order closes. There is no driver at this stage so no pay, no automatic rule sets these amounts, and the tip follows the delivery fee (CUS-010).
-- No pickup before payment; the merchant's percentage follows their contract, and the pharmacy has a configurable percentage with no online payment fee.
+- No pickup before payment; the merchant's percentage follows their contract, the pharmacy has a configurable percentage, and there is no payment fee on write-in and pharmacy orders (PAY-011).
 - The merchant corrects the products invoice amount or photo once before payment, and the 10-minute window restarts.
 - Rejecting a write-in order before the products invoice requires a reason: not available, requires a prescription, outside the store's activity, or other with text; and the order enters "Awaiting support decision".
 
@@ -3593,7 +3597,7 @@ Rules:
 - A fixed fee deducted from restaurant and Shops merchants on every menu order: 2.5% of the product value after discount + 1 SAR; it does not include delivery, service fees, or the tip.
 - It remains with the menu link exemption.
 - Mart and pharmacies do not bear this fee; the actual Moyasar fee is recorded as a separate platform expense.
-- The fixed 1 SAR is once per order when its products are captured; payment provider fees on the two write-in payments are recorded as a separate expense, without repeating the merchant's fixed fee.
+- The fixed 1 SAR is once per menu order when its products are captured; there is no payment fee on write-in and pharmacy orders, and the payment provider's fees on their two payments are recorded as an expense on the platform.
 - The fee is deducted whatever the payment method, even if the whole order was paid from the wallet; it is a fixed commercial fee, not a pass-through of the Moyasar cost.
 - The products value after discount is what the customer paid for the products after all discounts, including the platform's share of the discount.
 
@@ -3767,7 +3771,7 @@ Rules:
 - If a transferred driver has both a deposit installment and a deduction of their negative opening balance in the same week, the deposit is deducted first and then the balance, with the two together capped at SAR 100 per week (TRN-001).
 
 Acceptance criteria:
-- A driver who has not paid the deposit does not get their account activated.
+- A driver who has not paid the deposit does not get their account activated, except a driver transferred from the previous platform.
 - The dues account balance shown to the driver does not include the deposit.
 
 Pages: D07 D10 D13 A10 A18
@@ -3855,7 +3859,7 @@ Rules:
 - The markup percentage that goes to the platform (in Mart only) is a fee on the merchant, with 15% added to it in the monthly fees invoice.
 - The basis of each fee, its tax treatment and its entries are in the "PAY-005 appendix: chart of accounts, entries, and fee basis", which is approved.
 - Changing the registration status or VAT number applies to new orders only; it is saved on each order and recorded in the audit log.
-- All invoices the platform issues are issued automatically through Odoo on command from the system (INT-010), except the products invoice of a registered merchant, which the merchant issues itself.
+- All invoices the platform issues are issued automatically through Odoo on command from the system (INT-010); the products invoice, however, is always issued by the merchant, registered or not.
 - VAT on delivery fees, service fees, and the tip is on the platform in every case: it issues its invoice for them and remits it, and it is not deducted from the merchant, registered or not. Product VAT is always on the merchant, and the platform does not remit it on their behalf.
 - Payment splitting is the only model (PAY-006): the product value reaches the branch's Moyasar wallet and never passes through the platform's account; so the platform issues the platform invoice for delivery fees, service fees, and the tip, and the fee invoice to the merchant only, while the merchant issues the products invoice and its VAT stays with them, registered or not.
 - The platform adds no tax to any product: the sale price is final and inclusive, and the product VAT is on the merchant, registered or not, who remits it to the state.
@@ -3965,7 +3969,7 @@ Pages: A15 A18
 | 4150 | Ads and paid placements | Revenue | MKT-003. |
 | 4151 | Store customer campaigns | Revenue | MKT-005. |
 | 4152 | Double points bought by the merchant | Revenue | MKT-010; the price is a setting not specified in the file. |
-| 4153 | Cashier fee | Revenue | Listed in the fees invoice (PAY-022); the price is not specified in the file. |
+| 4153 | Cashier fee (later) | Revenue | When cashier integration is enabled (MER-011); the price is not specified in the file. |
 | 4160 | Penalties that go to the platform | Revenue | PAY-025. |
 | 4170 | Forfeited amounts | Revenue | An unclaimed reward, expired promotional credit, or expired points funded by the platform (PAY-005). |
 
@@ -4026,7 +4030,7 @@ A restaurant on a 10% percentage contract, VAT-registered or not (the VAT on pro
 | 2 | Full hold release (cancellation within the window / no driver) | 9101 | 9100 | No financial entry (PAY-001, PAY-003). |
 | 3 | Edit before capture (delete an item, cheaper substitute, partial refund before capture) | 9101 for the difference | 9100 for the difference | Reduces only the captured amount, with no reversing entries (PAY-028). |
 | 4 | Capture and splitting when the order closes | 1110 Moyasar—Platform 41.18; 1120 Branch wallets 88.75; 9101 (129.93) | 2100 Branch 88.75; 4120 Commission 10.50; 4130 Payment fee 3.63; 2151 Tax on merchant fees 2.12; 4110 Delivery 10.43; 4100 Service 2.55; 2150 Tax (1.57+0.38+1.30) 3.25; 4115 Tip 8.70; 9100 (129.93) | The platform's simplified invoice for the order (delivery, service, and tip) is issued at capture (INT-010). The merchant issues its products invoice. Fees contract: 4121 instead of 4120. Mart: 4122 + 4140 with their tax in 2151, and no 4130 (PAY-012). |
-| 4a | Location correction difference to a farther place | 1110 Moyasar—Platform (with the new hold at capture) | 4110 Delivery; 4100 Service; 2150 Tax | A simplified invoice for the difference (INT-010), and the driver's fee on the new distance in entry 13; if closer, the difference is refunded with entry 8 (ORD-009). |
+| 4a | Location correction difference to a farther place | 1110 Moyasar—Platform (with the new hold at capture) | 4110 Delivery; 4100 Service; 2150 Tax | A simplified invoice for the difference (INT-010), and the driver's fee on the new distance in entry 13; if closer, the held amount is reduced with entry 3 before capture, or the difference is refunded with entry 8 after it (ORD-009). |
 | 5 | Automatic capture after 24 hours with the order still open | Same as entry 4, for the full held amount | Same as entry 4, except that platform revenues (4100, 4110, 4115, 4120…) are recorded in 2190 until closing; VAT goes to 2150 immediately | At closing: debit 2190, credit the revenue accounts. A support decision after that is executed as a refund (entry 8) from 2190 (Section 5, item 10). |
 | 6 | Escalating the status to the supervisor at hour 18 | — | — | No entry; audit log only (owner decision). |
 | 7 | Actual Moyasar fee | 5110 Moyasar fees; 1160 Input tax (if any) | 1110 Moyasar—Platform | Per transaction; reconciled daily against the Moyasar statement (PAY-027). |
@@ -4106,7 +4110,7 @@ A restaurant on a 10% percentage contract, VAT-registered or not (the VAT on pro
 | Ads and placements | Placement, city and duration price | 15% VAT applies | Platform | A separate ad invoice at approval and deduction | MKT-003 |
 | Store customer campaigns | Region or city price | 15% VAT applies | Platform | A separate invoice, like an ad, after approval | MKT-005 |
 | Double points are bought by the merchant | The price is a setting (ADM) | 15% VAT applies | Platform | Monthly fee invoice | MKT-010 |
-| Cashier fee | Not specified in the file | 15% VAT applies (like platform fees) | Platform | Monthly fee invoice | PAY-022 |
+| Cashier fee (later) | Not specified in the file | 15% VAT applies (like platform fees) | Platform | Monthly fee invoice when it is enabled | MER-011 |
 | Loss charge on a merchant | Amount of the actual loss | Out of VAT scope (compensation) | No tax invoice | Non-taxable line in the branch statement and the fees invoice | PAY-025, PAY-022 |
 | Penalty on a merchant | The amount support decides | Out of VAT scope (contractual penalty) | No tax invoice | Non-taxable line in the branch statement and the fees invoice | PAY-025, PAY-022 |
 | Loss charge and penalty on a driver | The loss or the decided amount | Out of VAT scope | No invoice | Driver statement | PAY-025 |
@@ -4140,7 +4144,7 @@ All open questions in the draft were resolved in the latest review. Reference: t
 | 15 | Moyasar-to-bank transfer fees and STC Pay fees | Borne by the platform (5110, 5170) unless the merchant's contract states otherwise | No provision charges it to the merchant or the driver |
 | 16 | Rejected payout | Remains due in 2100 or 2110 and appears in the next cycle with the rejection reason; no entry | Rejection does not change the liability |
 | 17 | Installment payment of former drivers' deposits | 50 SAR from the net of each of the first two weeks. Whatever earnings do not cover is deducted from the following weeks until 100 is reached, and the driver keeps working | Accommodation without suspension, with the deposit completed |
-| 18 | Cashier fee and double points price | Two settings in the admin dashboard, with 15% on top, in the monthly fee invoice | A platform fee like the others |
+| 18 | Cashier fee (later) and double points price | Two settings in the admin dashboard, with 15% on top, in the monthly fee invoice | A platform fee like the others |
 | 19 | Prepaid ads | Invoice and deduction at approval; revenue is recognized by day, and whatever extends past month-end is deferred in 2180 | Recognizing revenue over the service period |
 
 **Accounting operating controls (binding for development):**
@@ -4662,7 +4666,7 @@ Acceptance criteria:
 
 Pages: M01 M05 M06
 
-#### MER-041 — Product integration via API [Important]
+#### MER-041 — Product integration via API [Later]
 
 Rules:
 - Restaurants, Shops with a menu, and Mart can import their products directly from their system; there is no product integration for pharmacies because they work by write-in.
@@ -4806,7 +4810,7 @@ Approved by the owner (29 October 2026).
 - **Merchant owner** = "merchant manager" in MER-037 and MER-043. It is the registration account itself, and sees all branches.
 - **Branch manager**: works in their own branch only (MER-037, MER-017). Created from MD10 with a ready-made permissions template. ✓ in the branch manager column means the permission is **included in the default template and for their branch only**.
 - **Staff member (with granted permissions)**: has nothing by default. The owner (or the branch manager within their limits) grants them permissions from the MER-037 list: Orders, Handover, Products, Prices, Offers, Campaigns, Reports, Finance, Tickets, Staff, **Reviews**.
-- **Prep account**: a shared device or kitchen account. It works with the "Orders" permission within its limits (M01, M08). It does not open dues or edit prices (MER-030). In M11 it sees only orders, devices and support.
+- **Prep account**: a shared device or kitchen account. It works with the "Orders" and "Handover" permissions, and "Tickets" for order tickets only, within its limits (M01, M08). It does not open dues or edit prices (MER-030). In M11 it sees only orders, devices and support.
 
 Cell symbols: ✓ allowed | ✗ not allowed and not grantable | "By grant" not allowed by default, and enabled by granting the permission named in parentheses.
 
@@ -4834,7 +4838,7 @@ Cell symbols: ✓ allowed | ✗ not allowed and not grantable | "By grant" not a
 | 14 | Tickets and platform chat | ✓ | ✓ for their branch | "By grant" (Tickets) | ✓ Order tickets only | M12; MD12; M11. The "Accounts" subject also requires "Finance" (M12). **Destination (owner decision):** the account manager assigned to the merchant, which is a role in the admin dashboard, together with the supervisor |
 | 15 | Viewing the contract card | ✓ | "By grant" (Finance) | "By grant" (Finance) | ✗ | MD13. Display-only, and only for whoever holds "Finance" |
 | 16 | Statements and wallet (statement, payouts, fees invoice, archive) | ✓ | "By grant" (Finance) for their branch | "By grant" (Finance) | ✗ | MD07; M10; MER-043; MER-030 |
-| 17a | Payout request | ✗ | ✗ | ✗ | ✗ | The merchant does not request a payout: the branch wallet balance appears to the accountant in every cycle, who approves or rejects its payout (owner decision; PAY-006). The owner and the branch manager see the status "Awaiting approval" in the statement |
+| 17a | Payout request | ✗ | ✗ | ✗ | ✗ | The merchant does not request a payout: the branch wallet balance appears to the accountant in every cycle, who approves or rejects its payout (owner decision; PAY-006). The owner, and the branch manager if granted "Finance", see the status "Awaiting approval" in the statement |
 | 17b | Change bank details (request to change the bank account) | ✓ | ✗ | ✗ (not granted even with "Finance") | ✗ | MER-001: verification and finance approval, and the notification goes to the merchant manager's mobile. MD09 shows the account read-only, and the request is submitted from MD12 under the "Accounts" topic |
 | 18 | Paid campaigns and ads (create, send, stop) | ✓ | "By grant" (Campaigns) for their branch | "By grant" (Campaigns) | ✗ | MD05. Spend and return are visible to whoever has "Finance" or "Campaigns". The amount is deducted from the branch's dues after approval (MKT-003, MKT-005) |
 
@@ -4881,7 +4885,7 @@ Pages: D02
 #### DRV-003 — Location while working [Launch-critical]
 
 Rules:
-- The driver's location is sent only while working.
+- The driver's location is sent only while available or during an ongoing task.
 
 Acceptance criteria:
 - When the network returns, events are sent in the order they occurred.
@@ -4938,7 +4942,7 @@ Pages: D09 D10 A11
 
 Rules:
 - Platform staff can grant a verified badge after reviewing optional files.
-- The badge is a configurable eligibility or ranking factor; not a mandatory compliance list.
+- The badge is shown in the driver file and has no effect on dispatch; not a mandatory compliance list.
 
 Acceptance criteria:
 - The absence of optional verification does not block regular services.
@@ -4986,11 +4990,12 @@ Rules:
 - The level determines task-offer priority, capacity, and percentage benefits; by itself it does not prevent a regular delivery service.
 - Levels, their thresholds, and their benefits are configurable per city and period.
 - The level score is based on the last 30 days; it is checked daily, and the benefit is locked onto the task when it is accepted.
-- Default benefits: Diamond has higher priority, 3 orders together, and a 2-point reduction in the platform percentage; Gold has priority, 3 orders, and a 1-point reduction; Silver has 2 orders together; New and Under Watch have 1 order. The benefits are shown to the driver as numbers.
+- Default benefits: Diamond has 3 orders together and a 2-point reduction in the platform percentage; Gold has 3 orders and a 1-point reduction; Silver has 2 orders together; New and Under Watch have 1 order. The tier affects offer priority only through the performance score in the priority index (DSP-001). The benefits are shown to the driver as numbers.
 
 Acceptance criteria:
 - A score of 85 gives Gold under the default configuration.
 - Switching the performance filter does not change the level.
+- Two drivers with the same performance score and different tiers have the same priority index.
 
 Pages: D02 D08 D09 A11
 
@@ -4999,12 +5004,12 @@ Pages: D02 D08 D09 A11
 Rules:
 - A single page with filters: last 10 orders, last 30 orders, last 30 days, and custom; updated daily.
 - The official level score is the last 30 days; the other filters are for display and diagnosis.
-- Default weights: completion 20, delivery 20, pickup 15, acceptance 15, rating 15, confirmed reports 10, commitment 5; configurable.
+- Default weights: completion 20, delivery 20, pickup 15, acceptance 20, rating 15, confirmed reports 10; configurable.
 - Scores exclude merchant delays, customer cancellations, and technical failures.
 - The platform configures the conversion of indicators into scores; the default is linear from zero to the target, capped at the indicator's weight; an indicator with no data is excluded and the remaining weights are normalized to 100.
 - The first 30 orders are level New; there is no automatic financial penalty from a lower score.
 - Default targets: completion 98%, on-time delivery 90%, on-time pickup 90%, acceptance 80%, rating 4.8, confirmed reports zero, and commitment 95%.
-- Each indicator is calculated over the last 30 days. Lower-is-better indicators (cancellation and lateness) are compared with the city average. Commitment = accepted orders ÷ orders offered while online. Fewer than 20 orders in the period is "Not enough data" and the tier does not change.
+- Each indicator is calculated over the last 30 days. Acceptance = accepted orders ÷ orders offered while online. Fewer than 20 orders in the period is "Not enough data" and the tier does not change.
 
 Acceptance criteria:
 - The level score does not change merely by switching the display filter.
@@ -5076,12 +5081,12 @@ Rules:
 - Five consecutive steps are applied to the driver: warning, then priority reduction for a week, then a 24-hour ban, then operations review, then a permanent ban.
 - In fraud, location spoofing, account sharing, and abuse of a customer, platform staff jump directly to a permanent ban without progression, after a review; the system does not ban anyone automatically.
 - The driver receives a notification of the reason for each step.
-- The driver objects within 7 days of the decision notification, and gets the response within 48 hours; anything not answered within that time is escalated to the support supervisor
+- The driver objects within 7 days of the decision notification, and gets the response within 48 hours; anything not answered within that time is escalated to the admin (SUP-006)
 - Ladder steps are carried out manually by an operations employee or support supervisor after review, not automatically by the system.
 - Violations that move the driver one step: a confirmed report, or leaving without permission, or an emergency report that platform staff deemed a violation (ORD-014).
 - The driver returns to the start of the ladder after 90 days with no violation.
-- A priority reduction lowers the priority index by 20% for 7 days.
-- Leaving without permission (decided by an Operations employee after reviewing the case, with no automatic detection): first time a warning, second within 30 days a priority reduction, third a suspension until Operations reviews.
+- A priority reduction multiplies the priority index by 0.8 for 7 days.
+- Leaving without permission is a violation that moves the driver one step up the ladder, and it is decided by an Operations employee after reviewing the case, with no automatic detection.
 
 Acceptance criteria:
 - No driver is banned without the reason being shown to them.
@@ -5153,7 +5158,7 @@ Pages: D01
 #### DSP-001 — Dispatching the Task Offer to Drivers [Launch-critical]
 
 Rules:
-- Filtering: online and active, service and city permitted, not excluded by the branch or the customer, recent location, suitable equipment, and available capacity.
+- Filtering: online and active, service and city permitted, not excluded by the branch or the customer, recent location, and available capacity.
 - Dispatch starts after the customer's 60-second cancellation window ends (ORD-002), and for write-in and pharmacy orders after the customer pays (ORD-013); the 15-minute window counts from that point.
 - Each eligible driver gets a "priority index" out of 100: the driver score (DRV-017, which includes rating) 50%, delivery volume in the last 30 days relative to the city's top driver 30%, and proximity to the branch 20%.
 - A preferred captain gets a single exclusive task offer for 30 seconds first if platform staff have configured it; if they do not respond, the order returns to the sequence without changing the 15-minute window.
@@ -5299,7 +5304,7 @@ Rules:
 - Least privilege
 - Admin dashboard sign-in is by email, password, and a second verification code; the merchant owner signs in to their dashboard with mobile number and verification code (CUS-001). Sign-in attempts are blocked for 15 minutes after 5 wrong attempts.
 - Penetration test before launch
-- The prescription photo is not visible to any role in the admin dashboard; only the pharmacist sees it (PHR-012), and the customer's address is seen only by support and operations.
+- The prescription photo is not visible to any role in the admin dashboard; only the pharmacist sees it (PHR-012), and the customer's address is seen only by admin, support, and operations.
 - Session expires after 30 minutes of inactivity.
 - The admin manages staff accounts from A20: invitation by email, the role, the cities, and suspension, which ends the staff member's sessions immediately.
 
@@ -5570,7 +5575,7 @@ Rules:
 
 Acceptance criteria:
 - A closed month does not change
-- Collected minus the actual Moyasar fee equals the amount deposited in the bank; otherwise the difference is shown
+- Collected minus the actual Moyasar fee equals the Moyasar balance of the platform and the branch wallets (1110 and 1120), then what was settled from it to the bank; otherwise the difference is shown
 - A reconciliation difference without a comment blocks closing.
 
 Pages: A18
@@ -5858,6 +5863,7 @@ Rules:
 - Subscription to a platform offer is per branch, and the merchant manager can select all branches with one click.
 - The merchant's funding share is fixed when their branch subscribes; raising it suspends their subscription until they approve the new share, and lowering it takes effect immediately.
 - One coupon per order. It combines with product offers, and does not combine with a whole-order offer such as the first-order offer; the higher value applies automatically.
+- No coupon in write-in and pharmacy orders; only the wallet balance is used in them (PAY-002).
 
 Acceptance criteria:
 - An offer outside the branch zone does not appear.
@@ -5955,6 +5961,7 @@ Rules:
 - Running out of deal stock or the end of the period stops it; the usual price returns, and a recurring deal runs again in its next cycle.
 - Hour Deal limit: one item per customer in the period.
 - The branch bears the full Hour Deal discount.
+- A second piece of the same item is charged at its regular price, with a message in the cart explaining this.
 
 Acceptance criteria:
 - 30% is eligible to publish.
@@ -6186,7 +6193,7 @@ Pages: C06 C11
 Rules:
 - The status of a medicine order that was not delivered is "Returning to the pharmacy", and the driver returns the medicine to the pharmacy at the return stop within the same task
 - The return is done by a code like the pickup code, and the pharmacy enters this code.
-- The return window is configurable. After it ends, an alert reaches operations to decide, even if the pharmacy has closed
+- The return window is configurable. After it ends, an alert reaches support to decide, even if the pharmacy has closed
 - The customer does not get the delivery fee back, and gets back the medicine price and the 5% service fee after the pharmacy confirms the return is intact. Rejecting the refund is a support decision based on the pharmacy's confirmation.
 - The default return window is 60 minutes.
 - Re-delivering the medicine to the customer is a new order with a new delivery fee.
@@ -6194,7 +6201,7 @@ Rules:
 - Medicine whose refund was refused is kept by the pharmacy in the customer's name for 7 days (setting), and it is re-delivered with a new order in which the customer pays only the delivery fee; after that period it is destroyed without a refund, and this is recorded in the order file.
 
 Acceptance criteria:
-- A medicine order is not closed before the return code is entered or an operations decision is issued.
+- A medicine order is not closed before the return code is entered or a support decision is issued.
 - When the window ends, an alert reaches operations.
 - Medicine 100 and service 5 returned intact: 105 is refunded to the customer and the delivery fee is not refunded.
 - Medicine whose refund was refused and whose delivery the customer did not request within 7 days: "Destroyed" is recorded in the order file and nothing is refunded.
@@ -6383,7 +6390,7 @@ Acceptance criteria:
 #### SYS-015 — Monitoring and Backup [Launch-critical]
 
 Rules:
-- An availability check every minute. An alert reaches the owner's mobile when errors rise, payment fails, Moyasar notifications stop, scheduled jobs pile up, or the messaging balance runs out
+- An availability check every minute. An alert reaches the owner's mobile and the on-call engineers list when errors rise, payment fails, Moyasar notifications stop, scheduled jobs pile up, or the messaging balance runs out
 - A tool that collects errors with the version number, logs carrying the order number, and a "failed events" list with a retry button
 - An automatic daily backup, with the ability to restore to any moment within 7 days. The backup includes images, invoices, and prescriptions, and the restore is tested monthly
 - The database and its backups are hosted inside Saudi Arabia; the choice of technology stays with the engineering team.
@@ -6480,7 +6487,7 @@ Rules:
 - A one-time export, with the data owner's consent, of merchant and branch names, images, and driver documents to prefill registration.
 - The menu and its prices (store price and selling price) are entered manually by platform staff.
 - No balances or contracts are exported.
-- Sales onboards merchants and drivers.
+- Sales onboards merchants, and Operations onboards and approves drivers (A10).
 
 Acceptance criteria:
 - A merchant who did not consent does not have its data prefilled.

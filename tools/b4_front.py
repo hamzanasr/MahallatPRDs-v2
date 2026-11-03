@@ -4,9 +4,9 @@ import collections
 from b4_common import *
 from b4_pages import STD_STATES
 
-import b4_decisions12 as DEC12
-VERSION = DEC12.VERSION
-DATE = DEC12.DATE
+import b4_decisions13 as DEC13
+VERSION = DEC13.VERSION
+DATE = DEC13.DATE
 REVISION = D['revision']
 
 COUNT = collections.Counter(r['priority'] for r in D['requirements'])
