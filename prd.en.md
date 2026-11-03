@@ -1,6 +1,6 @@
-# Mahallat Platform Specification — Version 4.12
+# Mahallat Platform Specification — Version 4.13
 
-31 October 2026 · Revision 2026-10-31 · 241 requirements · 93 pages. The requirements are the reference.
+2 November 2026 · Revision 2026-11-02 · 241 requirements · 93 pages. The requirements are the reference.
 
 ## Order states by type
 
@@ -245,7 +245,7 @@ One definition for each number used across all pages and reports, so the same nu
 |---|---|---|
 | Payment fee | 2.5% of the product value after discount + 1 SAR | Fixed on restaurant and Shops merchants whatever the payment method; not Mart or pharmacy |
 | Mart and pharmacy merchant percentage | 5% | Global, then per-merchant; base is the original price |
-| Markup rate | Mart 5%; restaurants and Shops per each merchant's contract | Inside the sale price; independent of the merchant percentage |
+| Markup rate | Mart 5% | Inside the sale price; independent of the merchant percentage. No markup in restaurants and Shops: platform staff enter the sale price (MER-002) |
 | Menu and Mart service | 2.5% | Total after discounts, excluding the tip and before the service fee |
 | Write-in and pharmacy service | 5% | Products only, as a separate line item |
 | Per-customer fee per branch | 2 / 5; threshold 25; cap 30; 365-day cycle | For the fee contract only; independent counter per customer and branch; the threshold applies to the selling price |
@@ -279,30 +279,30 @@ One definition for each number used across all pages and reports, so the same nu
 
 Values that had no default, approved by the owner (29 October 2026), and remain adjustable from settings.
 
-| # | Setting | Proposed assumption | Allowed range | Reason | Reference |
+| # | Setting | Default | Allowed range | Reason | Reference |
 |---|---|---|---|---|---|
-| 1 | Small refund limit | 25 SAR per decision | 0–50 SAR | Stays under the technical support limit (SAR 50), so a small refund needs no second approval. In use: it classifies the report as a "small claim" in the queue and reports only, and does not mean an automatic refund | CFG-01 L319; SUP-004 L5265 |
-| 2 | Financial limit — Support agent | **50 SAR** per decision (owner decision, mandatory) | Fixed by owner decision | Owner decision | Corrects ADM-043 L5193 (which has 200) |
-| 3 | Financial limit — Support supervisor | **200 SAR** per decision (owner decision, mandatory) | Fixed by owner decision | Owner decision | Corrects ADM-043 L5193 (which has 1,000) |
-| 4 | Financial limit — Admin | No limit, and every decision is logged | — | Last step in the approval ladder: "anything above goes to admin" | ADM-043 L5193 |
-| 5 | Financial limit — Operations | 0 SAR | 0 only as long as the permission is not granted | The role has no cancellation, refund, loss charge, or penalty | L123–L125; ADM-043 L5198 |
-| 6 | Financial limit — Finance | SAR 200 for reversing entries and accepting appeals | 0–1,000 SAR | Equal to the support supervisor limit, because the two roles reverse each other's decisions (L126, L2097), and anything above it goes to admin. Finance does not originate loss charges or penalties | L124, L126; L2097 |
-| 7 | Financial limit — Sales | 0 SAR | 0 only | Has no financial permissions on orders | L123–L126 |
-| 8 | Financial limit — New custom role | 0 SAR until admin sets it | 0–200 SAR | The new role starts safe, and does not exceed the supervisor's limit without an explicit decision | A22 L2591; ADM-001 "least necessary permission" |
-| 9 | Single penalty cap (independent of the role limit) | No separate cap; the role limit is the actual cap | — | The loss charge is limited to the proven loss (SUP-002 L5245), and the penalty is a manual decision subject to the executor's limit. This makes an additional figure unnecessary | CFG-01 L319; PAY-025 |
-| 10 | Target time to rule on the objection | **48 hours** everywhere (owner decision) | 24–72 hours | Owner decision. The number is written into SUP-006 L5289 ("target period" without a number) to match L260 and L4631 | SUP-006 L5289 |
-| 11 | Escalating an unanswered objection | At 48 hours it escalates automatically to the support supervisor | Follows item 10 | Owner decision: an unanswered objection is escalated. We propose the support supervisor because they hold the authority to accept the objection (L2517) | SUP-006 |
-| 12 | Objection submission window | **7 days** from the decision notification (owner decision) | 3–14 days | Exists. Mentioned here for confirmation | L260; SUP-006 L5288 |
-| 13 | Escalating the "Awaiting support decision" status | **18 hours** from the hold, escalated to the support supervisor (owner decision) | 12–22 hours | 6 hours remain before automatic capture at 24 hours, and capture happens on time without change | L273; PAY-003 L3306; L109 |
-| 14 | Location distance from address warning | **300 meters**, and the actual distance is shown (owner decision) | 100–1,000 m | Owner decision. Format: in meters below 1 km ("350 m away"), and in kilometers above it ("1.4 km away") | CUS-002 L2819; C13 L627 |
-| 15 | Customer chat remaining after the order is closed | **24 hours**, a configurable setting (owner decision) | 0–72 hours | Owner decision. Note: MER-022 L4060 and M13 L980 close the **merchant** conversation with the customer when the order closes. The setting covers the customer-driver conversation (CUS-008) only, and the merchant conversation stays as it is. | CUS-008 L2905, L2907 |
-| 16 | Marketing message limits | **No limit of any kind** (owner decision) | — | Owner decision. The existing limits are removed (see table C) | CFG-01 L319 |
-| 17 | Busy mode with a preparation cap | Stays +15 minutes for an hour, and the resulting time does not exceed 40 minutes (owner's decision) | Increase 5–15 min; duration 15–60 min | Owner decision. Available extension = 40 − longest preparation time. Example: if the time is 35 minutes, only +5 is shown | L250; MER-018 L4010; M09 L1167 |
-| 18 | Loyalty points to SAR conversion rate | **100 points = 1 SAR**, a setting per city or period (the value is an assumption) | 50–200 points per riyal | The minimum redemption is 500 points, so the first redemption is 5 SAR, a tangible amount without a large burden on the platform net | MKT-010 L5427, L5430 |
-| 19 | Points earning rate | 10 points per SAR 1 of the platform net on the order | 1–20 points per riyal | Without an earning rate, the conversion rate is meaningless. With item 18, the loyalty cost is about 10% of the platform net | MKT-010 L5425, L5427 |
+| 1 | Small refund limit | 25 SAR per decision | 0–50 SAR | Stays under the technical support limit (SAR 50), so a small refund needs no second approval. In use: it classifies the report as a "small claim" in the queue and reports only, and does not mean an automatic refund | CFG-01; SUP-004 |
+| 2 | Financial limit — Support agent | **50 SAR** per decision (owner decision, mandatory) | Fixed by owner decision | Owner decision | ADM-043 |
+| 3 | Financial limit — Support supervisor | **200 SAR** per decision (owner decision, mandatory) | Fixed by owner decision | Owner decision | ADM-043 |
+| 4 | Financial limit — Admin | No limit, and every decision is logged | — | Last step in the approval ladder: "anything above goes to admin" | ADM-043 |
+| 5 | Financial limit — Operations | 0 SAR | 0 only as long as the permission is not granted | The role has no cancellation, refund, loss charge, or penalty | Default role distribution; ADM-043 |
+| 6 | Financial limit — Finance | SAR 200 for reversing entries and accepting appeals | 0–1,000 SAR | Equal to the support supervisor limit, because the two roles reverse each other's decisions (default role distribution), and anything above it goes to admin. Finance does not originate loss charges or penalties | Default role distribution; ADM-043 |
+| 7 | Financial limit — Sales | 0 SAR | 0 only | Has no financial permissions on orders | Default role distribution |
+| 8 | Financial limit — New custom role | 0 SAR until admin sets it | 0–200 SAR | The new role starts safe, and does not exceed the supervisor's limit without an explicit decision | A22; ADM-001 "least necessary permission" |
+| 9 | Single penalty cap (independent of the role limit) | No separate cap; the role limit is the actual cap | — | The loss charge is limited to the proven loss (SUP-002), and the penalty is a manual decision subject to the executor's limit. This makes an additional figure unnecessary | CFG-01; PAY-025 |
+| 10 | Target time to rule on the objection | **48 hours** everywhere (owner decision) | 24–72 hours | Owner decision | SUP-006; Configurable values |
+| 11 | Escalating an unanswered objection | At 48 hours it escalates automatically to the support supervisor | Follows item 10 | Owner decision: an unanswered objection is escalated. It goes to the support supervisor because they hold the authority to accept the objection (default role distribution) | SUP-006 |
+| 12 | Objection submission window | **7 days** from the decision notification (owner decision) | 3–14 days | Exists. Mentioned here for confirmation | Configurable values; SUP-006 |
+| 13 | Escalating the "Awaiting support decision" status | **18 hours** from the hold, escalated to the support supervisor (owner decision) | 12–22 hours | 6 hours remain before automatic capture at 24 hours, and capture happens on time without change | Configurable values; PAY-001; PAY-003 |
+| 14 | Location distance from address warning | **300 meters**, and the actual distance is shown (owner decision) | 100–1,000 m | Owner decision. Format: in meters below 1 km ("350 m away"), and in kilometers above it ("1.4 km away") | CUS-002; C13 |
+| 15 | Customer chat remaining after the order is closed | **24 hours**, a configurable setting (owner decision) | 0–72 hours | Owner decision. MER-022 and M13 close the **merchant** conversation with the customer when the order closes. The setting covers the customer-driver conversation (CUS-008) only, and the merchant conversation stays as it is. | CUS-008 |
+| 16 | Marketing message limits | **No limit of any kind** (owner decision) | — | Owner decision, with weekly monitoring of unsubscribes | MKT-001 |
+| 17 | Busy mode with a preparation cap | Stays +15 minutes for an hour, and the resulting time does not exceed 40 minutes (owner's decision) | Increase 5–15 min; duration 15–60 min | Owner decision. Available extension = 40 − longest preparation time. Example: if the time is 35 minutes, only +5 is shown | Configurable values; MER-018; M09 |
+| 18 | Loyalty points to SAR conversion rate | **100 points = 1 SAR**, a setting per city or period (the value is an assumption) | 50–200 points per riyal | The minimum redemption is 500 points, so the first redemption is 5 SAR, a tangible amount without a large burden on the platform net | MKT-010 |
+| 19 | Points earning rate | 10 points per SAR 1 of the platform net on the order | 1–20 points per riyal | Without an earning rate, the conversion rate is meaningless. With item 18, the loyalty cost is about 10% of the platform net | MKT-010 |
 | 20 | Store customer campaign price per city | Set by the admin per city before activation; never free | Greater than 0 | Owner decision: the campaign is paid, so no zero price | MKT-005 |
-| 21 | Merchant campaign budget limit ("Higher than the platform limit for you") | No limit | 0 = no limit | Consistent with the owner's decision to remove message limits. If a financial limit rather than a message limit is meant, it needs a separate decision | MD05 L1411; MKT-005 |
-| 22 | Repeated exceeding of the refund limit before restriction | Exceeding the limit (20%) in two consecutive reviews 30 days apart: a notice, then restriction on the third | 2–4 times | SUP-007 says "if repeated" without a number | SUP-007 L5301 |
+| 21 | Merchant campaign budget limit ("Higher than the platform limit for you") | No limit | 0 = no limit | Consistent with the owner's decision to remove message limits | MD05; MKT-005 |
+| 22 | Repeated exceeding of the refund limit before restriction | Exceeding the limit (20%) in two consecutive reviews 30 days apart: a notice, then restriction on the third | 2–4 times | Sets the count for "if repeated" in SUP-007 | SUP-007 |
 
 ## Financial transaction examples
 
@@ -318,7 +318,7 @@ Values that had no default, approved by the owner (29 October 2026), and remain 
 | Fee-contract restaurant: new customer at the branch, two orders at selling price 20 then 40 | Customer pays the selling price | Fee 2 then 5; continues until the customer's total at the branch reaches 30; no percentage |
 | Restaurant not registered for VAT, 10% contract percentage: products at selling price 115 | Customer pays 115 including VAT and the merchant's share enters its branch's Moyasar wallet<br/>The merchant issues the products invoice, and the platform issues its invoice for delivery and service only | Commission 11.50 + its VAT 1.73 are deducted; merchant receives 101.77 before the payment fee; product VAT 15 stays with them |
 
-> In restaurants, the commission is calculated on the selling price or as a per-customer fee according to the contract. If there is a markup on the menu, the contract determines where it goes, not the platform's rules.
+> In restaurants, the commission is calculated on the selling price or as a per-customer fee according to the contract. Platform staff enter the sale price, and there is no markup in restaurants and Shops (MER-002).
 
 ## Integrations
 
@@ -367,6 +367,8 @@ What remains unresolved. For each question: what it is waiting on, who resolves 
 
 | Number | Decision | Dated |
 |---|---|---|
+| Q-20 | Restaurants and Shops: platform staff enter the menu and the sale price manually, the restaurant store price is for analytics only, and there is no markup; Mart is the store price × 1.05; and no merchant changes a price except through a request the platform approves (MER-002, MER-010) | 2 November 2026, owner |
+| Q-19 | The company accountant reviewed and approved the accounting annex (PAY-005 annex); and a driver's negative opening balance is not written off (TRN-001) | 2 November 2026, owner |
 | **Q-01** | Work on Moyasar with the wallet model, with no alternative (PAY-006, INT-001) | 31 October 2026, owner |
 | **Q-02** | Transport General Authority reporting starts from the existing link (REG-007), the Communications Authority link is an "Important" requirement (REG-008), and residents register as freelance drivers (DRV-001) | 31 October 2026, owner |
 | **Q-07** | Verification code by WhatsApp or text message through 4jawaly, and by text message when WhatsApp fails (CUS-001) | 31 October 2026, owner |
@@ -395,7 +397,7 @@ What remains unresolved. For each question: what it is waiting on, who resolves 
 
 Access to the sections and stores available for the customer's address.
 
-- Elements: Delivery address: the address name, its district, and its city in the header, not just "My address", Notifications bell: in the header, Unified search: a search field for all sections (CUS-004), Current order: a card at the top of the page with the store name, status badge, arrival time in minutes and arrival clock time (ORD-011), and the four status steps (looking for a driver, being prepared, out for delivery, delivered); with more than one current order, a single card "You have N current orders", Restaurants, Mart, Shops, and Pharmacies: the four sections with their visibility and order by the customer's city (CUS-009), City banners: carrying a visible "Ad" tag, as does any paid row (CUS-003), Featured stores: a row of stores, Discounted products: a row of products with a discount, Suggestions: a "Suggestions for you" row with a reason line beneath: an item the customer ordered before or their dietary preference (CUS-003); for a new user, a fallback row "Most ordered in your city", Store card in the rows: rating, arrival time as a single number, delivery fee, and the Quality badge (MKT-014); each merchant has a single store, the nearest open branch whose zone covers the address (CUS-003)
+- Elements: Delivery address: the address name, its district, and its city in the header, not just "My address", Notifications bell: in the header, Unified search: a search field for all sections (CUS-004), Current order: a card at the top of the page with the store name, status badge, arrival time in minutes and arrival clock time (ORD-011), and the customer status steps (looking for a driver, being prepared, out for delivery, delivered; preceded by "The store is reviewing your order" in write-in and pharmacy orders) (ORD-001); with more than one current order, a single card "You have N current orders", Restaurants, Mart, Shops, and Pharmacies: the four sections with their visibility and order by the customer's city (CUS-009), City banners: carrying a visible "Ad" tag, as does any paid row (CUS-003), Featured stores: a row of stores, Discounted products: a row of products with a discount, Suggestions: a "Suggestions for you" row with a reason line beneath: an item the customer ordered before or their dietary preference (CUS-003); for a new user, a fallback row "Most ordered in your city", Store card in the rows: rating, arrival time as a single number, delivery fee, and the Quality badge (MKT-014); each merchant has a single store, the nearest open branch whose zone covers the address (CUS-003)
 - Actions and what happens:
   - **Change address**: opens Addresses (C13). After another address is chosen, the sections, stores, and fees refresh immediately (CUS-003) with a transient notice "We updated the stores for your address". An address outside coverage goes to C24. If the new address is outside the zone of the cart's branch, the cart stays with its branch and payment in it is disabled, and "Open branch ..." appears with a new cart if another branch of the merchant covers the address (CRT-001).
   - **Search**: opens Search (C02) with the cursor in the field and the keyboard visible, with recent searches.
@@ -621,7 +623,7 @@ Current and past orders with status, source, and fulfillment method.
 
 A map, status, and an overall arrival time with no code.
 
-- Elements: map: top of the page (CUS-007), remaining time: a single arrival time in minutes and the arrival clock time, without breaking down the components (CUS-007, ORD-011), status line: the four customer-facing status steps, driver: first name, transport type, and a "Hidden number" tag, call and chat: two buttons directly next to the driver, address instructions: the address card and its instructions, fix location: a button in the address card, leave at the door: an "Leave it at the door" switch with an explanation of the photo (ORD-010), and after dropping off, a photo of the order in place, cancel order card: with a countdown, within the grace period only (ORD-002), showing its effect "The full N SAR hold is released"
+- Elements: map: top of the page (CUS-007), remaining time: a single arrival time in minutes and the arrival clock time, without breaking down the components (CUS-007, ORD-011), status line: the customer status steps: four, and five in write-in and pharmacy orders, starting with "The store is reviewing your order" (ORD-001), driver: first name, transport type, and a "Hidden number" tag, call and chat: two buttons directly next to the driver, address instructions: the address card and its instructions, fix location: a button in the address card, leave at the door: an "Leave it at the door" switch with an explanation of the photo (ORD-010), and after dropping off, a photo of the order in place, cancel order card: with a countdown, within the grace period only (ORD-002), showing its effect "The full N SAR hold is released"
 - Actions and what happens:
   - **Call**: a call through a proxy number (CUS-008). Disabled after the contact period ends.
   - **Chat**: opens C25. Disabled before a driver accepts, with the text "Chat is available when a driver accepts".
@@ -1140,12 +1142,12 @@ Manage the restaurant or Shops menu according to permissions.
 
 #### M06 — Product and Price Edit
 
-A clear preview of the store price, sale price, and the approved price limits.
+A clear preview of the store price and the sale price, and a price change request to the platform.
 
-- Elements: name, description, and image: product fields, edit limit: badge for the store price edit mode granted to the merchant (not allowed, needs review, within a percentage with the percentage, full) (MER-002), approved price: the last price approved by the platform, and the price limits without review in numbers ("from … to …"), proposed price: the store price the merchant writes, and the review status if any "Your proposal … awaiting review since …", sale price: now and after approval together, with the line "Sale price = store price × (1 + markup rate …%) per your branch's contract" (MER-002), preparation time: in minutes (MER-040), availability time: with the period of the menu the product belongs to for comparison ("Within the Morning menu period …") (MER-005), options: product options; for a combo meal the component list, each component with its options and the availability of each option, and the meal status (available / unavailable) (MER-024), cashier: product linking and sync status (MER-024)
+- Elements: name, description, and image: product fields, price change request: the merchant does not change a price directly; changing the price sends a request that the platform approves or rejects (MER-002), approved price: the store price and sale price the merchant sees now, and the platform's latest approval, proposed price: the price the merchant requests, and the review status if any "Your request … awaiting review since …", sale price: the current one; in restaurants and Shops the platform sets it on approval, and in Mart it is the store price × 1.05 (MER-002), preparation time: in minutes (MER-040), availability time: with the period of the menu the product belongs to for comparison ("Within the Morning menu period …") (MER-005), options: product options; for a combo meal the component list, each component with its options and the availability of each option, and the meal status (available / unavailable) (MER-024), cashier: product linking and sync status (MER-024)
 - Actions and what happens:
-  - **Allowed save**: available when the price is within the price limits, the mode is "full", or no price change was made: saves immediately without confirmation and updates the sale price, and returns to M05 with a notification "Saved". Disabled when the edit needs review, or the mode is "not allowed" (MER-002)
-  - **Submit for review**: appears as the primary action when the price falls outside the price limits or the mode is "needs review": confirmation "The sale price … remains for customers until the platform approves …". After that a badge "Awaiting review" appears in M05, the request reaches the platform (A08), and non-price edits are saved immediately (MER-002)
+  - **Save**: saves non-price edits immediately and returns to M05 with a "Saved" notification. A price change is not saved directly, and the button switches to "Submit for review" (MER-002)
+  - **Submit for review**: appears as the primary action when the price changes: confirmation "The sale price … remains for customers until the platform approves your request". After that a badge "Awaiting review" appears in M05, the request reaches the platform (A08), and non-price edits are saved immediately (MER-002)
   - **Preview**: the product card as the customer sees it: image, name, current sale price, preparation time, and options
   - **Pause**: choose the return time; the product disappears until that time (MER-004)
   - **Add component**: for a combo meal: choose a product from the menu as a component and set its substitute options
@@ -1153,19 +1155,17 @@ A clear preview of the store price, sale price, and the approved price limits.
 - Validation and error messages:
   - Preparation time above the limit: "Maximum preparation time is 40 minutes" and it is not saved (MER-040)
   - Preparation time empty or zero: "Enter the preparation time in minutes"
-  - Price outside the price limits: the field turns red "Outside the price limits; it will be sent for review, and … remains for customers until approval" (MER-002)
   - Availability end before its start: "Availability end must be after its start"
   - Availability time outside the menu period: "The time is outside the Morning menu period (…)"
   - Meal component with no option: "Add at least one option for each component"
 - Permissions:
   - Name, description, image, availability, and preparation time: "Products" permission
-  - Price field: the "Prices" permission within the merchant's cap; and the store price is for this branch only (MER-002)
+  - Price change request: the "Prices" permission; the request is for this branch only (MER-002)
 - UX decisions:
-  - The primary button switches automatically between "Allowed save" and "Submit for review" depending on the price entered.
-  - The price limits are shown in numbers rather than a percentage alone, so the merchant knows in advance whether it will be reviewed.
+  - The primary button is "Save" for non-price edits, and switches to "Submit for review" when the price changes.
 - Requirements: MER-002 MER-005 MER-040 MER-024 MER-004
 - Navigates to: M05 M12
-- Special states: mode "not allowed": the price field is locked with the text "Price editing is not available to you. To change it, message the platform" and a button that opens M12; awaiting review: the price field shows the proposal, and under it "The customer sees … until approval"; proposal rejected: banner "The platform rejected …: reason…" and the field returns to the approved price; meal unavailable: red banner in the page header with the name of the out-of-stock component (MER-024); product synced from the cashier: the fields coming from it are shown with "From cashier"
+- Special states: awaiting review: the price field shows the proposal, and under it "The customer sees … until approval"; proposal rejected: banner "The platform rejected …: reason…" and the field returns to the approved price; meal unavailable: red banner in the page header with the name of the out-of-stock component (MER-024); product synced from the cashier: the fields coming from it are shown with "From cashier"
 
 #### M07 — Mart Catalogs and Products
 
@@ -1175,7 +1175,7 @@ Choose a whole collection, then customize it locally.
 - Actions and what happens:
   - **Subscribe to a catalog**: enabling it shows a confirmation "The catalog's current products … (…) will be added enabled, and what is added to it later comes in disabled unless "Enable additions automatically" is on". Cancelling shows "Its products will disappear from your grocery, and the sales history is not deleted" (CAT-001)
   - **Enable a product**: toggle in your grocery. The toggle of a centrally paused product is locked, and touching it shows "The platform paused it for all groceries, and it cannot be enabled locally" (CAT-001)
-  - **Edit price**: opens M06 in Mart mode: the local store price for this grocery versus the reference price, and the sale price (MER-010)
+  - **Edit price**: opens M06 in Mart mode: the requested local price for this grocery versus the reference price, and the sale price; it is sent for review and does not change for the customer before platform approval (MER-010)
   - **Add product**: form (name, barcode, image, section, price) then "Submit for approval": saved as a draft and sent to the platform for approval in the general catalog (MER-010)
   - **Barcode search**: opens the camera and goes to the matching product, or shows "Not found in your catalogs" with "Add it for review"
 - Validation and error messages:
@@ -1183,7 +1183,7 @@ Choose a whole collection, then customize it locally.
   - Barcode already exists: "This barcode belongs to an existing product: …"
 - Permissions:
   - Subscription, enabling, and adding a product: "Products" permission
-  - Local price: "Prices" permission
+  - Local price request: "Prices" permission
   - Mart account limits (MER-030)
 - UX decisions:
   - The source badge is color-coded so the merchant is not surprised by a central pause.
@@ -1406,30 +1406,29 @@ Order search, its details, and its net.
 
 A management tool depending on the merchant's operating type.
 
-- Elements: products: for each product the menu period, availability toggle, availability time (MER-005), store price, sale price, completeness, and the customer-facing status in its own text (visible, outside menu period now, paused until a time, centrally paused, price awaiting review, new product for review), menu periods or catalogs: a "Menu periods" tab for restaurants and Shops with a menu, and "Catalogs" instead of it for Mart only (MER-005, MER-010), availability: a toggle for each product, and bulk selection: pause until a time, enable, set availability hours, store price and sale price: two columns; and the pending price next to the approved one with an arrow and "The customer sees the approved price until accepted", review requests: a tab of new products sent for review, price mode: a bar at the top of the page with the granted store price edit mode and its percentage, and that the sale price = store price × (1 + markup rate) per the branch's contract, and the menu is shared by all branches while each branch has its own store price and availability (MER-002), menu completeness: the overall percentage and its breakdown and a percentage per product with small bars (MER-047), improvement assistant: a draft image or description beside the current one with a "Draft" tag until the user chooses to use it (MER-047), linking and sync: a tab with the link status, last sync and its result, the imported count, incoming prices awaiting review, and items hidden for being out of stock in the merchant's system (MER-041), Mart: the catalogs subscribed to and the "Enable additions automatically" option for each, a "Local price" tag for a product whose price was edited in this grocery, a centrally paused product cannot be enabled locally, and a sale price preview (MER-010)
+- Elements: products: for each product the menu period, availability toggle, availability time (MER-005), store price, sale price, completeness, and the customer-facing status in its own text (visible, outside menu period now, paused until a time, centrally paused, price awaiting review, new product for review), menu periods or catalogs: a "Menu periods" tab for restaurants and Shops with a menu, and "Catalogs" instead of it for Mart only (MER-005, MER-010), availability: a toggle for each product, and bulk selection: pause until a time, enable, set availability hours, store price and sale price: two columns (Shops: sale price only); the requested price next to the approved one with an arrow and "The customer sees the approved price until accepted", review requests: a tab of new products sent for review, prices: a bar at the top of the page "Price changes and new products are requests the platform approves", and the menu is shared by all branches while each branch has its own sale price and availability (MER-002), menu completeness: the overall percentage and its breakdown and a percentage per product with small bars (MER-047), improvement assistant: a draft image or description beside the current one with a "Draft" tag until the user chooses to use it (MER-047), linking and sync: a tab with the link status, last sync and its result, the imported count, incoming prices awaiting review, and items hidden for being out of stock in the merchant's system (MER-041), Mart: the catalogs subscribed to and the "Enable additions automatically" option for each, a "Local price" tag for a product whose price was edited in this grocery, a centrally paused product cannot be enabled locally, and a sale price preview (MER-010)
 - Actions and what happens:
   - **Add**: product form: name, image, description, price, options, menu period, availability time. Saving creates it with the status "New product for review" in "Review requests" (MER-002, MER-010).
-  - **Edit**: product edit dialog with a preview of the store price and sale price before saving; the price is applied or sent for review depending on the mode (MER-002).
-  - **Subscribe to a catalog**: for Mart only (disabled for others with a hint). A list of catalogs; choosing one shows a confirmation: "Its current products enter your grocery enabled at the reference store prices, and its later additions are not enabled unless "Enable additions automatically" is on; you can edit the price, availability, and image of each product". After that the products appear in the table.
+  - **Edit**: product edit dialog with a preview of the store price and sale price; a price change sends a request for review and the approved price stays for the customer until approval (MER-002).
+  - **Subscribe to a catalog**: for Mart only (disabled for others with a hint). A list of catalogs; choosing one shows a confirmation: "Its current products enter your grocery enabled at the reference store prices, and its later additions are not enabled unless "Enable additions automatically" is on; you can edit the availability and image of each product, and request a change to its price". After that the products appear in the table.
   - **Improve with the assistant**: generates a draft image or description for the selected product or for incomplete ones; nothing is published until "Use draft" (MER-047).
   - **Availability toggle**: pauses or enables the product in the selected branch immediately. Pausing asks "Until when?" (until I enable it, or until a specific time) (MER-004). The toggle of a centrally paused product is disabled with the reason.
   - **Bulk actions**: apply pause, enable, or availability hours to the selection at once, with a message of how many changed and how many did not and why.
   - **Sync now**: in the linking tab: requests the latest prices and stock from the merchant's system (MER-041).
 - Validation and error messages:
   - Empty or zero price: "Enter a price greater than zero"
-  - Price outside the price limits: not blocking; under the field "Outside the price limits (min – max) · will be sent for review" and the save button becomes "Send price for review"
   - Availability time ending before its start or outside the menu period: "Availability time must fall within the menu period"
   - Empty name: "Write the product name"
 - Permissions:
   - "Products" permission: adding and editing name, image, description, and availability
-  - "Prices" permission: editing the price within the merchant's mode limits (MER-002)
+  - "Prices" permission: sending a price change request for review (MER-002)
   - Branch manager: availability and its hours in their branch
   - Menu periods are display-only here; they are operated from the merchant page in the admin dashboard (MER-005)
 - UX decisions:
   - The customer-facing status in the last column answers: does the customer see the product now? And if not, why?
   - One assistant button turns missing completeness into an action.
 - Requirements: MER-002 MER-010 MER-005 MER-047 MER-041 MER-004
-- Special states: mode "not allowed": the price field is locked with "Price editing is not available to you; contact the platform"; price awaiting review: no second price edit for the product until decided, with "Awaiting review since…"; price or product rejected: a "Rejected" badge with the reason, and the approved one remains; link failure or sync delay: yellow alert with the last successful sync and a "Sync now" button, and the products stay in their last known state; menu with no active menu period now: alert "Customers see no product now because the menu is outside its period"
+- Special states: price awaiting review: no second price edit for the product until decided, with "Awaiting review since…"; price or product rejected: a "Rejected" badge with the reason, and the approved one remains; link failure or sync delay: yellow alert with the last successful sync and a "Sync now" button, and the products stay in their last known state; menu with no active menu period now: alert "Customers see no product now because the menu is outside its period"
 
 #### MD04 — Offers
 
@@ -1552,7 +1551,7 @@ Reply, support decision, and objection.
   - Objection after the deadline: the system rejects it with the message "Objection period ended on …" (SUP-006)
   - Hide request with no reason: "Choose the hide reason"
 - Permissions:
-  - "Tickets" permission: replying, requesting hide, and viewing reports
+  - "Reviews" permission: replying, requesting hide, and viewing reports (MER-037)
   - "Finance" permission: objecting to loss charges and penalties and seeing their amounts
   - Branch manager: their branch's ratings and reports only
 - Requirements: MER-027 SUP-006
@@ -1692,7 +1691,7 @@ What the merchant edits and what is display-only.
   - Merchant manager: all settings and requesting linking
   - "Finance" permission: sees the contract card; hidden from others
   - Branch manager: their branch's link, QR, sound, and printer
-  - Contract, operation type, and category are display-only for everyone
+  - Operation type and category are display-only for everyone; the contract is display-only for whoever holds "Finance"
 - UX decisions:
   - The cashier card reassures that orders work without linking, and "My system is not listed" turns a dead end into a request.
 - Requirements: MER-011 MER-007 MER-002 MER-009 PAY-010 PAY-011 INT-009 INT-012 MER-041
@@ -2214,12 +2213,12 @@ Merchants, branches, contracts, and onboarding requests.
 
 A unified file containing all the settings of the merchant and its branches without scattering.
 
-- Elements: Overview, Operations and zone: each branch's zone on a map: its city boundaries or a manual zone inside them (MER-046), and the hours, preparation time, and minimum, Products: store-price edit permission mode (MER-002) and percentage, and for each product in each branch the store price with the sale price beside it, calculated with the markup rate in the branch's contract; platform staff do not enter the sale price by hand, Contract: its type (PAY-009), value, markup rate, and effective date, any branch-specific contract percentage or markup rate, and the exempt menu link, and tax registration: registered with its VAT number or not registered (PAY-029), Offers, ads, and campaigns, Dues, Team, Support and log: platform chats with the merchant (ADM-010), the edit log with actor and values before and after, and bank account changes, a fixed header visible in all tabs: name, type and ordering method, city, number of branches, account manager, status (active, disabled), and the "Message merchant" and "Instant disable" buttons, Preferred captain (MER-038): preferred drivers with their live status (online, offline), tier, and equipment, and a field to add by driver number, Self-pickup: enabled or not, its discount, its distance for each branch, and who funds the discount (EXT-006), Shops conversion: menu readiness (number of valid products)
+- Elements: Overview, Operations and zone: each branch's zone on a map: its city boundaries or a manual zone inside them (MER-046), and the hours, preparation time, and minimum, Products: for each product in each branch, the store price (the restaurant's own menu price, for analytics only) and the sale price, both entered manually by platform staff; Shops have the sale price only (MER-002), Contract: its type (PAY-009), value, and effective date, any branch-specific contract percentage, and the exempt menu link, and tax registration: registered with its VAT number or not registered (PAY-029), Offers, ads, and campaigns, Dues, Team, Support and log: platform chats with the merchant (ADM-010), the edit log with actor and values before and after, and bank account changes, a fixed header visible in all tabs: name, type and ordering method, city, number of branches, account manager, status (active, disabled), and the "Message merchant" and "Instant disable" buttons, Preferred captain (MER-038): preferred drivers with their live status (online, offline), tier, and equipment, and a field to add by driver number, Self-pickup: enabled or not, its discount, its distance for each branch, and who funds the discount (EXT-006), Shops conversion: menu readiness (number of valid products)
 - Actions and what happens:
   - **Edit setting**: makes the current tab's fields editable. "Save" shows a before/after difference summary and asks for confirmation; it applies to new orders only and is recorded in "Support and log".
   - **Shops conversion**: a window that checks menu readiness; with no valid products the button stays disabled "Cannot publish: 0 valid products". The confirmation "Convert to a menu for new orders" (MER-053).
-  - **Menu permissions**: window: choose the mode, and the percentage for "Within a percentage" (MER-002).
-  - **Percentage**: window: contract type (a percentage agreed with the merchant, or a fee per new customer at each branch), its value, the markup rate by which the sale price is calculated from the store price, and effective date, with an optional per-branch customization of the percentage or markup rate while the merchant's contract stays for the other branches. The confirmation gives an example: "Selling price 110 and percentage 10% = 11 to the platform" (PAY-009). No confirmed order changes.
+  - **Menu and prices**: opens the merchant's menu to enter products, the store price and the sale price for each branch manually (MER-002).
+  - **Percentage**: window: contract type (a percentage agreed with the merchant, or a fee per new customer at each branch), its value, and effective date, with an optional per-branch customization of the percentage while the merchant's contract stays for the other branches. The confirmation gives an example: "Selling price 110 and percentage 10% = 11 to the platform" (PAY-009). No confirmed order changes.
   - **Branch zone**: for each branch: choose "City boundaries" or "Manual zone" and draw on the map; anything outside the branch's city boundaries is clipped while drawing (DSP-002). Saving applies it to new orders, offers, and campaigns (MER-046); a customer outside the branch's city cannot order from it.
   - **Link**: creates an exempt menu link and copies it, and it can be stopped. What is deducted from its orders (PAY-009).
   - **Add preferred captain**: the number of an approved driver in the branch's city; added to the list, and the branch's order is offered to them first as a task offer for 30 seconds (MER-038).
@@ -2272,7 +2271,7 @@ Primary, secondary, and public, and merchant product review.
 
 Only the required review according to permission and request type.
 
-- Elements: Before and after: in two colors, with the sale price in both cases, the reason for the request, Sale price: for a store-price edit the approved price and the percentage change from it are shown, the merchant's permission mode and price limits, the store price and sale price, and what the customer sees until the decision (MER-002), Merchant offers: offer terms, and the merchant funds it in full (MKT-007), Ads: placement, city, duration, price, and remaining capacity (MKT-003), New product: a review type opened in A07, Review-type chips with their counters: prices, merchant offers, ads, new products; and the city filter and sort (oldest first by default), the age of each request in the list, Rejection reason with ready templates and free text, Decision log: reviewer, time, and reason
+- Elements: Before and after: in two colors, with the sale price in both cases, the reason for the request, Sale price: for a price change request the approved and requested prices and the change percentage, the store price and the sale price, a new sale price field the staff member fills in for restaurants and Shops (in Mart, the local price × 1.05), and what the customer sees until the decision (MER-002), Merchant offers: offer terms, and the merchant funds it in full (MKT-007), Ads: placement, city, duration, price, and remaining capacity (MKT-003), New product: a review type opened in A07, Review-type chips with their counters: prices, merchant offers, ads, new products; and the city filter and sort (oldest first by default), the age of each request in the list, Rejection reason with ready templates and free text, Decision log: reviewer, time, and reason
 - Actions and what happens:
   - **Approve**: the button states the result by type: price "Sale price becomes [price]" takes effect on new orders immediately; a merchant offer is published with its terms; an ad is published, its amount is deducted, and the ad invoice is issued (MKT-003). The merchant is notified, the decision is recorded, and the list moves to the next item.
   - **Reject with reason**: the reason is mandatory (template or text); the previous approved price stays and nothing is deducted (MER-002, MKT-003), and the merchant receives the reason. Moves to the next item.
@@ -3174,7 +3173,7 @@ Pages: C09
 
 Rules:
 - Order status, payment, the driver's task, and the products invoice are independent fields; issuing the products invoice is not a condition for completing a menu order.
-- Customer statuses: Looking for a driver, Preparing, Delivering, Delivered; it stays Preparing until the driver picks up.
+- Customer statuses: Looking for a driver, Preparing, Delivering, Delivered; in write-in and pharmacy orders they are preceded by "The store is reviewing your order" from paying the delivery fee until the product invoice is paid (ORD-013). It stays Preparing until the driver picks up.
 - Each transition is executed on the server once and records the actor and time; racing transitions do not repeat the event.
 - Mart follows the menu lifecycle; write-in has two payments and a mandatory products invoice; Taxi is a deferred foundation.
 - The "Awaiting support decision" state is non-final: the order enters it whenever its amounts are a staff decision (no-show in self-pickup, unpaid in write-in, rejection before the products invoice, out-of-stock item), and it is closed only when the decision is recorded.
@@ -3184,6 +3183,7 @@ Acceptance criteria:
 - Pressing Ready does not change the customer status to Delivering.
 - Two acceptances do not link the order to two drivers.
 - An "Awaiting support decision" order is not captured, refunded or closed before the decision is recorded under the name of the person who made it, except for the automatic capture at 24 hours from the hold (PAY-001); after that, the decision is executed as a refund.
+- A write-in or pharmacy order shows the customer five steps starting with "The store is reviewing your order", and a menu or Mart order shows four.
 
 Pages: C10 MD02 A03
 
@@ -3459,7 +3459,7 @@ Pages: C20 A18 A19
 #### PAY-004 — Price and Fee Rule [Launch-critical]
 
 Rules:
-- The menu sale price = store price × (1 + the markup rate agreed with the merchant) (MER-002).
+- In restaurants and Shops, platform staff enter the sale price manually for each product (MER-002); it is not calculated from the store price.
 - Mart: store price × (1 + markup rate), default 5%.
 - The restaurant percentage applies to the sale price minus the merchant's share of the discount; the discount funded by the platform does not reduce the merchant commission base.
 - The customer service fee is calculated per PAY-021.
@@ -3539,14 +3539,14 @@ Rules:
 - The contract percentage is always calculated on the selling price minus only the merchant's share of the discount.
 - From an exempt menu link, the contract percentage or the per-customer contract fee is not deducted; the payment fee and the customer service fee remain.
 - These two contracts are for restaurants and Shops with a menu; Mart and pharmacies use their own percentages (PAY-012).
-- The restaurant or Shops contract stores the markup rate agreed with the merchant. The merchant's contract is the default for all its branches, and platform staff can customize the contract percentage or markup rate for a specific branch; each order saves its branch's contract.
+- The merchant's contract is the default for all its branches, and platform staff can customize the contract percentage for a specific branch; each order saves its branch's contract. Restaurant and Shops contracts have no markup.
 
 Acceptance criteria:
 - The contract type is one of percentage or per-customer-and-branch fee.
 - An item with a selling price of 110 and a contract percentage of 10%: the platform deducts 11.
 - Fee contract: no percentage is deducted from the merchant; only the customer fee is deducted (PAY-010).
-- Changing a merchant's or a branch's markup rate changes sale prices for new orders only.
-- A branch given a markup rate of 8% while its merchant's contract says 10%: its sale price = its store price × 1.08, and the other branches stay at 10%.
+- A change to a sale price or a contract percentage applies to new orders only.
+- A branch with a customized contract percentage of 8% while its merchant's contract says 10%: for an item with a sale price of 100, the platform deducts 8 in this branch and 10 in the other branches.
 
 Pages: A06
 
@@ -3779,6 +3779,7 @@ Rules:
 - If the driver's dues account reaches −50 SAR or less (a setting), they enter "balance lockout" and receive no new tasks until they pay; there is no automatic ban because of lateness.
 - The negative balance is not settled from the deposit during work; it is settled from it only when the account is closed, and the deposit is not returned before settlement.
 - The driver pays the negative balance electronically from the app through Moyasar, and returns to receiving tasks immediately upon payment.
+- A negative opening balance from the previous platform does not count toward the stop limit, and is deducted under TRN-001.
 
 Acceptance criteria:
 - A balance of −49 does not stop tasks, and a balance of −50 stops them.
@@ -3832,7 +3833,7 @@ Rules:
 - The accountant approves the table before coding, and then the examples are declared final.
 - Each merchant has an option platform staff set when adding it: registered for VAT or not registered; a registered merchant must have its VAT number (15 digits) entered. The option covers all merchants: restaurants, Shops, Mart and pharmacies.
 - The merchant always issues its products invoice (the tax invoice under its VAT number if registered) at the full selling price, and the platform issues the platform invoice for the delivery fee and service fee.
-- The markup percentage that goes to the platform (Mart, or a restaurant if the contract provides for it) is a fee on the merchant, with 15% added to it in the monthly fees invoice.
+- The markup percentage that goes to the platform (in Mart only) is a fee on the merchant, with 15% added to it in the monthly fees invoice.
 - The basis of each fee, its tax treatment and its entries are in the "PAY-005 appendix: chart of accounts, entries, and fee basis", which is approved.
 - Changing the registration status or VAT number applies to new orders only; it is saved on each order and recorded in the audit log.
 - All invoices the platform issues are issued automatically through Odoo on command from the system (INT-010), except the products invoice of a registered merchant, which the merchant issues itself.
@@ -3871,9 +3872,9 @@ Pages: A15 A18
 | Item | Value |
 |---|---|
 | Status | **Approved for development** by owner decision after the last review (29 October 2026). Meets the PAY-005 condition "chart of accounts before development" |
-| Note | It is advisable for the business's accountant to review section 5 before the first VAT return, because the regulatory responsibility before ZATCA lies with the business |
+| Accountant review | The company accountant reviewed and approved the annex (2 November 2026), including section 5 |
 | Date | 29 October 2026 |
-| Reference | PRD 4.11. Section 5 records the approved accounting treatment decisions, and they take precedence over any earlier assumption in this file |
+| Reference | Section 5 records the approved accounting treatment decisions, and they take precedence over any earlier assumption in this file |
 
 **General rules governing everything below:**
 - The double-entry ledger is the single source of truth for money; every movement is a balanced entry, and no entry is edited but corrected with a reversing entry; and the sum of each day's entries is zero (PAY-005).
@@ -3941,7 +3942,6 @@ Pages: A15 A18
 | 4122 | Mart and pharmacy commission | Revenue | 5% by default (PAY-012). |
 | 4130 | Payment fee borne by the merchant | Revenue | 2.5% of products after discount + 1 SAR (PAY-011, PAY-027). |
 | 4140 | Markup rate fee — Mart | Revenue | The markup is a fee on the merchant, with 15% added on top, in the monthly fee invoice (section 5 item 2). |
-| 4141 | Markup rate fee — restaurants with a contract stating it belongs to the platform | Revenue | The same treatment, only when the contract states it (section 5 item 3). |
 | 4150 | Ads and paid placements | Revenue | MKT-003. |
 | 4151 | Store customer campaigns | Revenue | MKT-005. |
 | 4152 | Double points bought by the merchant | Revenue | MKT-010; the price is a setting not specified in the file. |
@@ -3962,6 +3962,7 @@ Pages: A15 A18
 | 5150 | Loyalty points expense | Expense | MKT-010. |
 | 5160 | Loss charges and losses on the platform | Expense | When the responsible party is "Platform" for a written reason (PAY-025). |
 | 5170 | STC Pay transfer fees | Expense | If any; not specified in the file. |
+| 5180 | Refunds of previous-platform orders | Expense | Refund complaints on current-platform orders after the old payment account is closed, returned to the customer wallet (TRN-004). |
 
 ##### 1-F Memorandum accounts (memo — off balance sheet)
 
@@ -3993,7 +3994,7 @@ A restaurant on a 10% percentage contract, VAT-registered or not (the VAT on pro
 | Service 2.93 | Net + VAT | 2.55 + 0.38 |
 | Tip 10 | For the driver + VAT | 8.70 + 1.30 (CUS-010) |
 | **Platform share at Moyasar** | 129.93 − 88.75 | **41.18** |
-| Driver fee | 10.43 − 10% (1.04) | 9.39 (file example L285) |
+| Driver fee | 10.43 − 10% (1.04) | 9.39 (financial transaction examples) |
 | Driver tip | Net tip | 8.70 (received in full, CUS-010) |
 | **What remains for the platform** | 41.18 − tax 5.37 − driver 18.09 | **17.72** before the actual Moyasar fee |
 
@@ -4011,7 +4012,7 @@ A restaurant on a 10% percentage contract, VAT-registered or not (the VAT on pro
 | 8 | Partial or full refund after capture | The revenue and tax affected by the difference (4100, 4110, 4120/4121/4122, 4130, 2150, 2151); 2110 for the refunded tip; 2100 for the refunded branch share, or 5160 if the platform is responsible | 2160 Refunds in progress | A single function recalculates on the original order snapshot; the locked contract fee counter (PAY-028, PAY-010). A linked credit note is issued (PAY-007, INT-010). If delivery is refunded, the tip is refunded in full (CUS-010). Role limit: support agent 50, supervisor 200 (owner decision). |
 | 8a | Moyasar refund confirmation | 2160 | 1110 Moyasar—Platform; 1120 Branch wallets (with the branch share) | The branch share is deducted from its wallet (PAY-006). |
 | 8b | Refund to the customer's wallet instead of the card | 2160 | 2130 Refund credit | At the customer's choice; does not expire and has no claim window (PAY-003). |
-| 9 | Platform-funded discount on products (file example: discount 20, platform 12, merchant 8) | 5120 Platform discounts 12 | (part of the capture entry: what the customer paid decreases by 12 and the branch share remains calculated on 97) | Does not reduce the commission base (PAY-004, PAY-009, example L282). The merchant invoices the customer for 97 (what the customer paid + what the platform paid on their behalf), and its VAT is on 97 (section 5, item 4). |
+| 9 | Platform-funded discount on products (financial transaction examples: discount 20, platform 12, merchant 8) | 5120 Platform discounts 12 | (part of the capture entry: what the customer paid decreases by 12 and the branch share remains calculated on 97) | Does not reduce the commission base (PAY-004, PAY-009, financial transaction examples). The merchant invoices the customer for 97 (what the customer paid + what the platform paid on their behalf), and its VAT is on 97 (section 5, item 4). |
 | 9a | Platform discount on its own fees (free delivery, service discount) | 4190 Discounts on platform services | (what the customer paid decreases) | The platform invoice shows the full fee and the discount line, with VAT on the net (Section 5, item 5). The driver fee is not affected (PAY-014). |
 | 10 | Coupon or offer funded by the merchant | — (no expense on the platform) | 2100 is recorded at its share after the discount | Reduces the commission base by the merchant's share (PAY-009). |
 | 10a | Using branch-funded promotional credit | 2100 Branch (for the amount used); 9201 | 9200; (offset by the reduction in the amount collected from the customer) | Deducted from it only on use; expiry has no effect on it (PAY-002, PAY-031). |
@@ -4021,7 +4022,7 @@ A restaurant on a 10% percentage contract, VAT-registered or not (the VAT on pro
 | 14 | Approve a driver payout and send it | 2110 Driver | 2170 Payouts in progress | **With the accountant's approval** (PAY-006). At launch, a bank transfer to the driver's approved IBAN, and STC Pay later (INT-014). No payout for a zero or negative net. |
 | 14a | Record the transfer's bank reference | 2170 | 1100 Bank (and 1130 after STC Pay is enabled) | The bank reference or the STC Pay transaction number is stored. |
 | 14b | Funding the STC Pay account (after it is activated) | 1130 | 1100 Bank | — |
-| 15 | Approve a branch wallet payout and send it to Moyasar | 2100 Branch | 2170 Payouts in progress | **With the accountant's approval**, then the instruction is sent to Moyasar (owner decision, differs from PAY-006). No payout to a new, unapproved bank account (MER-001). |
+| 15 | Approve a branch wallet payout and send it to Moyasar | 2100 Branch | 2170 Payouts in progress | **With the accountant's approval**, then the instruction is sent to Moyasar (owner decision, PAY-006). No payout to a new, unapproved bank account (MER-001). |
 | 15a | Moyasar payout confirmation | 2170 | 1120 Branch wallets | — |
 | 16 | Accountant rejects the payout | — | — | No entry; the balance remains due in 2100/2110 with the rejection reason in the audit log. |
 | 17 | Payout failure after sending | 2170 | 2100 or 2110 | A failed transfer is not counted as paid and returns as a visible due amount for Finance (PAY-006, INT-014). |
@@ -4048,14 +4049,15 @@ A restaurant on a 10% percentage contract, VAT-registered or not (the VAT on pro
 | 29 | Opening balance entry from the old platform | 3900 Balance migration | 2130 (customer); 2110 (driver); 2105 (merchant) | Entered manually by the finance team from an approved statement with a second approver (TRN-001). |
 | 29a | Transfer of the corresponding cash from the previous platform's account | 1100 Bank | 3900 Balance migration | At the total of the transferred balances; 3900 reaches zero. Any difference is investigated and is closed only by an approved entry (section 5 item 12). |
 | 29b | Paying the merchant's opening balance | 2105 | 2170 → then 1100 on confirmation | In the first approval cycle, a bank transfer from the platform's account (not through the Moyasar wallet). |
+| 29c | Refund of a previous-platform order after the old payment account is closed | 5180 Refunds of previous-platform orders | 2130 Refund credit | With the reason "previous-platform refund" and the old order reference, and a second approver (TRN-004). |
 
 ---
 
-#### 3. Entry test figures (from the file examples L279–L287)
+#### 3. Entry test figures (from the financial transaction examples)
 
 | Example | Expected result in the ledger |
 |---|---|
-| Mart: store price 100, markup 5%, delivery 12 | Customer 119.93; 4122 = 5; 4140 = 5; 2151 = 1.50; 2100 = 93.50 (95 before platform fee tax, as in L279). The merchant invoices the customer at 105 |
+| Mart: store price 100, markup 5%, delivery 12 | Customer 119.93; 4122 = 5; 4140 = 5; 2151 = 1.50; 2100 = 93.50 (95 before platform fee tax, as in the financial transaction examples). The merchant invoices the customer at 105 |
 | Restaurant 10%, selling price 105 | 4120 = 10.50; 4130 = 3.63 |
 | Restaurant discount 20 (merchant 8, platform 12) | Commission base 97; 4120 = 9.70; 5120 = 12; 4130 = 3.13 |
 | Unregistered restaurant, selling price 115, 10% | 4120 = 11.50; 2151 = 1.73; 2100 = 101.77 before the payment fee |
@@ -4079,7 +4081,6 @@ A restaurant on a 10% percentage contract, VAT-registered or not (the VAT on pro
 | Pharmacy commission | 5% by default of the products invoice value | 15% VAT applies | Platform | Monthly fee invoice | PAY-012, PAY-022 |
 | Payment fee | 2.5% of products after discount + 1 SAR per menu order; no delivery, service or tip; no Mart or pharmacy; whatever the payment method | 15% VAT applies | Platform | Monthly fee invoice | PAY-011, PAY-022, PAY-029 |
 | Markup rate fee — Mart | 5% by default of the store price | 15% VAT applies (fee on the merchant). The full selling price to the customer is in the merchant's invoice with its VAT | Platform (the fee); merchant (the selling price) | Monthly fee invoice | PAY-004, PAY-012 |
-| Markup rate fee — restaurants | Per the contract | If it belongs to the platform: like Mart (a fee with 15% on top). If it belongs to the merchant: no fee | The platform, if it belongs to it | Monthly fee invoice | PAY-009 |
 | Ads and placements | Placement, city and duration price | 15% VAT applies | Platform | A separate ad invoice at approval and deduction | MKT-003 |
 | Store customer campaigns | Region or city price | 15% VAT applies | Platform | A separate invoice, like an ad, after approval | MKT-005 |
 | Double points are bought by the merchant | The price is a setting (ADM) | 15% VAT applies | Platform | Monthly fee invoice | MKT-010 |
@@ -4101,8 +4102,8 @@ All open questions in the draft were resolved in the latest review. Reference: t
 | # | Issue | Approved decision | Reason |
 |---|---|---|---|
 | 1 | Branch wallets at Moyasar | Within the budget: restricted asset 1120 against liability 2100, disclosed as restricted | The platform controls money leaving (no payout without its accountant's approval) and deducts from it, so it is under its control; full daily reconciliation with Moyasar achieves this |
-| 2 | Markup percentage in Mart | The merchant is the principal in selling the products and invoices the customer at the full selling price (105) with its tax. The markup is a fee on the merchant (4140) with 15% added on top in the monthly fee invoice together with the commission | The invoicing chain stays the same: the merchant sells, and the platform invoices its services to the merchant. Matches the L279 example: 95 before platform fee tax |
-| 3 | Markup in restaurants when the contract gives it to the platform | Same as item 2 (4141). When it belongs to the merchant there is no platform entry | Consistency |
+| 2 | Markup percentage in Mart | The merchant is the principal in selling the products and invoices the customer at the full selling price (105) with its tax. The markup is a fee on the merchant (4140) with 15% added on top in the monthly fee invoice together with the commission | The invoicing chain stays the same: the merchant sells, and the platform invoices its services to the merchant. Matches the Mart example in the financial transaction examples: 95 before platform fee tax |
+| 3 | No markup in restaurants and Shops | Platform staff enter the sale price, and the platform books no entry for the difference between it and the store price (MER-002) | Owner decision (2 November 2026) |
 | 4 | Platform-funded discount on products | The merchant invoices the full consideration (what the customer paid + what the platform paid on their behalf = 97 in the example) with its tax on it. The platform's share is a marketing expense 5120 with no input tax | What a third party pays on the customer's behalf is part of the consideration for the supply |
 | 5 | Platform discount on its own fees (free delivery, service discount) | A revenue reduction (4190), not an expense. The invoice shows the full fee and the discount line, and tax is on the net | A discount on the platform's own supply reduces the consideration |
 | 6 | VAT point for merchant fees | At deduction (treated as payment), so it is remitted in the return for the deduction period. A consolidated monthly tax invoice per branch is issued during the following month, and 2151 is a tracking sub-account of 2150 | Accrual at the earliest of supply, invoice, or payment |
@@ -4166,21 +4167,20 @@ Pages: MD15 A05 A06
 #### MER-002 — Menu, prices, and permissions [Launch-critical]
 
 Rules:
-- Each product in each branch has a store price entered by the merchant and a sale price set by the platform: either manually per product, or by a markup rate on the merchant's or branch's whole menu, so the sale price = store price × (1 + markup rate) in the branch's contract (PAY-009); a manual price takes precedence over the rate. The customer sees only the sale price and never sees the store price, the store price is used in reports and analytics, the merchant sees both prices, and all calculations are on the sale price.
-- Modes for the merchant's edits to the store price: prohibited, needs review, within a percentage, full; price limits are measured against the approved price (the last price approved by the platform), not against the merchant's last edit.
-- The price limits are an absolute percentage for raising or lowering; an edit outside it goes to review, and prohibited does not allow a price edit.
-- The approved price remains for the customer until an edit that needs review is accepted; the preview shows the store price and the sale price together.
+- Each product in each branch has a sale price: what the customer sees and pays, and the basis for fees and the percentage. In restaurants and Shops, platform staff enter the menu and the sale price manually for each product; the sale price is not calculated from the store price and there is no markup. In Mart, the sale price = the store price × (1 + the 5% markup) (MER-010).
+- In restaurants, the store price is the price written on the restaurant's own menu; platform staff enter it for analytics only (ADM-030) and it is not part of any financial calculation. Shops have no store price.
+- The merchant does not change any price directly: from the app or dashboard they send a price change request or a new product request, and the platform approves or rejects it with a reason (A08). When approving a restaurant or Shops request, the platform staff member types the new sale price by hand.
+- The approved price remains for the customer until the request is approved; the preview shows the store price and the sale price together.
 - The merchant's permission is set by the platform, then the merchant manager distributes permissions to merchant staff within its limits.
-- A new product for restaurants and Shops follows the price permission mode: it appears immediately in "full" and "within a percentage", and goes to review in "needs review".
+- A new product is added by platform staff, or requested by the merchant, in which case it does not appear to the customer before approval.
 - The menu is shared by the merchant and inherited by each branch, and each branch has its own store price, availability and hours, as with groceries (MER-010); changing a price in one branch does not change it in another.
 
 Acceptance criteria:
-- Two edits do not each accumulate a 5% raise beyond the price limits.
+- A price change request does not change what the customer sees before the platform approves it.
 - An employee does not exceed the merchant's permission ceiling.
-- A product with a store price of 30 and its branch's markup rate of 10%: its sale price is 33; the customer sees 33 and does not see 30, and fees and the percentage are calculated on 33.
-- The merchant sees the store price and the sale price of each product in their app and dashboard, and the store price is not shown to the customer on any page.
-- Raising a product's store price in the Olaya branch does not change its price in the Al Malqa branch, and the product stays in both branches' menu.
-- A menu with a 10% markup, and a product with a store price of 30 for which a platform employee entered a manual sale price of 35: the customer sees 35, and the other products are at store price × 1.10.
+- A restaurant product with a store price of 30 and a sale price of 33: the customer sees 33 and does not see 30, and fees and the percentage are calculated on 33; changing the store price alone does not change the sale price.
+- The merchant sees the store price and the sale price of each product in their app and dashboard, and the customer sees only the sale price.
+- Changing a product's sale price in the Olaya branch does not change its price in the Al Malqa branch, and the product stays in both branches' menu.
 
 Pages: M05 M06 MD03 MD13 A06 A08
 
@@ -4281,16 +4281,18 @@ Pages: MD13 MD15
 Rules:
 - The catalog is for Mart only. The platform creates three types at reference store prices: the primary (common grocery products), the secondary (specialized categories the grocery chooses, such as organic or imported), and the general (what Mart merchants suggest after platform approval).
 - When the merchant type is set to Mart, Mart mode is activated automatically, and the merchant chooses whole catalogs then edits products individually.
-- The catalog subscription inherits its current products enabled, and later additions enter the grocery disabled unless the merchant turns on the "Enable additions automatically" option; a local edit of price, availability, and image is not replaced by a central update.
+- The catalog subscription inherits its current products enabled, and later additions enter the grocery disabled unless the merchant turns on the "Enable additions automatically" option; local changes to availability and image, and a local price after platform approval, are not replaced by a central update.
 - A new merchant product is sent to the platform for approval into the general catalog; before approval it is a draft not shown to the customer, and after it, it stays enabled at the grocery that suggested it.
 - Deactivating a central product deactivates it in all groceries; a local activation does not override the central deactivation.
 - Each grocery has an independent page, enabled products, and local prices with a +5% preview.
 - The "Enable additions automatically" option is per grocery and catalog, and is off by default.
+- A grocery changes its local price only through a request the platform approves (A08); the sale price = the approved price × 1.05.
 
 Acceptance criteria:
 - Updating the central product does not touch an edited local price.
 - A new product in a shared catalog enters the shared grocery disabled, unless the "Enable additions automatically" option is on.
 - Central deactivation hides the product from everyone.
+- A grocery's request to change its local price does not change what the customer sees before the platform approves it.
 
 Pages: C04 C07 M07 MD03 A07
 
@@ -4778,10 +4780,10 @@ Approved by the owner (29 October 2026).
 
 #### Glossary
 
-- **Merchant owner** = "merchant manager" in MER-037 (L4223) and MER-043 (L4293). It is the registration account itself, and sees all branches.
-- **Branch manager**: works in their own branch only (MER-037 L4224, MER-017 L4003). Created from MD10 with a ready-made permissions template (L1545). ✓ in the branch manager column means the permission is **included in the default template and for their branch only**.
-- **Staff member (with granted permissions)**: has nothing by default. The owner (or the branch manager within their limits) grants them permissions from the MER-037 list: Orders, Handover, Products, Prices, Offers, Campaigns, Reports, Finance, Tickets, Staff, **Reviews** (L4223, L4227).
-- **Prep account**: a shared device or kitchen account. It works with the "Orders" permission within its limits (M01 L936, M08 L1144). It does not open dues or edit prices (MER-030 L4137). In M11 it sees only orders, devices and support (L1224).
+- **Merchant owner** = "merchant manager" in MER-037 and MER-043. It is the registration account itself, and sees all branches.
+- **Branch manager**: works in their own branch only (MER-037, MER-017). Created from MD10 with a ready-made permissions template. ✓ in the branch manager column means the permission is **included in the default template and for their branch only**.
+- **Staff member (with granted permissions)**: has nothing by default. The owner (or the branch manager within their limits) grants them permissions from the MER-037 list: Orders, Handover, Products, Prices, Offers, Campaigns, Reports, Finance, Tickets, Staff, **Reviews**.
+- **Prep account**: a shared device or kitchen account. It works with the "Orders" permission within its limits (M01, M08). It does not open dues or edit prices (MER-030). In M11 it sees only orders, devices and support.
 
 Cell symbols: ✓ allowed | ✗ not allowed and not grantable | "By grant" not allowed by default, and enabled by granting the permission named in parentheses.
 
@@ -4789,36 +4791,36 @@ Cell symbols: ✓ allowed | ✗ not allowed and not grantable | "By grant" not a
 
 | # | Action | Merchant owner | Branch manager | Staff member | Prep account | Reference and note |
 |---|---|---|---|---|---|---|
-| 1 | Accepting the order (interacting with the ringing and opening it) | ✓ | ✓ | "By grant" (Orders) | ✓ | M01 L921–922, L936; MER-030 L4131. There is no accept or reject decision for a menu or Mart order (MER-030 L4132), and "accept" here means stopping the ringing and starting preparation |
-| 2 | Set the preparation time (the only edit within 3 minutes) | ✓ | ✓ | "By grant" (Orders) | ✓ | M01 L921, L926; ORD-003 L3110 |
-| 3 | Ready announcement ("Ready") | ✓ | ✓ | "By grant" (Orders) | ✓ | M01 L923; M02 L967; M08 L1144 |
-| 3a | Delivery by the driver or the customer (code entry) | ✓ | ✓ | "By grant" (Handover) | ✓ | M01 L937; M03 L1016. The prep account has "Handover" because it is usually the device at the counter |
-| 4 | Out-of-stock handling (remove / call / replace / cancel according to the customer's choice) | ✓ | ✓ | "By grant" (Orders) | ✓ | M02 L967; M08 L1144; M12 L1268 |
-| 5 | Rejecting a write-in order (only before the products invoice is uploaded) | ✓ | ✓ | "By grant" (Orders) | ✗ | Owner decision: rejection applies to write-in orders only, and before the invoice only (ORD-004 L3130, MER-006 L3853). No reject button in menu and mart for any role. It is barred for the prep account: rejection cannot be undone, the order enters "Awaiting support decision", and a shared account does not show who decided (MER-037 L4225) |
-| 6 | Uploading the invoice (products invoice) | ✓ | ✓ | "By grant" (Orders) | ✓ | M02 L955; M04 L1041; M08 L1138. In write-in, the upload sends the payment request to the customer (M04 L1031) |
-| 7 | Temporarily pause the branch | ✓ | ✓ | "By grant" (Orders) | ✗ | M09 L1172; MER-004 L3822. Pausing hides the branch from customers, so it is not left to a shared account |
-| 8 | Busy mode | ✓ | ✓ | "By grant" (Orders) | ✓ | M09 L1172; MER-018 L4010. The kitchen knows best how busy it is. Busy mode does not raise any time above 40 minutes (owner decision) |
-| 8a | Edit working hours and special days | ✓ | ✓ | ✗ | ✗ | M09 L1173; MD09 L1535 |
-| 9a | Edit the menu (add a product, name, image and description, options, preparation time) | ✓ | ✗ (the menu is shared across all branches) | "By grant" (Products) | ✗ | M05 L1064–1066; M06 L1094; MD03 L1357. The branch manager changes only the **availability** of their branch's products and their temporary pause (M05 L1066, MD03 L1359) |
-| 9b | Edit prices (store price) | ✓ | ✓ for their branch | "By grant" (Prices) | ✗ | M05 L1065–1066; M06 L1095; MER-030 L4137. Editing is within the merchant's pattern, and anything beyond it goes to platform review (MER-002) |
-| 10 | Devices and printers (link, remove, sign a device out, auto-print) | ✓ | ✓ for their branch | ✗ (status view only) | ✗ (status view only) | M15 L1241–1242; MD13 L1627 |
-| 11 | Test print and bell test | ✓ | ✓ | ✓ | ✓ | M15 L1242. It needs no grant because it changes nothing |
-| 12 | Staff management (add, permissions, suspend) | ✓ | ✓ for their branch's employees and within their permissions | "By grant" (Staff) | ✗ | MD10 L1558–1560; M11 L1213, L1218; MER-037 L4224 |
-| 13 | Ratings, replying to them, and requesting hiding | ✓ | ✓ for their branch | "By grant" (Reviews) | ✗ | MER-037 L4227 makes it a separate permission, and MD08 L1488 contradicts it by tying it to "Tickets" |
-| 13a | Objecting to a loss charge or penalty | ✓ | "By grant" (Finance) | "By grant" (Finance) | ✗ | MD08 L1489; MD07 L1454, L1464–1465; SUP-006 |
-| 14 | Tickets and platform chat | ✓ | ✓ for their branch | "By grant" (Tickets) | ✓ Order tickets only | M12 L1267; MD12 L1600–1602; M11 L1224. The "Accounts" subject also requires "Finance" (M12 L1267). **Destination (owner decision):** the account manager assigned to the merchant, which is a role in the admin dashboard, together with the supervisor |
-| 15 | Viewing the contract card | ✓ | "By grant" (Finance) | "By grant" (Finance) | ✗ | MD13 L1626. Line L1628 says "view only for everyone", which contradicts L1626 |
-| 16 | Statements and wallet (statement, payouts, fees invoice, archive) | ✓ | "By grant" (Finance) for their branch | "By grant" (Finance) | ✗ | MD07 L1464–1465; M10 L1196; MER-043 L4297; MER-030 L4137 |
-| 17a | Payout request | ✗ | ✗ | ✗ | ✗ | The merchant does not request a payout: the branch wallet balance appears to the accountant in every cycle, who approves or rejects its payout (owner decision, 29 October; PAY-006 in 4.11). The owner and the branch manager see the status "Awaiting approval" in the statement |
-| 17b | Change bank details (request to change the bank account) | ✓ | ✗ | ✗ (not granted even with "Finance") | ✗ | MER-001 L3782–3784 require verification and finance approval, and the notification goes to the merchant manager's mobile. MD09 L1521 shows the account read-only and does not set where the request is made; the request is submitted from MD12 under the "Accounts" topic |
-| 18 | Paid campaigns and ads (create, send, stop) | ✓ | "By grant" (Campaigns) for their branch | "By grant" (Campaigns) | ✗ | MD05 L1414–1416. Spend and return are visible to whoever has "Finance" or "Campaigns" (L1415). The amount is deducted from the branch's dues after approval (MKT-003, MKT-005) |
+| 1 | Accepting the order (interacting with the ringing and opening it) | ✓ | ✓ | "By grant" (Orders) | ✓ | M01; MER-030. There is no accept or reject decision for a menu or Mart order (MER-030), and "accept" here means stopping the ringing and starting preparation |
+| 2 | Set the preparation time (the only edit within 3 minutes) | ✓ | ✓ | "By grant" (Orders) | ✓ | M01; ORD-003 |
+| 3 | Ready announcement ("Ready") | ✓ | ✓ | "By grant" (Orders) | ✓ | M01; M02; M08 |
+| 3a | Delivery by the driver or the customer (code entry) | ✓ | ✓ | "By grant" (Handover) | ✓ | M01; M03. The prep account has "Handover" because it is usually the device at the counter |
+| 4 | Out-of-stock handling (remove / call / replace / cancel according to the customer's choice) | ✓ | ✓ | "By grant" (Orders) | ✓ | M02; M08; M12 |
+| 5 | Rejecting a write-in order (only before the products invoice is uploaded) | ✓ | ✓ | "By grant" (Orders) | ✗ | Owner decision: rejection applies to write-in orders only, and before the invoice only (ORD-004, MER-006). No reject button in menu and mart for any role. It is barred for the prep account: rejection cannot be undone, the order enters "Awaiting support decision", and a shared account does not show who decided (MER-037) |
+| 6 | Uploading the invoice (products invoice) | ✓ | ✓ | "By grant" (Orders) | ✓ | M02; M04; M08. In write-in, the upload sends the payment request to the customer (M04) |
+| 7 | Temporarily pause the branch | ✓ | ✓ | "By grant" (Orders) | ✗ | M09; MER-004. Pausing hides the branch from customers, so it is not left to a shared account |
+| 8 | Busy mode | ✓ | ✓ | "By grant" (Orders) | ✓ | M09; MER-018. The kitchen knows best how busy it is. Busy mode does not raise any time above 40 minutes (owner decision) |
+| 8a | Edit working hours and special days | ✓ | ✓ | ✗ | ✗ | M09; MD09 |
+| 9a | Edit the menu (add a product, name, image and description, options, preparation time) | ✓ | ✗ (the menu is shared across all branches) | "By grant" (Products) | ✗ | M05; M06; MD03. The branch manager changes only the **availability** of their branch's products and their temporary pause (M05, MD03) |
+| 9b | Edit prices (store price) | ✓ | ✓ for their branch | "By grant" (Prices) | ✗ | M05; M06; MER-030. Editing is within the merchant's pattern, and anything beyond it goes to platform review (MER-002) |
+| 10 | Devices and printers (link, remove, sign a device out, auto-print) | ✓ | ✓ for their branch | ✗ (status view only) | ✗ (status view only) | M15; MD13 |
+| 11 | Test print and bell test | ✓ | ✓ | ✓ | ✓ | M15. It needs no grant because it changes nothing |
+| 12 | Staff management (add, permissions, suspend) | ✓ | ✓ for their branch's employees and within their permissions | "By grant" (Staff) | ✗ | MD10; M11; MER-037 |
+| 13 | Ratings, replying to them, and requesting hiding | ✓ | ✓ for their branch | "By grant" (Reviews) | ✗ | MER-037; MD08. A permission separate from "Tickets" |
+| 13a | Objecting to a loss charge or penalty | ✓ | "By grant" (Finance) | "By grant" (Finance) | ✗ | MD08; MD07; SUP-006 |
+| 14 | Tickets and platform chat | ✓ | ✓ for their branch | "By grant" (Tickets) | ✓ Order tickets only | M12; MD12; M11. The "Accounts" subject also requires "Finance" (M12). **Destination (owner decision):** the account manager assigned to the merchant, which is a role in the admin dashboard, together with the supervisor |
+| 15 | Viewing the contract card | ✓ | "By grant" (Finance) | "By grant" (Finance) | ✗ | MD13. Display-only, and only for whoever holds "Finance" |
+| 16 | Statements and wallet (statement, payouts, fees invoice, archive) | ✓ | "By grant" (Finance) for their branch | "By grant" (Finance) | ✗ | MD07; M10; MER-043; MER-030 |
+| 17a | Payout request | ✗ | ✗ | ✗ | ✗ | The merchant does not request a payout: the branch wallet balance appears to the accountant in every cycle, who approves or rejects its payout (owner decision; PAY-006). The owner and the branch manager see the status "Awaiting approval" in the statement |
+| 17b | Change bank details (request to change the bank account) | ✓ | ✗ | ✗ (not granted even with "Finance") | ✗ | MER-001: verification and finance approval, and the notification goes to the merchant manager's mobile. MD09 shows the account read-only, and the request is submitted from MD12 under the "Accounts" topic |
+| 18 | Paid campaigns and ads (create, send, stop) | ✓ | "By grant" (Campaigns) for their branch | "By grant" (Campaigns) | ✗ | MD05. Spend and return are visible to whoever has "Finance" or "Campaigns". The amount is deducted from the branch's dues after approval (MKT-003, MKT-005) |
 
 #### General matrix rules
 
-1. No employee's permissions exceed what the platform granted the merchant. What the platform has withdrawn appears locked for all roles (MER-037 L4224, MD10 L1563).
-2. A branch manager does not grant an employee a permission they do not hold themselves (MD10 L1560).
-3. Every action from the prep account is recorded with the device name and the last employee who logged in on it, if any. The reason is that MER-037 L4225 requires the employee to be recorded.
-4. Ringing continues until a device with the "Orders" permission interacts (MER-030 L4131).
+1. No employee's permissions exceed what the platform granted the merchant. What the platform has withdrawn appears locked for all roles (MER-037, MD10).
+2. A branch manager does not grant an employee a permission they do not hold themselves (MD10).
+3. Every action from the prep account is recorded with the device name and the last employee who logged in on it, if any, because MER-037 requires the employee to be recorded.
+4. Ringing continues until a device with the "Orders" permission interacts (MER-030).
 
 ### Driver (DRV)
 
@@ -5082,9 +5084,11 @@ Rules:
 - The system saves each driver's route in their log, and the Operations employee judges location spoofing from it. No automatic speed or jump limits.
 - The system detects modified phones (rooted or jailbroken).
 - A modified phone detection reaches the Operations team as an alert with evidence and appears in the driver file; the driver is not disabled automatically (DRV-023)
+- Every week the operations team reviews a random sample of task routes in each enabled city (setting, default 20 tasks), plus every task with a lateness or non-arrival complaint, and records the result of each review.
 
 Acceptance criteria:
 - An Operations employee opens any driver's route log from their file, and the driver stays active until an employee decides.
+- Every week the operations team sees a sample-review task for each enabled city, and it cannot be closed without recording its result.
 
 Pages: D01 A02 A10
 
@@ -5474,10 +5478,12 @@ Acceptance criteria:
 Rules:
 - Every page shows the indicators, charts, tables, and alerts listed in its elements, in the "Admin Dashboard" section, using the definitions in the "Indicator Definitions" appendix.
 - Unified indicator definitions are used across all pages.
+- Restaurant price analysis: for each city and restaurant, the average ratio of sale price to store price (the restaurant's menu price), and the share of restaurants that sell at their own menu price. It is calculated from products that have a store price, and excludes Shops and Mart.
 
 Acceptance criteria:
 - Tapping any number opens the list it was calculated from
 - When the same number is shown on two pages for the same period, the value is the same
+- A restaurant whose two products have store prices 30 and 20 and sale prices 33 and 20: the average increase is 5%, and it is not counted among restaurants selling at their menu price because one of its products is above it.
 
 Pages: A01 A21
 
@@ -6432,12 +6438,14 @@ Rules:
 - Each entry with the reason "Opening balance" and the statement reference, and it needs a second approver (ADM-002), and it is recorded in the ledger (PAY-005).
 - The merchant's opening balance is paid from the platform's bank in the first approval cycle (PAY-006), and does not pass through the branch wallet at Moyasar (Appendix PAY-005, entry 29b).
 - The balance holder may object within 14 days of first login with a support ticket of type "Opening balance"; Finance reviews it against the statement, and the correction is an entry on the migration account with a second approver.
-- A driver's negative balance enters the statement and is deducted from earnings up to SAR 50 per week. A negative opening balance does not stop the driver even if it passes the stop limit (PAY-026). Amounts under SAR 10 are written off.
+- A driver's negative balance enters the statement and is never written off, however small; it is deducted from earnings up to SAR 50 per week until paid. It is tracked separately from the driver's activity on the new platform: the stop limit (PAY-026) counts only post-launch activity, so a negative opening balance does not stop the driver even if it passes the limit.
 
 Acceptance criteria:
 - The total of opening balances matches the current platform's statement to the halala.
 - An opening balance not approved by a second approver does not appear in the wallet.
 - A driver with an opening balance of −SAR 120 keeps receiving tasks, and SAR 50 is deducted in the first week.
+- A driver with an opening balance of −SAR 120 who then gets a SAR 5 penalty after launch is not stopped; the driver is stopped if post-launch activity reaches −SAR 50.
+- A negative opening balance of SAR 3 is not written off, and is deducted in the first week.
 
 Pages: A18
 
@@ -6463,7 +6471,7 @@ Rules:
 Rules:
 - Orders, invoices, payments and tickets from the current platform, and its conversations for 6 months, are exported to a searchable archive read by Finance and Support, then the old system is shut down. Ratings are not archived.
 - Personal data (name, mobile, address) is hidden one year after the transition or on a deletion request, and the financial record stays without identity for the statutory period.
-- The old payment account stays for 7 days after shutdown to process refunds, and after that any refund complaint goes to the customer wallet.
+- The old payment account stays for 7 days after shutdown to process refunds, and after that any refund complaint goes to the customer wallet and is booked as a platform expense with the reason "previous-platform refund" and a second approver (PAY-005 annex, entry 29c).
 - The new platform has new credentials for each external service, and the old ones are revoked when the seven days end.
 
 #### TRN-005 — Mandatory update of the current apps [Launch-critical]
