@@ -371,6 +371,21 @@ for _n, _rid, _start, _old, _new in DEC15.SUB:
     _r[_k] = [x.replace(_old, _new) if x.startswith(_start) else x for x in _r[_k]]
 DEC.DECISIONS.extend((n, t, d, _ids3.get(n, [])) for n, t, d in DEC15.DECISIONS)
 
+# الجولة السادسة عشرة: ضريبة المنتجات مسؤولية التاجر وحده
+import b4_decisions16 as DEC16
+D['revision'] = DEC16.REVISION
+for _n, _rid, _old, _new in DEC16.REPLACE:
+    _r = _touch(_rid, _n)
+    _k = next((k for k in ('rules', 'acceptance') if any(x.startswith(_old) for x in _r[k])), None)
+    assert _k, (_rid, _old)
+    _r[_k] = [(_new if x.startswith(_old) else x) for x in _r[_k]]
+for _n, _rid, _start, _old, _new in DEC16.SUB:
+    _r = _touch(_rid, _n)
+    _k = next(k for k in ('rules', 'acceptance') if any(x.startswith(_start) for x in _r[k]))
+    assert any(_old in x for x in _r[_k]), (_rid, _old)
+    _r[_k] = [x.replace(_old, _new) if x.startswith(_start) else x for x in _r[_k]]
+DEC.DECISIONS.extend((n, t, d, _ids3.get(n, [])) for n, t, d in DEC16.DECISIONS)
+
 DEC.DECISIONS.sort(key=lambda x: x[0])
 DEC.SETTING_EDITS.update(DEC3.SETTING_EDITS)
 DEC.SETTING_EDITS.update(DEC4.SETTING_EDITS)
@@ -425,6 +440,10 @@ for _start, _col, _old, _new in DEC8.EXAMPLE_EDITS8:
     D['financialExamples'][_i][_col] = D['financialExamples'][_i][_col].replace(_old, _new)
 # الجولة الرابعة عشرة: أمثلة العمليات المالية (بعد كل تعديلات الأمثلة السابقة)
 for _start, _col, _old, _new in DEC14.EXAMPLE_EDITS14:
+    _i = next(i for i, x in enumerate(D['financialExamples']) if x[0].startswith(_start))
+    assert _old in D['financialExamples'][_i][_col], (_start, _old)
+    D['financialExamples'][_i][_col] = D['financialExamples'][_i][_col].replace(_old, _new)
+for _start, _col, _old, _new in DEC16.EXAMPLE_EDITS16:
     _i = next(i for i, x in enumerate(D['financialExamples']) if x[0].startswith(_start))
     assert _old in D['financialExamples'][_i][_col], (_start, _old)
     D['financialExamples'][_i][_col] = D['financialExamples'][_i][_col].replace(_old, _new)
