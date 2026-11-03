@@ -361,6 +361,16 @@ for _n, _rid, _start, _old, _new in DEC14.SUB:
     _r[_k] = [x.replace(_old, _new) if x.startswith(_start) else x for x in _r[_k]]
 DEC.DECISIONS.extend((n, t, d, _ids3.get(n, [])) for n, t, d in DEC14.DECISIONS)
 
+# الجولة الخامسة عشرة: مواءمة صياغة ضريبة المنتجات
+import b4_decisions15 as DEC15
+D['revision'] = DEC15.REVISION
+for _n, _rid, _start, _old, _new in DEC15.SUB:
+    _r = _touch(_rid, _n)
+    _k = next(k for k in ('rules', 'acceptance') if any(x.startswith(_start) for x in _r[k]))
+    assert any(_old in x for x in _r[_k]), (_rid, _old)
+    _r[_k] = [x.replace(_old, _new) if x.startswith(_start) else x for x in _r[_k]]
+DEC.DECISIONS.extend((n, t, d, _ids3.get(n, [])) for n, t, d in DEC15.DECISIONS)
+
 DEC.DECISIONS.sort(key=lambda x: x[0])
 DEC.SETTING_EDITS.update(DEC3.SETTING_EDITS)
 DEC.SETTING_EDITS.update(DEC4.SETTING_EDITS)

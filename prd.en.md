@@ -1,6 +1,6 @@
-# Mahallat Platform Specification — Version 4.16
+# Mahallat Platform Specification — Version 4.17
 
-3 November 2026 · Revision 2026-11-03c · 241 requirements · 93 pages. The requirements are the reference.
+4 November 2026 · Revision 2026-11-04 · 241 requirements · 93 pages. The requirements are the reference.
 
 ## Order states by type
 
@@ -3861,7 +3861,7 @@ Rules:
 - Changing the registration status or VAT number applies to new orders only; it is saved on each order and recorded in the audit log.
 - All invoices the platform issues are issued automatically through Odoo on command from the system (INT-010); the products invoice, however, is always issued by the merchant, registered or not.
 - VAT on delivery fees, service fees, and the tip is on the platform in every case: it issues its invoice for them and remits it, and it is not deducted from the merchant, registered or not. Product VAT is on the registered merchant, and the platform does not remit it on their behalf.
-- Payment splitting is the only model (PAY-006): the product value reaches the branch's Moyasar wallet and never passes through the platform's account; so the platform issues the platform invoice for delivery fees, service fees, and the tip, and the fee invoice to the merchant only, while the merchant issues the products invoice and its VAT stays with them, registered or not.
+- Payment splitting is the only model (PAY-006): the product value reaches the branch's Moyasar wallet and never passes through the platform's account; so the platform issues the platform invoice for delivery fees, service fees, and the tip, and the fee invoice to the merchant only, while the merchant issues the products invoice and its VAT stays with a registered merchant; no VAT applies to an unregistered merchant's products.
 - The platform adds no tax to any product: the sale price is final; a VAT-registered merchant remits the VAT on its products to the state, and no VAT applies to an unregistered merchant's products.
 
 Acceptance criteria:
@@ -4096,7 +4096,7 @@ A restaurant on a 10% percentage contract, VAT-registered or not (VAT on product
 
 | Fee | What it is calculated on | Tax inclusive or exclusive | Who issues the invoice | In any invoice | Reference |
 |---|---|---|---|---|---|
-| Product price | Selling price after discount | Included, and always borne by the merchant | Merchant | Products invoice from the merchant | PAY-029, owner decision |
+| Product price | Selling price after discount | Included, and borne by a registered merchant; no VAT applies to an unregistered merchant's products | Merchant | Products invoice from the merchant | PAY-029, owner decision |
 | Delivery fee | Distance: restaurants 9 SAR covers 3 km + 1.5/km (9–25); Mart and pharmacy 12 SAR covers 3 km + 1.5/km (12–30) | Included (12 → 10.43 + 1.57) | Platform | Platform invoice for the order at capture | PAY-013, PAY-029, INT-010 |
 | Customer service fee — menu and Mart | 2.5% of products after discounts + the delivery actually paid, excluding the tip and before service | Included | Platform | Platform invoice for the order | PAY-021, PAY-029 |
 | Customer service fee — write-in and pharmacy | 5% of products only | Included | Platform | Platform invoice for the order (second payment) | PAY-021, PAY-012 |
