@@ -315,6 +315,37 @@ for _owner, _title, _new_title, _new_desc in DEC12.REPORT_EDITS12:
     if _new_desc is not None:
         _rep['description'] = _new_desc
 
+# الجولة الثالثة عشرة: إزالة التعارضات بعد الفحص النهائي لـ 4.14
+import b4_decisions13 as DEC13
+D['revision'] = DEC13.REVISION
+for _n, _rid, _old, _new in DEC13.REPLACE:
+    _r = _touch(_rid, _n)
+    _k = next((k for k in ('rules', 'acceptance') if any(x.startswith(_old) for x in _r[k])), None)
+    assert _k, (_rid, _old)
+    _r[_k] = [(_new if x.startswith(_old) else x) for x in _r[_k] if _new is not None or not x.startswith(_old)]
+for _n, _rid, _start, _old, _new in DEC13.SUB:
+    _r = _touch(_rid, _n)
+    _k = next(k for k in ('rules', 'acceptance') if any(x.startswith(_start) for x in _r[k]))
+    assert any(_old in x for x in _r[_k]), (_rid, _old)
+    _r[_k] = [x.replace(_old, _new) if x.startswith(_start) else x for x in _r[_k]]
+for _n, _rid, _kind, _txt in DEC13.ADD:
+    _r = _touch(_rid, _n)
+    _r['rules' if _kind == 'R' else 'acceptance'].append(_txt)
+for _n, _rid, _p in DEC13.PRIORITY:
+    _touch(_rid, _n)['priority'] = _p
+DEC.DECISIONS.extend((n, t, d, _ids3.get(n, [])) for n, t, d in DEC13.DECISIONS)
+for _owner, _title, _new_title, _new_desc, _group in DEC13.REPORT_EDITS13:
+    _rep = next(x for x in D['reports'][_owner] if x['title'] == _title)
+    _rep['title'] = _new_title
+    if _new_desc is not None:
+        _rep['description'] = _new_desc
+    if _group is not None:
+        _rep['group'] = _group
+for _pid, _target in DEC13.PAGE_LINKS_DEL13:
+    _p = next(p for p in D['pages'] if p['id'] == _pid)
+    assert _target in _p['links'], (_pid, _target)
+    _p['links'].remove(_target)
+
 DEC.DECISIONS.sort(key=lambda x: x[0])
 DEC.SETTING_EDITS.update(DEC3.SETTING_EDITS)
 DEC.SETTING_EDITS.update(DEC4.SETTING_EDITS)
@@ -420,6 +451,16 @@ for _row in D['settings']:
         _found12.add(_row[0])
         _row[:] = list(DEC12.SETTING_EDITS12[_row[0]])
 assert _found12 == set(DEC12.SETTING_EDITS12), set(DEC12.SETTING_EDITS12) - _found12
+_found13 = set()
+for _row in D['settings']:
+    if _row[0] in DEC13.SETTING_EDITS13:
+        _found13.add(_row[0])
+        _row[:] = list(DEC13.SETTING_EDITS13[_row[0]])
+assert _found13 == set(DEC13.SETTING_EDITS13), set(DEC13.SETTING_EDITS13) - _found13
+for _row in D['integrations']:
+    if _row[0] in DEC13.INTEGRATIONS13:
+        _desc, _state = DEC13.INTEGRATIONS13[_row[0]]
+        _row[1], _row[2] = _desc or _row[1], _state or _row[2]
 for _id, _old, _new in DEC10.PRELAUNCH_EDITS10:
     _x = next(x for x in D['open'] if x[0] == _id)
     _j = next(j for j, y in enumerate(_x) if isinstance(y, str) and _old in y)
