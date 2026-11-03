@@ -1,6 +1,6 @@
-# Mahallat Platform Specification — Version 4.15
+# Mahallat Platform Specification — Version 4.16
 
-3 November 2026 · Revision 2026-11-03b · 241 requirements · 93 pages. The requirements are the reference.
+3 November 2026 · Revision 2026-11-03c · 241 requirements · 93 pages. The requirements are the reference.
 
 ## Order states by type
 
@@ -330,7 +330,7 @@ Values that had no default, approved by the owner (29 October 2026), and remain 
 | Mart: same 100, merchant percentage 4% | Sale price does not change with a change in the merchant percentage alone | Merchant commission 4; markup rate 5 is independent |
 | Driver: full delivery 12, illustrative platform percentage 10% | The customer's discount does not change the driver pay base | Net delivery without tax 10.43; platform percentage 1.04; due 9.39; tip is independent |
 | Fee-contract restaurant: new customer at the branch, two orders at selling price 20 then 40 | Customer pays the selling price | Fee 2 then 5; continues until the customer's total at the branch reaches 30; no percentage |
-| Restaurant not registered for VAT, 10% contract percentage: products at selling price 115 | Customer pays 115 including VAT and the merchant's share enters its branch's Moyasar wallet<br/>The merchant issues the products invoice, and the platform issues its invoice for delivery and service only | Commission 11.50 + its VAT 1.73 are deducted; merchant receives 101.77 before the payment fee; product VAT 15 stays with them |
+| Restaurant not registered for VAT, 10% contract percentage: products at selling price 115 | Customer pays 115 and the merchant's share enters its branch's Moyasar wallet<br/>The merchant issues the products invoice, and the platform issues its invoice for delivery and service only | Commission 11.50 + its VAT 1.73 are deducted; merchant receives 101.77 before the payment fee; no VAT applies to its products |
 
 > In restaurants, the commission is calculated on the selling price or as a per-customer fee according to the contract. Platform staff enter the sale price, and there is no markup in restaurants and Shops (MER-002).
 
@@ -1690,7 +1690,7 @@ Topic, owner, attachments, and tickets.
 
 What the merchant edits and what is display-only.
 
-- Elements: Name and cover pending review: a card titled "Pending review", Special hours and days, Sound and printer, QR, store link and branch links (INT-009), Cashier (later, MER-011): integration status, the systems available to you, and a "My system is not listed" button (MER-011), Contract for display: a "Display only" card for the default contract and for the selected branch if its contract is customized (PAY-009), with clear values and examples: contract type, order fee and cap (PAY-010), payment fee (PAY-011), menu link order exemption (on or off) (MER-007), platform fee tax (PAY-022), and VAT registration: the VAT number, or "Not registered: you issue the products invoice yourself and its tax remains your responsibility" (PAY-029), Operating type: display-only with "Set by the platform and determines the fee model", and the section and category "Display placement only" (MER-009), Prices: any price change is a request that the platform approves (MER-002), Systems connected through the partner API: system name, what it can access, branches (later, INT-012), API product integration (later, MER-041): status, last sync, and a link to the integration tab in products (MER-041)
+- Elements: Name and cover pending review: a card titled "Pending review", Special hours and days, Sound and printer, QR, store link and branch links (INT-009), Cashier (later, MER-011): integration status, the systems available to you, and a "My system is not listed" button (MER-011), Contract for display: a "Display only" card for the default contract and for the selected branch if its contract is customized (PAY-009), with clear values and examples: contract type, order fee and cap (PAY-010), payment fee (PAY-011), menu link order exemption (on or off) (MER-007), platform fee tax (PAY-022), and VAT registration: the VAT number, or "Not registered: you issue the products invoice yourself, and no VAT applies to it" (PAY-029), Operating type: display-only with "Set by the platform and determines the fee model", and the section and category "Display placement only" (MER-009), Prices: any price change is a request that the platform approves (MER-002), Systems connected through the partner API: system name, what it can access, branches (later, INT-012), API product integration (later, MER-041): status, last sync, and a link to the integration tab in products (MER-041)
 - Actions and what happens:
   - **Allowed edit**: enables the allowed fields. Name and cover are sent for review with "Awaiting review" and the old ones remain for customers until accepted; sound and printer are saved immediately.
   - **QR**: downloads a print-ready QR for the store link or the selected branch.
@@ -3860,9 +3860,9 @@ Rules:
 - The basis of each fee, its tax treatment and its entries are in the "PAY-005 appendix: chart of accounts, entries, and fee basis", which is approved.
 - Changing the registration status or VAT number applies to new orders only; it is saved on each order and recorded in the audit log.
 - All invoices the platform issues are issued automatically through Odoo on command from the system (INT-010); the products invoice, however, is always issued by the merchant, registered or not.
-- VAT on delivery fees, service fees, and the tip is on the platform in every case: it issues its invoice for them and remits it, and it is not deducted from the merchant, registered or not. Product VAT is always on the merchant, and the platform does not remit it on their behalf.
+- VAT on delivery fees, service fees, and the tip is on the platform in every case: it issues its invoice for them and remits it, and it is not deducted from the merchant, registered or not. Product VAT is on the registered merchant, and the platform does not remit it on their behalf.
 - Payment splitting is the only model (PAY-006): the product value reaches the branch's Moyasar wallet and never passes through the platform's account; so the platform issues the platform invoice for delivery fees, service fees, and the tip, and the fee invoice to the merchant only, while the merchant issues the products invoice and its VAT stays with them, registered or not.
-- The platform adds no tax to any product: the sale price is final and inclusive, and the product VAT is on the merchant, registered or not, who remits it to the state.
+- The platform adds no tax to any product: the sale price is final; a VAT-registered merchant remits the VAT on its products to the state, and no VAT applies to an unregistered merchant's products.
 
 Acceptance criteria:
 - 1.525 becomes 1.53.
@@ -3870,7 +3870,7 @@ Acceptance criteria:
 - Registered merchant, same order: no product VAT is deducted; only the commission 11.50 and its VAT 1.73, so the merchant receives 101.77 before the payment fee.
 - A "Registered" merchant cannot be saved without a 15-digit VAT number.
 - Order with a 12 SAR delivery fee: its VAT of 1.57 appears on the platform invoice and is not deducted from the merchant's balance.
-- Unregistered merchant, splitting active, products at selling price 115, 10% contract percentage: the platform issues no invoice for the products and does not deduct their VAT; it deducts only the commission 11.50 and its VAT 1.73, so the merchant receives 101.77 before the payment fee and bears the product VAT of 15 themselves.
+- Unregistered merchant, splitting active, products at selling price 115, 10% contract percentage: the platform issues no invoice for the products and does not deduct their VAT; it deducts only the commission 11.50 and its VAT 1.73, so the merchant receives 101.77 before the payment fee and no VAT applies to its products.
 - Unregistered merchant, splitting active: the merchant issues the products invoice, and the platform issues none for it.
 
 Pages: A18 A22
@@ -4006,7 +4006,7 @@ Pages: A15 A18
 
 ##### 2-A Reference numeric example (used in the entries below)
 
-A restaurant on a 10% percentage contract, VAT-registered or not (the VAT on products is its responsibility in both cases, PAY-029). Selling price 105, delivery 12, service 2.5%, tip 10, paid entirely by card.
+A restaurant on a 10% percentage contract, VAT-registered or not (VAT on products is the registered merchant's responsibility, PAY-029). Selling price 105, delivery 12, service 2.5%, tip 10, paid entirely by card.
 
 | Item | Account | Amount |
 |---|---|---|
@@ -5006,9 +5006,9 @@ Rules:
 - The official level score is the last 30 days; the other filters are for display and diagnosis.
 - Default weights: completion 20, delivery 20, pickup 15, acceptance 20, rating 15, confirmed reports 10; configurable.
 - Scores exclude merchant delays, customer cancellations, and technical failures.
-- The platform configures the conversion of indicators into scores; the default is linear from zero to the target, capped at the indicator's weight; an indicator with no data is excluded and the remaining weights are normalized to 100.
+- The platform configures the conversion of indicators into scores; the default is linear from zero to the target, capped at the indicator's weight, and confirmed reports are inverted: the full weight at zero reports, decreasing linearly to zero at an upper limit (setting, default 5% of orders); an indicator with no data is excluded and the remaining weights are normalized to 100.
 - The first 30 orders are level New; there is no automatic financial penalty from a lower score.
-- Default targets: completion 98%, on-time delivery 90%, on-time pickup 90%, acceptance 80%, rating 4.8, confirmed reports zero, and commitment 95%.
+- Default targets: completion 98%, on-time delivery 90%, on-time pickup 90%, acceptance 80%, rating 4.8, and confirmed reports zero.
 - Each indicator is calculated over the last 30 days. Acceptance = accepted orders ÷ orders offered while online. Fewer than 20 orders in the period is "Not enough data" and the tier does not change.
 
 Acceptance criteria:
