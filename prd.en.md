@@ -1,6 +1,6 @@
-# Mahallat Platform Specification — Version 4.18
+# Mahallat Platform Specification — Version 4.19
 
-4 November 2026 · Revision 2026-11-04b · 241 requirements · 93 pages. The requirements are the reference.
+13 November 2026 · Revision 2026-11-13 · 242 requirements · 93 pages. The requirements are the reference.
 
 ## Order states by type
 
@@ -359,7 +359,7 @@ Values that had no default, approved by the owner (29 October 2026), and remain 
 - Finance is shown only to authorized users; a log of who did what, when, and before and after; manual payouts are approved by a different person.
 - Home, sections, placements, values, and keys come from the server; exception order is branch, then city, then region, then global, per the value's setting.
 - Three separate environments; daily backups and a restore drill; measurable performance targets; monitoring of payment, the scheduler, and integrations.
-- The release is an update to the same store apps with the new platform's rules. Accounts and contracts are not migrated from the current app; balances are transferred manually as opening balances (TRN-001), and reference data is used through a one-time export with consent (TRN-002).
+- The release is an update to the same store apps with the new platform's rules. All current platform data is migrated (TRN-007), and balances are entered manually as opening balances (TRN-001).
 - Acceptance tests for every requirement, financial examples in halalas, and tests of photo paths, permissions, loss charge and penalty, and customer non-responsiveness.
 
 ## Before go-live
@@ -375,16 +375,17 @@ What remains unresolved. For each question: what it is waiting on, who resolves 
 | Number | Question | Resolved by | Blocked until resolved | Requirements |
 |---|---|---|---|---|
 | **Q-04** | Final terms of HRDF (Hadaf), and the list of controlled medicines or medicines prohibited from delivery. ("Wasfaty" is deferred: PHR-003 later) | Owner with Legal | Enabling pharmacies in production | REG-006, DRV-022, EXT-004, PHR-012 |
-| **Q-06** | Approval of the data retention policy outside the archive, especially sharing the entrance photo without consent | Legal | Automatic deletion | CUS-001, DRV-028 |
+| **Q-06** | Approval of the data retention policy, including migrated data (dormant accounts, conversations and deleted records), especially sharing the entrance photo without consent | Legal | Automatic deletion | CUS-001, DRV-028, TRN-004, TRN-007 |
 
 ### Resolved
 
 | Number | Decision | Dated |
 |---|---|---|
+| Q-21 | All current platform data (52 groups, including deleted records) is migrated to the new platform, and balances are entered manually (TRN-007, TRN-001) | 13 November 2026, owner |
 | Q-20 | Restaurants and Shops: platform staff enter the menu and the sale price manually, the restaurant store price is for analytics only, and there is no markup; Mart is the store price × 1.05; and no merchant changes a price except through a request the platform approves (MER-002, MER-010) | 2 November 2026, owner |
 | Q-19 | The company accountant reviewed and approved the accounting annex (PAY-005 annex); and a driver's negative opening balance is not written off (TRN-001) | 2 November 2026, owner |
 | **Q-01** | Work on Moyasar with the wallet model, with no alternative (PAY-006, INT-001) | 31 October 2026, owner |
-| **Q-02** | Transport General Authority reporting starts from the existing link (REG-007), the Communications Authority link is an "Important" requirement (REG-008), and residents register as freelance drivers (DRV-001) | 31 October 2026, owner |
+| **Q-02** | The two links with the Transport General Authority (REG-007) and the Communications Authority (REG-008, "Important") are built from scratch, and residents register as freelance drivers (DRV-001) | 13 November 2026, owner |
 | **Q-07** | Verification code by WhatsApp or text message through 4jawaly, and by text message when WhatsApp fails (CUS-001) | 31 October 2026, owner |
 | **Q-15** | No automated calls to merchants at launch; they stay for later with the call center (SYS-018, INT-013) | 31 October 2026, owner |
 | **Q-16** | Order-receiving devices are later (MER-042), and the merchant sends the print command from the phone in the app (MER-021) | 31 October 2026, owner |
@@ -398,8 +399,8 @@ What remains unresolved. For each question: what it is waiting on, who resolves 
 | **Q-12** | Branch wallets at Moyasar on the balance sheet as a restricted asset with an offsetting liability | 29 October 2026 |
 | **Q-13** | Existing driver deposit: 50 SAR from each of the first two weeks, and the rest from the following weeks, without suspension | 29 October 2026 |
 | **Q-14** | The notifications button on the home screen opens a pop-up list of notifications from the last 30 days, and each notification opens its destination | 29 October 2026 |
-| **Q-17** | No freeze of the current platform: pending payouts finish before the cutover, and the cutover date is the moment of transition (TRN-003) | 31 October 2026, owner |
-| **Q-18** | Personal data in the archive is hidden after one year, and the financial record stays without identity for the statutory period (TRN-004) | 31 October 2026, owner |
+| **Q-17** | A short, announced maintenance window at the cutover for the final copy, with pending payouts finishing before it (TRN-003) | 13 November 2026, owner |
+| **Q-18** | No separate archive: the record is migrated to the new platform, a sealed copy of the old database is kept, and retention periods are with Legal (TRN-004, Q-06) | 13 November 2026, owner |
 
 **The question is closed** by amending the relevant requirement and moving it to "Resolved" with the date and who resolved it.
 
@@ -2888,7 +2889,7 @@ Pages: D12
 
 Rules:
 - The system sends the Transport General Authority (TGA) driver, vehicle, and order data in the format and at the timing the Authority specifies.
-- The link starts from the existing link on the current platform and its data.
+- The link is built from scratch; no driver is registered with the authority through the current platform today.
 
 Acceptance criteria:
 - The data of every active driver and every delivered order is sent in the approved format, and each submission is logged with its result.
@@ -2898,7 +2899,7 @@ Pages: A22
 #### REG-008 — Delivery platforms system link at the Communications Authority [Important]
 
 Rules:
-- The link is built right after launch, starting from the existing link on the current platform.
+- The link is built from scratch right after launch.
 - Regulatory identifiers for drivers, vehicles and orders are kept in the new system from day one, whether or not the link is built.
 
 Acceptance criteria:
@@ -2920,6 +2921,7 @@ Rules:
 - Mobile numbers are accepted as 05XXXXXXXX or 5XXXXXXXX, and stored in international format +9665XXXXXXXX.
 - The customer accepts the terms and privacy policy at sign-up; marketing messages are on until they turn them off in settings (C14).
 - The verification code is valid for 5 minutes, can be resent after 60 seconds, and 5 wrong attempts block entry for 15 minutes, with a request limit per number and per IP address.
+- A migrated customer logs in with a verification code on the same mobile number and reaches their existing account, and accepts the new terms at first login (TRN-007).
 
 Acceptance criteria:
 - Browsing does not ask for a verification code.
@@ -2995,6 +2997,7 @@ Pages: C03 C07 C08
 Rules:
 - On reorder, the system creates a cart with today's prices and availability, and shows the differences.
 - The customer rates the food separately from delivery, and it is tied to an actual order.
+- Migrated orders and ratings appear in the history, and reorder works where the products still exist (TRN-007).
 
 Acceptance criteria:
 - An out-of-stock item from the old order is shown with a warning.
@@ -3024,6 +3027,7 @@ Rules:
 - Contact expires a configurable period after the order is closed, with an assumed default of 24 hours; the conversation owner can ask the platform to remove part of it.
 - Phone numbers, links, and external accounts are removed from the chat.
 - Communication stays available after the order is closed for the configured period (24 hours by default).
+- Conversations of migrated orders appear in the history according to the retention period (Q-06).
 
 Acceptance criteria:
 - The other party does not receive a typed number.
@@ -3561,6 +3565,7 @@ Rules:
 - From an exempt menu link, the contract percentage or the per-customer contract fee is not deducted; the payment fee and the customer service fee remain.
 - These two contracts are for restaurants and Shops with a menu; Mart and pharmacies use their own percentages (PAY-012).
 - The merchant's contract is the default for all its branches, and platform staff can customize the contract percentage for a specific branch; each order saves its branch's contract. Restaurant and Shops contracts have no markup.
+- Old merchant contracts are migrated as a record and no fees are calculated from them, and no branch of a migrated merchant opens before a new contract of one of the two types (TRN-007).
 
 Acceptance criteria:
 - The contract type is one of percentage or per-customer-and-branch fee.
@@ -4201,6 +4206,7 @@ Rules:
 - A new product is added by platform staff, or requested by the merchant, in which case it does not appear to the customer before approval.
 - The menu is shared by the merchant and inherited by each branch, and each branch has its own store price, availability and hours, as with groceries (MER-010); changing a price in one branch does not change it in another.
 - Any change to the price of an option or size sends a request like other prices. For a restaurant request, the merchant sends the new menu price, and on approval the employee updates the store price and writes the sale price. Each product has one pending request until it is decided.
+- For a migrated merchant, the menu arrives migrated with today's price as the sale price, and platform staff approve it in one step; later edits follow this requirement (TRN-007).
 
 Acceptance criteria:
 - A price change request does not change what the customer sees before the platform approves it.
@@ -4858,6 +4864,7 @@ Rules:
 - The account includes contact, bank, vehicle and its photos, city, and equipment, and mandatory documents: ID or residency number and its expiry date, the driving license, and the vehicle registration and plate number, with their photos. Platform staff verify them manually and approve activation, and the expiry of any document sends a reminder and does not stop tasks.
 - No Taxi operation at launch; no mandatory compliance list other than HRDF (Hadaf) and reporting to the Transport General Authority (TGA) (REG-007).
 - Account closure goes through support to settle dues and insurance.
+- A migrated driver completes missing mandatory documents within 30 days while working, then stops receiving tasks until they are complete; an expired document is a reminder only (TRN-007).
 
 Acceptance criteria:
 - An unapproved driver does not receive a task.
@@ -5254,6 +5261,7 @@ Rules:
 - The company's and its drivers' permissions apply only within its cities.
 - Note for the developer: there is no contracting with delivery companies at launch. The entire companies section (FLT-001 to FLT-004) is built later, and driver data and payouts are designed so that a company can be added without a rebuild.
 - When contracted: the platform contracts with the company and pays out to it, and the company manages its drivers and pays them out.
+- Old delivery company records and transactions are migrated as a historical record, and there is no companies feature at launch (TRN-007).
 
 Acceptance criteria:
 - A company does not see any other company's data.
@@ -5307,6 +5315,7 @@ Rules:
 - The prescription photo is not visible to any role in the admin dashboard; only the pharmacist sees it (PHR-012), and the customer's address is seen only by admin, support, and operations.
 - Session expires after 30 minutes of inactivity.
 - The admin manages staff accounts from A20: invitation by email, the role, the cities, and suspension, which ends the staff member's sessions immediately.
+- The admin assigns a role to each migrated employee before their first login; the register of migrated deleted records is read by the admin only (TRN-007).
 
 Acceptance criteria:
 - Access to the admin dashboard is rejected without completing the second verification step
@@ -5864,6 +5873,7 @@ Rules:
 - The merchant's funding share is fixed when their branch subscribes; raising it suspends their subscription until they approve the new share, and lowering it takes effect immediately.
 - One coupon per order. It combines with product offers, and does not combine with a whole-order offer such as the first-order offer; the higher value applies automatically.
 - No coupon in write-in and pharmacy orders; only the wallet balance is used in them (PAY-002).
+- Coupons, offers and ads active at the moment of cutover end at the cutover with prior notice, and are migrated as records (TRN-007).
 
 Acceptance criteria:
 - An offer outside the branch zone does not appear.
@@ -6102,6 +6112,7 @@ Pages: A22
 
 Rules:
 - The link opens the store inside the app on iOS and Android, or opens the app store to download it.
+- QR codes and links issued by the current platform keep opening the same merchant (TRN-007).
 
 Acceptance criteria:
 - When a link to a deleted branch is opened, the platform shows an understandable alternative.
@@ -6466,7 +6477,7 @@ Pages: A22
 #### TRN-001 — Opening balances [Launch-critical]
 
 Rules:
-- Finance produces the current platform statement as of the cutover (TRN-003) and approves it, the technical team extracts its figures from the database, then Finance enters each customer, driver and merchant balance as an opening balance in their new wallet.
+- Finance produces the current platform statement as of the cutover (TRN-003) and approves it, the technical team extracts its figures from the database, then Finance enters each customer, driver and merchant balance as an opening balance in the wallet of their migrated account (TRN-007).
 - Each entry with the reason "Opening balance" and the statement reference, and it needs a second approver (ADM-002), and it is recorded in the ledger (PAY-005).
 - The merchant's opening balance is paid from the platform's bank in the first approval cycle (PAY-006), and does not pass through the branch wallet at Moyasar (Appendix PAY-005, entry 29b).
 - The balance holder may object within 14 days of first login with a support ticket of type "Opening balance"; Finance reviews it against the statement, and the correction is an entry on the migration account with a second approver.
@@ -6481,28 +6492,28 @@ Acceptance criteria:
 
 Pages: A18
 
-#### TRN-002 — Onboarding from current platform data [Launch-critical]
+#### TRN-002 — Onboarding from migrated data [Launch-critical]
 
 Rules:
-- A one-time export, with the data owner's consent, of merchant and branch names, images, and driver documents to prefill registration.
-- The menu and its prices (store price and selling price) are entered manually by platform staff.
-- No balances or contracts are exported.
+- Merchants and drivers are onboarded from their migrated data (TRN-007): Sales and Operations review and approve them, without re-registering them.
+- The menu arrives migrated with today's price as the sale price, and platform staff approve it in one step; the store price for restaurants is entered later for analytics (MER-002).
+- Balances are not migrated but entered per TRN-001; old contracts are a record, and no branch opens before a new contract (PAY-009).
 - Sales onboards merchants, and Operations onboards and approves drivers (A10).
 
 Acceptance criteria:
-- A merchant who did not consent does not have its data prefilled.
+- A migrated merchant's branch does not appear to customers before its new contract and the approval of its menu.
 
 #### TRN-003 — Cutover and transition [Launch-critical]
 
 Rules:
-- No freeze of the current platform. Pending payouts finish before the cutover, and the cutover date is the moment of transition.
-- Orders open at the moment of cutover finish on the current platform, and their effect is added to the statement before it is approved.
+- The final copy runs in a short, announced maintenance window at the quietest time, targeting 4 hours or less, which the engineering team confirms after the first trial, and the record is copied before it. Pending payouts finish before the cutover, and the cutover date is the start of the window.
+- Orders open at the moment of cutover finish on the current platform and are then migrated, and their effect is added to the statement before it is approved.
 
-#### TRN-004 — Current platform archive [Launch-critical]
+#### TRN-004 — Current platform shutdown and retention [Launch-critical]
 
 Rules:
-- Orders, invoices, payments and tickets from the current platform, and its conversations for 6 months, are exported to a searchable archive read by Finance and Support, then the old system is shut down. Ratings are not archived.
-- Personal data (name, mobile, address) is hidden one year after the transition or on a deletion request, and the financial record stays without identity for the statutory period.
+- The current platform's record lives on in the new platform (TRN-007), with no separate archive; a sealed copy of the old database is kept for the statutory period, read by Finance on request, then the old system is shut down.
+- Retention periods for migrated data, including dormant accounts, conversations and deleted records, are set by Legal (Q-06); personal data is hidden on a deletion request, and the financial record stays without identity for the statutory period.
 - The old payment account stays for 7 days after shutdown to process refunds, and after that any refund complaint goes to the customer wallet and is booked as a platform expense with the reason "previous-platform refund" and a second approver (PAY-005 annex, entry 29c).
 - The new platform has new credentials for each external service, and the old ones are revoked when the seven days end.
 
@@ -6520,6 +6531,38 @@ Acceptance criteria:
 
 Rules:
 - The "express shipping" service stops when the current platform is shut down, and is not built in the new platform.
+- Old express shipping orders are migrated as a read-only record (TRN-007).
+
+#### TRN-007 — Data migration [Launch-critical]
+
+Rules:
+- All current platform data is migrated to the new platform with no exception among its 52 groups: customers and their addresses, orders of all types and statuses with their invoices and payments, financial transactions and tax transactions, merchants, branches, zones, contracts, menus and the mart catalog, merchant staff and admin staff, drivers with their vehicles and documents, ratings, tickets, conversations, coupons, offers and ads, notifications, companies, cities and reference lists, and deleted records; the current platform's settings values are carried over to their counterparts, and those with no counterpart are listed for the owner.
+- The owner of a migrated account logs in with a verification code on the same mobile number and reaches their existing account, and no second account is created for them; they accept the new terms and the privacy policy at first login (CUS-001).
+- Migrated orders, payments and financial transactions are a read-only record with their old numbers: they are not edited, not refunded through Moyasar, and not recalculated.
+- Balances are not produced by the migration: the team enters them manually as opening balances per TRN-001, and migrating old transactions changes no wallet.
+- A migrated menu keeps its products, options and photos, and today's price is the sale price until edited per MER-002; the branch opens after platform staff approve its menu in one step and correct the exceptions, and after the merchant signs a new contract (PAY-009).
+- Old merchant contracts and grace periods are migrated as a record of the old terms, and no fees are calculated from them.
+- A migrated driver works with their migrated account, and completes missing mandatory documents (DRV-001) within 30 days while working, then stops receiving tasks until they are complete; insurance is paid in installments (PAY-024).
+- Merchant staff are migrated with the closest ready-made role and the merchant manager adjusts their permissions (MER-037); for admin staff, the admin assigns each of them one of the six roles before first login, and the employee sets a new password with a second factor (ADM-001).
+- Coupons, offers and ads active at the moment of cutover are migrated as records and end at the cutover with prior notice.
+- Delivery company records, their transactions and salaried driver attendance are migrated as a historical record; there is no companies feature at launch (FLT-001), and their remaining drivers work as freelancers.
+- The menus of branches linked to Grubtech are migrated like any menu, and neither the link nor its keys are activated; old integration partner keys are migrated as inactive records.
+- Saved card records are migrated as records and are not used for payment, and passwords, sessions and old app notification tokens are migrated without use.
+- QR codes and links issued by the current platform keep opening the same merchant (INT-009).
+- Deleted records are migrated as deleted into a deleted-records register that only the admin can read, and they do not come back as active accounts or orders.
+- Open tickets continue on the new platform, and notifications are migrated with the app showing the last 30 days of them.
+- The migration is tried on a copy of the data, and the cutover date is set only after a successful trial. The migration report lists the count of each data group on both sides and explains every difference, and the owner approves it.
+- Before the cutover, data is fixed or accepted as is: duplicate accounts, wrong branch locations and incomplete driver files; Sales and Operations review them from lists the engineering team provides.
+
+Acceptance criteria:
+- A migrated customer logs in with the same number and sees their saved addresses and all their past orders without registering, and no two accounts are created for the same number.
+- An order fulfilled on the current platform appears on the new platform with the same number, items, amounts and final status.
+- A migrated merchant's menu shows the same products, options and photos as on the current platform.
+- After the migration and before the opening balances are entered, every wallet shows zero; after they are entered, their total matches the current platform's statement to the halala (TRN-001).
+- A QR code printed before the cutover opens the merchant in the new app.
+- The counts in the approved migration report match for each of the 52 groups, and every difference has a written reason.
+- An account deleted before the cutover does not appear as an active account, and its record is in the deleted-records register.
+- A migrated merchant's branch does not appear to customers before its new contract and the approval of its menu.
 
 ### Taxi (TAX)
 

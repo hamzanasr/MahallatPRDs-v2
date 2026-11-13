@@ -386,6 +386,32 @@ for _n, _rid, _start, _old, _new in DEC16.SUB:
     _r[_k] = [x.replace(_old, _new) if x.startswith(_start) else x for x in _r[_k]]
 DEC.DECISIONS.extend((n, t, d, _ids3.get(n, [])) for n, t, d in DEC16.DECISIONS)
 
+# الجولة السابعة عشرة: ترحيل كل بيانات المنصة الحالية (TRN-007)
+import b4_decisions17 as DEC17
+D['revision'] = DEC17.REVISION
+for _after, _n, _new in DEC17.NEW_REQ:
+    assert _new['id'] not in _by, _new['id']
+    _i = next(i for i, x in enumerate(D['requirements']) if x['id'] == _after)
+    D['requirements'].insert(_i + 1, copy.deepcopy(_new))
+    _by[_new['id']] = D['requirements'][_i + 1]
+    _ids3.setdefault(_n, []).append(_new['id'])
+for _n, _rid, _old, _new in DEC17.REPLACE:
+    _r = _touch(_rid, _n)
+    _k = next((k for k in ('rules', 'acceptance') if any(x.startswith(_old) for x in _r[k])), None)
+    assert _k, (_rid, _old)
+    _r[_k] = [(_new if x.startswith(_old) else x) for x in _r[_k]]
+for _n, _rid, _start, _old, _new in DEC17.SUB:
+    _r = _touch(_rid, _n)
+    _k = next(k for k in ('rules', 'acceptance') if any(x.startswith(_start) for x in _r[k]))
+    assert any(_old in x for x in _r[_k]), (_rid, _old)
+    _r[_k] = [x.replace(_old, _new) if x.startswith(_start) else x for x in _r[_k]]
+for _n, _rid, _kind, _txt in DEC17.ADD:
+    _r = _touch(_rid, _n)
+    _r['rules' if _kind == 'R' else 'acceptance'].append(_txt)
+for _n, _rid, _t in DEC17.TITLES:
+    _touch(_rid, _n)['title'] = _t
+DEC.DECISIONS.extend((n, t, d, _ids3.get(n, [])) for n, t, d in DEC17.DECISIONS)
+
 DEC.DECISIONS.sort(key=lambda x: x[0])
 DEC.SETTING_EDITS.update(DEC3.SETTING_EDITS)
 DEC.SETTING_EDITS.update(DEC4.SETTING_EDITS)
@@ -475,6 +501,10 @@ for _row in D['integrations']:
     if _row[0] in DEC9.INTEGRATIONS9:
         _row[1], _row[2] = DEC9.INTEGRATIONS9[_row[0]]
 for _start, _new in DEC9.QUALITY_EDITS9:
+    _i = next(i for i, x in enumerate(D['quality']) if x.startswith(_start))
+    D['quality'][_i] = _new
+import b4_decisions17 as DEC17
+for _start, _new in DEC17.QUALITY_EDITS17:
     _i = next(i for i, x in enumerate(D['quality']) if x.startswith(_start))
     D['quality'][_i] = _new
 for _id, _old, _new in DEC9.PRELAUNCH_EDITS9:
